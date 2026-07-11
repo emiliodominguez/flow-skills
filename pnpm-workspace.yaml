@@ -2,3 +2,5 @@
 # Allow esbuild — used by tsup/tsx/vitest — to run its install script.
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - eslint@10.7.0

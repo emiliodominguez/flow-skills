@@ -8,6 +8,15 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+    # Held back until a dedicated migration: TypeScript 7 (native compiler) breaks
+    # typescript-eslint; vitest 4 changes the runner API. Bump these deliberately.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: vitest
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitest/coverage-v8"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

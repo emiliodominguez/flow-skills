@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import yaml from "js-yaml";
+import { load as loadYaml } from "js-yaml";
 import { discoverSkills } from "../src/core/registry";
 import { cursorTarget } from "../src/targets/cursor";
 import { windsurfTarget } from "../src/targets/windsurf";
@@ -17,7 +17,7 @@ const skills = discoverSkills(path.join(root, "skills"));
 function parseYamlFrontmatter(content: string): Record<string, unknown> {
 	const match = /^---\n([\s\S]*?)\n---/.exec(content);
 	expect(match, "generated file should have frontmatter").toBeTruthy();
-	return yaml.load(match![1]!) as Record<string, unknown>;
+	return loadYaml(match![1]!) as Record<string, unknown>;
 }
 
 let tmp: string;

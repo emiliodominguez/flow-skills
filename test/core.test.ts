@@ -8,8 +8,18 @@ import { frontmatter } from "../src/targets/render";
 import { prettyPath } from "../src/core/paths";
 import { packageRoot } from "../src/core/config";
 import { readManagedBlock, writeManagedBlock, removeManagedBlock, BLOCK_START, BLOCK_END } from "../src/core/install-fs";
+import { resolveSelection } from "../src/commands/install";
+import type { Config } from "../src/core/config";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+const cfg = (profiles: Record<string, string[]>): Config => ({
+	skillsDir: "skills",
+	installMode: "symlink",
+	defaultTargets: ["claude"],
+	profiles,
+	targets: {},
+});
 
 describe("parseFrontmatter (F5)", () => {
 	it("consumes all whitespace after the colon, not just one space", () => {
@@ -53,6 +63,27 @@ describe("packageRoot (F4)", () => {
 		expect(fs.existsSync(path.join(r, "package.json"))).toBe(true);
 		expect(fs.existsSync(path.join(r, "skills"))).toBe(true);
 		expect(r).toBe(root);
+	});
+});
+
+describe("resolveSelection (profiles)", () => {
+	const config = cfg({ frontend: ["ed-styles", "ed-animate"], review: ["ed-review", "ed-styles"] });
+
+	it("explicit skills win over profile and 'all'", () => {
+		expect(resolveSelection(["ed-work"], ["frontend"], config)).toEqual(["ed-work"]);
+	});
+
+	it("expands a profile to its skills, de-duping across profiles", () => {
+		expect(resolveSelection([], ["frontend"], config)).toEqual(["ed-styles", "ed-animate"]);
+		expect(resolveSelection([], ["frontend", "review"], config)).toEqual(["ed-styles", "ed-animate", "ed-review"]);
+	});
+
+	it("returns [] (all skills) when neither skills nor profile is given", () => {
+		expect(resolveSelection([], undefined, config)).toEqual([]);
+	});
+
+	it("throws a helpful error on an unknown profile", () => {
+		expect(() => resolveSelection([], ["nope"], config)).toThrow(/Unknown profile "nope".*frontend, review/);
 	});
 });
 

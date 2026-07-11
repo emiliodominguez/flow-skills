@@ -31,6 +31,7 @@ program
 	.command("list")
 	.description("List all skills (and, with --targets, the install targets)")
 	.option("--targets", "also list available target adapters")
+	.option("--profiles", "also list configured install profiles")
 	.action((opts) => listCommand(opts));
 
 program
@@ -55,6 +56,7 @@ program
 	.option("--force", "overwrite entries not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
 	.option("--watch", "keep running and re-generate targets on source change")
+	.option("--profile <name...>", "install a named set of skills from config `profiles`")
 	.action((skills, opts) => installCommand("install", skills, opts));
 
 program
@@ -65,6 +67,7 @@ program
 	.addOption(scopeOption)
 	.option("--force", "remove entries even if not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
+	.option("--profile <name...>", "remove a named set of skills from config `profiles`")
 	.action((skills, opts) => installCommand("uninstall", skills, opts));
 
 program

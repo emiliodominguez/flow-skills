@@ -8,9 +8,10 @@ import { TARGETS } from "../targets/index.js";
 /**
  * `list` — show every skill in the repo and the available targets.
  *
- * @param opts - `targets` to also print the target adapters.
+ * @param opts - `targets` to also print the target adapters; `profiles` to print
+ *   the configured install sets.
  */
-export function listCommand(opts: { targets?: boolean }): void {
+export function listCommand(opts: { targets?: boolean; profiles?: boolean }): void {
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const skills = discoverSkills(path.join(root, config.skillsDir));
@@ -28,6 +29,19 @@ export function listCommand(opts: { targets?: boolean }): void {
 		const targetWidth = Math.max(...targets.map((t) => t.name.length), 0);
 		for (const target of targets) {
 			console.log(`  ${pc.bold(target.name.padEnd(targetWidth))}  ${pc.dim(target.describe)}`);
+		}
+	}
+
+	if (opts.profiles) {
+		const names = Object.keys(config.profiles);
+		log.heading(`Profiles (${names.length})`);
+		if (names.length === 0) {
+			console.log(pc.dim("  (none configured — add a `profiles` map to agent-skills.config.json)"));
+		} else {
+			const profileWidth = Math.max(...names.map((n) => n.length), 0);
+			for (const name of names) {
+				console.log(`  ${pc.bold(name.padEnd(profileWidth))}  ${pc.dim(config.profiles[name]!.join(", "))}`);
+			}
 		}
 	}
 }

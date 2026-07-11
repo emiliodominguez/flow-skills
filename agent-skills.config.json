@@ -3,6 +3,10 @@
 	"skillsDir": "skills",
 	"installMode": "symlink",
 	"defaultTargets": ["claude"],
+	"profiles": {
+		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
+		"review": ["ed-review", "ed-adversarial-review", "ed-simplify", "ed-refactor"]
+	},
 	"targets": {
 		"claude": {
 			"enabled": true,

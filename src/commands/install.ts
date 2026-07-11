@@ -16,6 +16,33 @@ export interface InstallOptions {
 	dryRun?: boolean;
 	/** install only: keep running and re-generate non-native targets on source change. */
 	watch?: boolean;
+	/** named install set(s) from config `profiles` — expanded to skills when no explicit skills are passed. */
+	profile?: string[];
+}
+
+/**
+ * Resolve which skills an operation targets. Explicit `[skills...]` args win; then
+ * `--profile <name...>` (the union of the named profiles' skill lists); otherwise
+ * all skills (empty list). Throws on an unknown profile name.
+ *
+ * @param skillNames - Positional skill args.
+ * @param profiles - `--profile` values.
+ * @param config - Resolved config (holds the `profiles` map).
+ * @returns The effective skill-name list to select.
+ */
+export function resolveSelection(skillNames: string[], profiles: string[] | undefined, config: Config): string[] {
+	if (skillNames.length > 0) return skillNames;
+	if (!profiles?.length) return [];
+	const names = new Set<string>();
+	for (const name of profiles) {
+		const list = config.profiles[name];
+		if (!list) {
+			const known = Object.keys(config.profiles);
+			throw new Error(`Unknown profile "${name}".${known.length ? ` Known: ${known.join(", ")}.` : " No profiles configured."}`);
+		}
+		for (const skill of list) names.add(skill);
+	}
+	return [...names];
 }
 
 /**
@@ -29,8 +56,9 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const skillsDir = path.join(root, config.skillsDir);
+	const selected = resolveSelection(skillNames, opts.profile, config);
 
-	const failures = runOnce(mode, skillNames, opts, config, skillsDir);
+	const failures = runOnce(mode, selected, opts, config, skillsDir);
 	if (failures.length > 0) {
 		log.error(`${mode} failed for: ${failures.join(", ")}`);
 		process.exitCode = 1;
@@ -38,7 +66,7 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 		log.ok(`${mode} complete`);
 	}
 
-	if (mode === "install" && opts.watch && !opts.dryRun) watch(skillNames, opts, config, skillsDir);
+	if (mode === "install" && opts.watch && !opts.dryRun) watch(selected, opts, config, skillsDir);
 }
 
 /**

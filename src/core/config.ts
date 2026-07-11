@@ -15,12 +15,15 @@ export interface Config {
 	installMode: "symlink" | "copy";
 	defaultTargets: string[];
 	targets: Record<string, TargetConfig>;
+	/** Named install sets: a profile name → the skill ids it installs. */
+	profiles: Record<string, string[]>;
 }
 
 const DEFAULTS: Config = {
 	skillsDir: "skills",
 	installMode: "symlink",
 	defaultTargets: ["claude"],
+	profiles: {},
 	targets: {
 		claude: { enabled: true, userPath: "~/.claude/skills", projectPath: ".claude/skills" },
 		cursor: { enabled: true, userPath: "~/.cursor/rules", projectPath: ".cursor/rules" },
@@ -97,6 +100,9 @@ function mergeInto(base: Config, override?: Partial<Config>): void {
 	if (override.skillsDir) base.skillsDir = override.skillsDir;
 	if (override.installMode) base.installMode = override.installMode;
 	if (override.defaultTargets) base.defaultTargets = override.defaultTargets;
+	if (override.profiles) {
+		for (const [name, list] of Object.entries(override.profiles)) base.profiles[name] = list;
+	}
 	if (override.targets) {
 		for (const [name, tc] of Object.entries(override.targets)) {
 			base.targets[name] = { ...(base.targets[name] ?? { enabled: true, userPath: "", projectPath: "" }), ...tc };

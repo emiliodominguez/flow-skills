@@ -22,6 +22,14 @@
 			"description": "Targets used when --target is not passed.",
 			"default": ["claude"]
 		},
+		"profiles": {
+			"type": "object",
+			"description": "Named install sets: profile name → list of skill ids installed by `install --profile <name>`.",
+			"additionalProperties": {
+				"type": "array",
+				"items": { "type": "string" }
+			}
+		},
 		"targets": {
 			"type": "object",
 			"description": "Per-target install paths and enablement.",

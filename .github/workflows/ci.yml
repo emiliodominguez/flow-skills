@@ -32,3 +32,11 @@ jobs:
 
             - name: Format check
               run: pnpm run format:check
+
+            - name: Docs are up to date
+              run: |
+                  pnpm run docs:gen
+                  git diff --exit-code docs/SKILLS.md || {
+                    echo "::error::docs/SKILLS.md is stale — run 'pnpm docs:gen' and commit the result."
+                    exit 1
+                  }

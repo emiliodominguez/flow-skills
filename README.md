@@ -108,11 +108,23 @@ Pass specific skills to scope an operation: `agent-skills install ed-plan ed-wor
 | **codex**    | `AGENTS.md` sections         | all skills in one **managed block** (preserves your other content) |
 | **windsurf** | `.md` rule                   | one file per skill in `.windsurf/rules/`                           |
 
-Generated files carry a marker so `uninstall` **only removes files this tool created** — it
-never deletes your hand-written rules or clobbers surrounding `AGENTS.md` content.
-
 Only the `claude` target supports symlinking (the format is identical to the source). The
 others are transformed, so they're always generated fresh — re-run `install` to sync.
+
+### Safety — what it will and won't touch
+
+The installer writes into your real config directories, so it never destroys anything it did
+not create:
+
+- **claude** only overwrites/removes a directory that is _its own_ symlink or a copy it
+  marked. A hand-authored `~/.claude/skills/<name>/` that collides with a skill name is
+  **left alone** unless you pass `--force`.
+- **cursor/windsurf** files carry a marker; `uninstall` removes only marked files.
+- **codex** edits stay inside a delimited block in `AGENTS.md`; your surrounding content is
+  preserved.
+- `--dry-run` previews every action; `--force` is the explicit override.
+
+Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety-model--what-the-tool-will-and-wont-touch).
 
 ---
 
@@ -134,7 +146,22 @@ others are transformed, so they're always generated fresh — re-run `install` t
 
 Paths for Cursor/Codex/Windsurf follow each tool's documented convention; adjust them here
 if your version differs. Keep machine-specific overrides in a git-ignored
-`.agent-skills.local.json` (same shape, deep-merged on top).
+`.agent-skills.local.json` (same shape, deep-merged on top). Full reference:
+[docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+
+---
+
+## Documentation
+
+| Doc                                                               | What's in it                                              |
+| ----------------------------------------------------------------- | --------------------------------------------------------- |
+| [docs/SKILLS.md](docs/SKILLS.md)                                  | Catalog of every skill and what it's for (auto-generated) |
+| [docs/OVERVIEW.md](docs/OVERVIEW.md)                              | The skill workflow and the practices behind it            |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference — targets, scopes, paths                 |
+| [docs/AUTHORING.md](docs/AUTHORING.md)                            | How to write a good skill                                 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                      | How the CLI works + the safety model                      |
+| [docs/ROADMAP.md](docs/ROADMAP.md)                                | What's planned next                                       |
+| [CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md) | Contributing & release history                            |
 
 ---
 
@@ -160,9 +187,32 @@ pnpm test             # vitest — validates the corpus + exercises every adapte
 pnpm run typecheck    # tsc --noEmit
 pnpm run build        # bundle to dist/ (tsup)
 pnpm run format       # prettier (tabs, width 150)
+pnpm docs:gen         # regenerate docs/SKILLS.md from the skills
 ```
 
-CI runs typecheck + validate + test + format-check on every push and PR.
+CI runs typecheck + validate + test + format-check + docs-freshness on every push and PR.
+
+---
+
+## Troubleshooting
+
+**A skill isn't showing up in the tool.** Confirm it installed to the right place:
+`pnpm skills install -t <target> --dry-run`. For non-`claude` targets, check the path
+matches your tool's current rules directory and override it in `agent-skills.config.json`
+if not (see [docs/CONFIGURATION.md](docs/CONFIGURATION.md)).
+
+**`install` says "exists, not managed".** There's already a directory/file at the
+destination that this tool didn't create. Inspect it; if it's safe to replace, re-run with
+`--force`.
+
+**`AGENTS.md` errors with "malformed or duplicate markers".** The file has more than one
+`agent-skills` marker pair (e.g. from a bad merge). Remove the stray pair by hand and re-run.
+
+**`pnpm install` warns about ignored build scripts (esbuild).** Allow it once — this repo
+already lists esbuild in `pnpm-workspace.yaml`; run `pnpm install` again after cloning.
+
+**Broken symlinks after moving the repo.** Symlinked (`claude`) installs point at the repo's
+path. If you move the repo, re-run `pnpm skills install` to repoint them, or use `--copy`.
 
 ---
 

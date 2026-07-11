@@ -26,6 +26,12 @@ const DEFAULTS: Config = {
 		cursor: { enabled: true, userPath: "~/.cursor/rules", projectPath: ".cursor/rules" },
 		codex: { enabled: true, userPath: "~/.codex/AGENTS.md", projectPath: "AGENTS.md" },
 		windsurf: { enabled: true, userPath: "~/.codeium/windsurf/memories", projectPath: ".windsurf/rules" },
+		// Project-oriented tools: no global rules location, so userPath mirrors the project path.
+		copilot: { enabled: true, userPath: ".github/copilot-instructions.md", projectPath: ".github/copilot-instructions.md" },
+		zed: { enabled: true, userPath: ".rules", projectPath: ".rules" },
+		aider: { enabled: true, userPath: "CONVENTIONS.md", projectPath: "CONVENTIONS.md" },
+		cline: { enabled: true, userPath: ".clinerules", projectPath: ".clinerules" },
+		continue: { enabled: true, userPath: "~/.continue/rules", projectPath: ".continue/rules" },
 	},
 };
 

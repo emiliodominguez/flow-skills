@@ -3,6 +3,11 @@ import { claudeTarget } from "./claude.js";
 import { cursorTarget } from "./cursor.js";
 import { codexTarget } from "./codex.js";
 import { windsurfTarget } from "./windsurf.js";
+import { copilotTarget } from "./copilot.js";
+import { zedTarget } from "./zed.js";
+import { aiderTarget } from "./aider.js";
+import { clineTarget } from "./cline.js";
+import { continueTarget } from "./continue.js";
 
 /** All known target adapters, keyed by id. */
 export const TARGETS: Record<string, Target> = {
@@ -10,6 +15,11 @@ export const TARGETS: Record<string, Target> = {
 	cursor: cursorTarget,
 	codex: codexTarget,
 	windsurf: windsurfTarget,
+	copilot: copilotTarget,
+	zed: zedTarget,
+	aider: aiderTarget,
+	cline: clineTarget,
+	continue: continueTarget,
 };
 
 /**

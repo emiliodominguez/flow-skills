@@ -23,6 +23,31 @@
 			"enabled": true,
 			"userPath": "~/.codeium/windsurf/memories",
 			"projectPath": ".windsurf/rules"
+		},
+		"copilot": {
+			"enabled": true,
+			"userPath": ".github/copilot-instructions.md",
+			"projectPath": ".github/copilot-instructions.md"
+		},
+		"zed": {
+			"enabled": true,
+			"userPath": ".rules",
+			"projectPath": ".rules"
+		},
+		"aider": {
+			"enabled": true,
+			"userPath": "CONVENTIONS.md",
+			"projectPath": "CONVENTIONS.md"
+		},
+		"cline": {
+			"enabled": true,
+			"userPath": ".clinerules",
+			"projectPath": ".clinerules"
+		},
+		"continue": {
+			"enabled": true,
+			"userPath": "~/.continue/rules",
+			"projectPath": ".continue/rules"
 		}
 	}
 }

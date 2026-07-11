@@ -38,7 +38,7 @@ program
 	.option("--strict", "fail on warnings too")
 	.action((opts) => validateCommand(opts));
 
-const targetOption = new Option("-t, --target <name...>", "target(s): claude, cursor, codex, windsurf (default: config)");
+const targetOption = new Option("-t, --target <name...>", "target(s): claude, cursor, codex, windsurf, copilot, zed, aider, cline, continue (default: config)");
 const scopeOption = new Option("-s, --scope <scope>", "install scope").choices(["user", "project"]).default("user");
 
 program

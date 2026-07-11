@@ -1,6 +1,6 @@
 {
 	"name": "agent-skills",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "Author agent skills once, install them into Claude Code, Cursor, Codex/AGENTS.md and Windsurf — with validation, scaffolding and a tested installer.",
 	"type": "module",
 	"private": true,
@@ -34,7 +34,15 @@
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepare": "pnpm run build"
+		"prepack": "pnpm run build",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{ts,js}": [
+			"prettier --write",
+			"eslint --fix --no-warn-ignored"
+		],
+		"*.{json,md,yml,yaml}": "prettier --write"
 	},
 	"dependencies": {
 		"commander": "^12.1.0",

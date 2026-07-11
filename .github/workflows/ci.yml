@@ -1,42 +1,68 @@
 name: ci
 
 on:
-    push:
-        branches: [main]
-    pull_request:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  HUSKY: "0"
 
 jobs:
-    check:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Format check
+        run: pnpm run format:check
+      - name: Docs are up to date
+        run: |
+          pnpm run docs:gen
+          git diff --exit-code docs/SKILLS.md || {
+            echo "::error::docs/SKILLS.md is stale — run 'pnpm docs:gen' and commit the result."
+            exit 1
+          }
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level=high
 
-            - uses: pnpm/action-setup@v4
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm run typecheck
+      - name: Validate skills
+        run: pnpm run validate
+      - name: Test + coverage
+        run: pnpm run test:coverage
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-                  cache: pnpm
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Typecheck
-              run: pnpm run typecheck
-
-            - name: Validate skills
-              run: pnpm run validate
-
-            - name: Test
-              run: pnpm run test
-
-            - name: Format check
-              run: pnpm run format:check
-
-            - name: Docs are up to date
-              run: |
-                  pnpm run docs:gen
-                  git diff --exit-code docs/SKILLS.md || {
-                    echo "::error::docs/SKILLS.md is stale — run 'pnpm docs:gen' and commit the result."
-                    exit 1
-                  }
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Packaging smoke test
+        run: pnpm run smoke

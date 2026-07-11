@@ -190,15 +190,21 @@ See [`docs/AUTHORING.md`](docs/AUTHORING.md) and [`CONTRIBUTING.md`](CONTRIBUTIN
 ## Develop
 
 ```sh
-pnpm skills <cmd>     # run the CLI from source (tsx)
-pnpm test             # vitest — validates the corpus + exercises every adapter
-pnpm run typecheck    # tsc --noEmit
-pnpm run build        # bundle to dist/ (tsup)
-pnpm run format       # prettier (tabs, width 150)
-pnpm docs:gen         # regenerate docs/SKILLS.md from the skills
+pnpm skills <cmd>       # run the CLI from source (tsx)
+pnpm test               # vitest — corpus validation, adapters, core units, CLI
+pnpm run test:coverage  # vitest with v8 coverage (70% threshold)
+pnpm run typecheck      # tsc over src + test + scripts
+pnpm run lint           # eslint (typescript-eslint)
+pnpm run format         # prettier (tabs, width 150)
+pnpm docs:gen           # regenerate docs/SKILLS.md from the skills
+pnpm smoke              # pack + install the tarball in a clean project, run the bin
+pnpm run build          # bundle to dist/ (tsup)
 ```
 
-CI runs typecheck + validate + test + format-check + docs-freshness on every push and PR.
+A husky pre-commit hook runs prettier + eslint on staged files. CI runs three jobs on every
+push and PR: **lint** (eslint, format, docs-freshness, prod-dependency audit), **test**
+(typecheck, validate, coverage on a Node 20/22/24 matrix), and **pack** (the packaging smoke
+test). Pushing a `v*` tag runs the release workflow.
 
 ---
 

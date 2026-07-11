@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1783797117194" clover="3.2.0">
-  <project timestamp="1783797117194" name="All files">
-    <metrics statements="623" coveredstatements="526" conditionals="241" coveredconditionals="191" methods="62" coveredmethods="57" elements="926" coveredelements="774" complexity="0" loc="623" ncloc="623" packages="3" files="17" classes="17"/>
+<coverage generated="1783797432310" clover="3.2.0">
+  <project timestamp="1783797432310" name="All files">
+    <metrics statements="624" coveredstatements="527" conditionals="242" coveredconditionals="192" methods="62" coveredmethods="57" elements="928" coveredelements="776" complexity="0" loc="624" ncloc="624" packages="3" files="17" classes="17"/>
     <package name="commands">
       <metrics statements="167" coveredstatements="86" conditionals="38" coveredconditionals="23" methods="7" coveredmethods="4"/>
       <file name="doctor.ts" path="/Users/emilio.dominguez/Repos/agent-skills/src/commands/doctor.ts">
@@ -188,7 +188,7 @@
       </file>
     </package>
     <package name="core">
-      <metrics statements="256" coveredstatements="246" conditionals="118" coveredconditionals="92" methods="28" coveredmethods="28"/>
+      <metrics statements="257" coveredstatements="247" conditionals="119" coveredconditionals="93" methods="28" coveredmethods="28"/>
       <file name="config.ts" path="/Users/emilio.dominguez/Repos/agent-skills/src/core/config.ts">
         <metrics statements="51" coveredstatements="51" conditionals="19" coveredconditionals="16" methods="5" coveredmethods="5"/>
         <line num="1" count="1" type="stmt"/>
@@ -244,7 +244,7 @@
         <line num="99" count="18" type="stmt"/>
       </file>
       <file name="install-fs.ts" path="/Users/emilio.dominguez/Repos/agent-skills/src/core/install-fs.ts">
-        <metrics statements="88" coveredstatements="88" conditionals="43" coveredconditionals="40" methods="13" coveredmethods="13"/>
+        <metrics statements="88" coveredstatements="88" conditionals="44" coveredconditionals="41" methods="13" coveredmethods="13"/>
         <line num="1" count="1" type="stmt"/>
         <line num="5" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -306,12 +306,12 @@
         <line num="153" count="1" type="cond" truecount="1" falsecount="0"/>
         <line num="154" count="11" type="stmt"/>
         <line num="155" count="11" type="stmt"/>
-        <line num="156" count="11" type="cond" truecount="1" falsecount="0"/>
+        <line num="156" count="11" type="cond" truecount="2" falsecount="0"/>
         <line num="157" count="6" type="stmt"/>
         <line num="158" count="6" type="stmt"/>
         <line num="159" count="6" type="stmt"/>
         <line num="160" count="6" type="cond" truecount="2" falsecount="0"/>
-        <line num="161" count="11" type="cond" truecount="1" falsecount="0"/>
+        <line num="161" count="8" type="cond" truecount="1" falsecount="0"/>
         <line num="162" count="5" type="stmt"/>
         <line num="163" count="5" type="cond" truecount="1" falsecount="0"/>
         <line num="164" count="10" type="stmt"/>
@@ -377,7 +377,7 @@
         <line num="39" count="5" type="stmt"/>
       </file>
       <file name="skill.ts" path="/Users/emilio.dominguez/Repos/agent-skills/src/core/skill.ts">
-        <metrics statements="81" coveredstatements="71" conditionals="35" coveredconditionals="21" methods="5" coveredmethods="5"/>
+        <metrics statements="82" coveredstatements="72" conditionals="35" coveredconditionals="21" methods="5" coveredmethods="5"/>
         <line num="1" count="1" type="stmt"/>
         <line num="36" count="1" type="stmt"/>
         <line num="39" count="1" type="stmt"/>
@@ -431,34 +431,35 @@
         <line num="114" count="16" type="stmt"/>
         <line num="116" count="17" type="cond" truecount="0" falsecount="1"/>
         <line num="117" count="17" type="cond" truecount="1" falsecount="0"/>
-        <line num="118" count="17" type="cond" truecount="1" falsecount="0"/>
-        <line num="120" count="17" type="stmt"/>
+        <line num="118" count="17" type="stmt"/>
+        <line num="119" count="17" type="cond" truecount="1" falsecount="0"/>
         <line num="121" count="17" type="stmt"/>
-        <line num="131" count="1" type="cond" truecount="1" falsecount="0"/>
-        <line num="132" count="2" type="stmt"/>
-        <line num="133" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="122" count="17" type="stmt"/>
+        <line num="132" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="133" count="2" type="stmt"/>
         <line num="134" count="2" type="cond" truecount="1" falsecount="0"/>
-        <line num="135" count="2" type="stmt"/>
-        <line num="137" count="2" type="cond" truecount="1" falsecount="0"/>
-        <line num="138" count="32" type="stmt"/>
-        <line num="140" count="32" type="stmt"/>
-        <line num="141" count="32" type="cond" truecount="1" falsecount="0"/>
-        <line num="142" count="432" type="stmt"/>
-        <line num="143" count="432" type="cond" truecount="3" falsecount="0"/>
-        <line num="144" count="166" type="stmt"/>
+        <line num="135" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="136" count="2" type="stmt"/>
+        <line num="138" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="139" count="32" type="stmt"/>
+        <line num="141" count="32" type="stmt"/>
+        <line num="142" count="32" type="cond" truecount="1" falsecount="0"/>
+        <line num="143" count="432" type="stmt"/>
+        <line num="144" count="432" type="cond" truecount="3" falsecount="0"/>
         <line num="145" count="166" type="stmt"/>
-        <line num="146" count="432" type="cond" truecount="0" falsecount="1"/>
-        <line num="147" count="0" type="stmt"/>
+        <line num="146" count="166" type="stmt"/>
+        <line num="147" count="432" type="cond" truecount="0" falsecount="1"/>
         <line num="148" count="0" type="stmt"/>
         <line num="149" count="0" type="stmt"/>
         <line num="150" count="0" type="stmt"/>
         <line num="151" count="0" type="stmt"/>
         <line num="152" count="0" type="stmt"/>
         <line num="153" count="0" type="stmt"/>
-        <line num="154" count="432" type="stmt"/>
-        <line num="155" count="32" type="stmt"/>
-        <line num="156" count="2" type="stmt"/>
+        <line num="154" count="0" type="stmt"/>
+        <line num="155" count="432" type="stmt"/>
+        <line num="156" count="32" type="stmt"/>
         <line num="157" count="2" type="stmt"/>
+        <line num="158" count="2" type="stmt"/>
       </file>
     </package>
     <package name="targets">

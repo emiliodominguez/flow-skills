@@ -3,6 +3,36 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); this project uses [SemVer](https://semver.org/).
 
+## [0.2.0] — 2026-07-11
+
+A "bulletproof" hardening pass across correctness, operations, and process.
+
+### Added
+
+- **`doctor` command** — reports each target's install state (linked / copied / generated /
+  drifted / conflict / missing) via a new `Target.status()`, flags drift and conflicts, and
+  exits non-zero so it's scriptable.
+- **`--force` flag** on `install`/`uninstall` — and it **backs up** (moves to a `.bak-<n>`
+  sibling) rather than deleting outright.
+- **Auto-generated skills catalog** (`docs/SKILLS.md` via `pnpm docs:gen`), enforced fresh by CI.
+- **ESLint** (typescript-eslint) with the type-aware async rules; **coverage** (v8, 70%
+  threshold, ~84% actual); **packaging smoke test** (`pnpm smoke`); **husky + lint-staged**
+  pre-commit; **Dependabot**; a **release workflow**; `.editorconfig` and a PR template.
+
+### Changed
+
+- File-per-skill targets (cursor/windsurf) now guard **unmanaged files on install too** (they
+  previously overwrote them) — consistent with the native target; both honor `--force`.
+- One target failing no longer aborts the others (per-target error handling; non-zero exit).
+- On Windows the native target falls back to copy (no symlink privilege).
+- Typecheck now covers `test/` and `scripts/` (they were silently excluded); the CI test job
+  runs on a Node 20/22/24 matrix.
+
+### Fixed
+
+- Stricter skill lint: the dangling-reference check now also scans descriptions; warns on
+  missing `Done when` / guardrails sections.
+
 ## [0.1.1] — 2026-07-11
 
 Hardening pass from a multi-persona review of 0.1.0, each fix covered by a regression test.

@@ -4,68 +4,68 @@
 
 The 16 skills in this repo, alphabetically. Each description doubles as the
 skill's "when to use" trigger. For the workflow and how the skills connect, see
-[OVERVIEW.md](OVERVIEW.md).
+[OVERVIEW.md](OVERVIEW.md). Each heading links to the full generated page.
 
-## ed-adversarial-review
+## [ed-adversarial-review](skills/ed-adversarial-review.md) `v0.1.0`
 
 Red-team a change before it ships — fan out attacker personas (exploit developer, chaos engineer, malicious user, boundary breaker, data-integrity auditor, time bomb) that each try to BREAK the code or HURT the user, then a verification pass keeps only breaks that are actually reachable in the real code. Use for anything security-, money-, data-, auth-, or concurrency-sensitive, after /ed-review, or when invoked as /ed-adversarial-review (also "red team this", "how could this break", "attack this", "poke holes in the code", "what could go wrong in prod"). Complements /ed-review (which asks "is it correct?"); this asks "how do I break it?". Hands off to /ed-work to fix, then re-run.
 
-## ed-animate
+## [ed-animate](skills/ed-animate.md) `v0.1.0`
 
 Build, refactor, and tune animated React interfaces using a storyboard DSL, live control panels, and structured design critique. Use when working with animations, transitions, motion, easing, springs, staggered reveals, entrance/exit, scroll-driven sequences, or when the user says "animate", "make it bouncy", "smoother transition", "polish this UI", "critique this design", or invokes /ed-animate. Has three sub-modes — storyboard (write/refactor animations), dials (add live tuning controls), and critique (audit a UI). Hands off to /ed-work for production wiring or /ed-review when polished.
 
-## ed-brainstorm
+## [ed-brainstorm](skills/ed-brainstorm.md) `v0.1.0`
 
 Turn a vague idea into a clear, well-stress-tested design through dialogue before any code is written. Use when the user describes something new ("I want to build...", "what if we...", "I have an idea..."), when requirements are fuzzy, when the goal is exploring options, or when invoked as /ed-brainstorm. Has two modes — collaborative (default) and adversarial (can convene a small skeptic panel) — and hands off to /ed-plan once the design crystallises.
 
-## ed-diagnose
+## [ed-diagnose](skills/ed-diagnose.md) `v0.1.0`
 
 Root-cause a bug or performance regression through a disciplined loop — reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says "debug this", "why isn't this working", "it's broken", "investigate"). Makes the minimal root-cause fix and locks it in with a regression test, escalating to /ed-work when the fix spans multiple slices.
 
-## ed-git-fix
+## [ed-git-fix](skills/ed-git-fix.md) `v0.1.0`
 
 Resolve git merge/rebase conflicts, restack dependent branches until the chain is clean, and clean up stale worktrees and merged branches. Use when the user says "fix the rebase", "fix conflicts", "resolve merge", "restack", "gt sr", "stack rebase", "clean up branches", "git is broken", or when invoked as /ed-git-fix. Works with any stacking tool (Graphite, git-spice, Git Town) or plain git. Hands off to /ed-ship to continue once the tree is clean.
 
-## ed-handoff
+## [ed-handoff](skills/ed-handoff.md) `v0.1.0`
 
 Compact the current conversation into a handoff document so a fresh agent (or future-you) can pick up where this session left off without re-reading the entire transcript. Use when the conversation is getting long, when switching contexts, when the user says "save the state", "wrap this up", "handoff", or when invoked as /ed-handoff. Writes a portable markdown file with the essentials and points the next session at the right skill (a live plan → `/ed-work .plans/<file>` in a fresh context).
 
-## ed-plan
+## [ed-plan](skills/ed-plan.md) `v0.1.0`
 
 Research the codebase with parallel read-only agents, design the approach, then write a task-decomposed plan to ./.plans/<date>-<slug>.md so a FRESH session can execute it. Use when the design from /ed-brainstorm is clear and you need to figure out HOW (or when invoked as /ed-plan, or when the user says "make a plan", "break this down", "what's the approach"). Writes a plan file and hands off to /ed-work in a clean context.
 
-## ed-pr-fix
+## [ed-pr-fix](skills/ed-pr-fix.md) `v0.1.0`
 
 Address GitHub PR review comments — pull ALL open feedback, group it by intent, fix in a coherent order, and reply to every thread with a commit link. Use after /ed-ship when reviewers leave comments (or when invoked as /ed-pr-fix, when the user says "address the review", "fix the PR feedback", "respond to comments"). Fixes use /ed-work discipline; hands back to /ed-ship to push the follow-up commits.
 
-## ed-prototype
+## [ed-prototype](skills/ed-prototype.md) `v0.1.0`
 
 Build throwaway code to answer a specific design question — a tiny runnable terminal app for state/logic questions, or several radically different UI variations toggleable from one route for visual questions. Use when the user says "prototype this", "let me play with it", "try a few designs", "sanity-check this state machine", or when invoked as /ed-prototype. Output is DISPOSABLE — meant to be thrown away once the question is answered. Hands off to /ed-brainstorm or /ed-plan with the answer.
 
-## ed-prune-claude-setup
+## [ed-prune-claude-setup](skills/ed-prune-claude-setup.md) `v0.1.0`
 
 Audit and curate the Claude Code setup — memory entries, CLAUDE.md rules, settings.json, enabled plugins/skills. Surface stale, duplicate, dead, or now-redundant entries and confirm each removal with the user. Use when the user says "prune my claude setup", "audit my config", "prune memory", "trim CLAUDE.md", "clean up my claude setup", "is this still needed", or when invoked as /ed-prune-claude-setup. NOT for code cleanup (that's /ed-simplify or /ed-refactor). Out of scope: mechanical junk like caches, history, backups — those belong in a shell alias.
 
-## ed-refactor
+## [ed-refactor](skills/ed-refactor.md) `v0.1.0`
 
 Behavior-preserving improvement of existing code — find structural friction, deepen shallow modules, consolidate duplication, manage deprecations and migrations. Use when the user says "refactor this", "clean this up", "this is getting messy", "let's restructure", or when invoked as /ed-refactor. NOT for changing behavior (that's /ed-work) and NOT for line-level slop reduction (that's /ed-simplify). Hands off to /ed-work for the actual changes or /ed-review when done.
 
-## ed-review
+## [ed-review](skills/ed-review.md) `v0.1.0`
 
 Multi-persona review of changes before they ship — fans out distinct-viewpoint reviewers (correctness, readability, architecture, security, performance, simplicity), then runs an adversarial verification pass that tries to REFUTE each finding so only real, confidence-tagged problems survive. Use after /ed-work is complete, before /ed-ship, or when invoked as /ed-review (also triggers on "review this", "check before I push", "audit changes"). Surfaces real problems only — no nitpicking. Hands off to /ed-adversarial-review for a red-team pass, /ed-simplify for de-slopping, or /ed-ship to merge.
 
-## ed-ship
+## [ed-ship](skills/ed-ship.md) `v0.1.0`
 
 Get reviewed changes to production safely — atomic commits with conventional-commit messages, a draft PR with auto-fix on pre-commit failures, and a pre-launch checklist for anything user-facing. Use after /ed-review passes (and /ed-adversarial-review for security/money/data/auth/migration-sensitive changes), or when invoked as /ed-ship (also "push this", "open a PR", "let's ship it", "ready to deploy"). Hands off to /ed-pr-fix when reviewers comment, /ed-git-fix when the push snags on a rebase/conflict.
 
-## ed-simplify
+## [ed-simplify](skills/ed-simplify.md) `v0.1.0`
 
 Aggressively reduce code — strip AI slop, kill single-use abstractions, delete defensive checks for impossible cases, collapse indirection, and shrink files to essence WITHOUT changing behavior. Use when the user says "simplify", "deslop", "reduce", "trim", "make shorter", "too much code", "clean up", "bloated", "overengineered", or complains about AI artifacts (excessive comments, single-use helpers, defensive checks). Default scope is changed files on the current branch vs main; triggers automatically as a post-step in /ed-review when slop is detected. Hands off to /ed-review then /ed-ship.
 
-## ed-styles
+## [ed-styles](skills/ed-styles.md) `v0.1.0`
 
 Write modern, lean CSS/SCSS — explicit properties over shorthand, precise transitions over `transition: all`, modern CSS over hacks, terse comments. Honors the house rules from CLAUDE.md (SCSS modules, kebab-case, bracket notation, no BEM, no `background` shorthand) and extends them with broader good-practice guardrails. Use when writing or editing `.css`, `.scss`, or `.module.scss` files, when the user says "style this", "add styles", "polish the CSS", "fix the layout", "make this responsive", or when invoked as /ed-styles. For motion-heavy work hand off to /ed-animate. For full design-system / component generation hand off to frontend-design.
 
-## ed-work
+## [ed-work](skills/ed-work.md) `v0.1.0`
 
 Execute work as thin, verified vertical slices — either from a plan file written by /ed-plan (`/ed-work .plans/<file>`) in a fresh context, or ad-hoc from a description when there's no plan. Write code, prove it works with evidence, then move to the next slice. Use for any implementation work (or when invoked as /ed-work, when the user says "implement this", "build this", "let's code this up", "make it work", "run the plan"). Verifies against official docs when uncertain, prefers tests-first for new behavior, and hands off to /ed-review when the work is complete.

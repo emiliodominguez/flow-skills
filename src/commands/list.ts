@@ -18,9 +18,13 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean }): vo
 
 	log.heading(`Skills (${skills.length})`);
 	const width = Math.max(...skills.map((s) => s.name.length), 0);
+	// Reserve a version column only if at least one skill declares a version.
+	const versionOf = (s: (typeof skills)[number]) => (typeof s.frontmatter.version === "string" ? s.frontmatter.version : "");
+	const verWidth = Math.max(...skills.map((s) => versionOf(s).length), 0);
 	for (const skill of skills) {
 		const summary = skill.frontmatter.description.split(/[.—]/)[0]!.trim().slice(0, 90);
-		console.log(`  ${pc.bold(skill.name.padEnd(width))}  ${pc.dim(summary)}`);
+		const ver = verWidth > 0 ? pc.dim(("v" + (versionOf(skill) || "—")).padEnd(verWidth + 2)) + " " : "";
+		console.log(`  ${pc.bold(skill.name.padEnd(width))}  ${ver}${pc.dim(summary)}`);
 	}
 
 	if (opts.targets) {

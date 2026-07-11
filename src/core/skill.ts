@@ -113,6 +113,11 @@ export function validateSkill(skill: Skill): Issue[] {
 		}
 	}
 
+	// `version` is optional, but if present it should be a semver-ish string so `list` can surface it.
+	if (typeof fm.version === "string" && fm.version && !/^\d+\.\d+\.\d+/.test(fm.version)) {
+		add("warn", "version.semver", `version "${fm.version}" is not semver-ish (e.g. 1.2.0)`);
+	}
+
 	if (skill.body.length < 40) add("warn", "body.thin", "body is very short — is this skill complete?");
 	if (!/^##\s+Done when/im.test(skill.body)) add("warn", "structure.done-when", "no `## Done when` completion gate");
 	if (!/^##.*(anti-pattern|rules|does not do)/im.test(skill.body))

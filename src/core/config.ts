@@ -1,0 +1,84 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+/** Where a target installs by default, per scope. Paths may use `~`. */
+export interface TargetConfig {
+	enabled: boolean;
+	userPath: string;
+	projectPath: string;
+}
+
+/** The full resolved config for a repo. */
+export interface Config {
+	skillsDir: string;
+	installMode: "symlink" | "copy";
+	defaultTargets: string[];
+	targets: Record<string, TargetConfig>;
+}
+
+const DEFAULTS: Config = {
+	skillsDir: "skills",
+	installMode: "symlink",
+	defaultTargets: ["claude"],
+	targets: {
+		claude: { enabled: true, userPath: "~/.claude/skills", projectPath: ".claude/skills" },
+		cursor: { enabled: true, userPath: "~/.cursor/rules", projectPath: ".cursor/rules" },
+		codex: { enabled: true, userPath: "~/.codex/AGENTS.md", projectPath: "AGENTS.md" },
+		windsurf: { enabled: true, userPath: "~/.codeium/windsurf/memories", projectPath: ".windsurf/rules" },
+	},
+};
+
+/**
+ * Locate the repo root by walking up from a start dir until an
+ * `agent-skills.config.json` (or the package.json + skills dir) is found. Falls
+ * back to the installed package root so a globally-installed CLI still works.
+ *
+ * @param startDir - Where to begin the upward search (default: cwd).
+ * @returns The repo/package root directory.
+ */
+export function findRepoRoot(startDir: string = process.cwd()): string {
+	let dir = startDir;
+	for (;;) {
+		if (fs.existsSync(path.join(dir, "agent-skills.config.json"))) return dir;
+		const parent = path.dirname(dir);
+		if (parent === dir) break;
+		dir = parent;
+	}
+	// Fallback: the package root (two levels up from this compiled file: dist/ -> root).
+	const here = path.dirname(fileURLToPath(import.meta.url));
+	return path.resolve(here, "..", "..");
+}
+
+/**
+ * Load config from `agent-skills.config.json`, deep-merged over built-in
+ * defaults, with an optional git-ignored `.agent-skills.local.json` override.
+ *
+ * @param root - The repo root (see {@link findRepoRoot}).
+ * @returns The effective config.
+ */
+export function loadConfig(root: string): Config {
+	const cfg: Config = structuredClone(DEFAULTS);
+	mergeInto(cfg, readJsonIfExists(path.join(root, "agent-skills.config.json")));
+	mergeInto(cfg, readJsonIfExists(path.join(root, ".agent-skills.local.json")));
+	return cfg;
+}
+
+function readJsonIfExists(file: string): Partial<Config> | undefined {
+	if (!fs.existsSync(file)) return undefined;
+	const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>;
+	delete parsed["$schema"];
+	return parsed as Partial<Config>;
+}
+
+function mergeInto(base: Config, override?: Partial<Config>): void {
+	if (!override) return;
+	if (override.skillsDir) base.skillsDir = override.skillsDir;
+	if (override.installMode) base.installMode = override.installMode;
+	if (override.defaultTargets) base.defaultTargets = override.defaultTargets;
+	if (override.targets) {
+		for (const [name, tc] of Object.entries(override.targets)) {
+			base.targets[name] = { ...(base.targets[name] ?? { enabled: true, userPath: "", projectPath: "" }), ...tc };
+		}
+	}
+}

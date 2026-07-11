@@ -1,0 +1,176 @@
+---
+name: ed-styles
+description: Write modern, lean CSS/SCSS — explicit properties over shorthand, precise transitions over `transition: all`, modern CSS over hacks, terse comments. Honors the house rules from CLAUDE.md (SCSS modules, kebab-case, bracket notation, no BEM, no `background` shorthand) and extends them with broader good-practice guardrails. Use when writing or editing `.css`, `.scss`, or `.module.scss` files, when the user says "style this", "add styles", "polish the CSS", "fix the layout", "make this responsive", or when invoked as /ed-styles. For motion-heavy work hand off to /ed-animate. For full design-system / component generation hand off to frontend-design.
+---
+
+# Styles
+
+Lean, explicit, modern CSS. Strong opinions on a small number of rules — everything else is taste.
+
+The rules in `~/.claude/CLAUDE.md > SCSS` are authoritative and already in context every session. This skill **extends** them with broader CSS practices.
+
+---
+
+## Selectors & specificity
+
+- **Single class selectors** as the default. Avoid `.parent .child .grandchild` chains
+- **Max 3 levels of SCSS nesting.** Deeper means restructure, don't nest harder
+- **No IDs in styles** — reserved for JS hooks and anchors
+- **No `!important`** except to override an unreachable third-party rule
+- **`:where()` over `:is()`** when you don't want a specificity bump — `:where()` is `0,0,0`
+- **`&` only for state/modifier nesting** (`&:hover`, `&[data-open]`), not for every descendant
+- **No `@extend`** — groups selectors in surprising places, hurts gzip. Use a mixin or composed class
+
+## Properties — explicit over shorthand
+
+- **No `background` shorthand.** Use `background-color` or `background-image`. Shorthand resets siblings — set `background: red` and you wipe out an earlier `background-image`
+- **No `transition: all`.** Enumerate the properties you actually animate. `all` is opaque, re-runs on every property change, and breaks predictability
+  - Bad: `transition: all 200ms ease`
+  - Good: `transition: opacity 200ms ease, transform 200ms ease`
+- **Logical properties** (`margin-inline`, `padding-block`, `inset-inline-start`) over physical (`margin-left`, `top`) for i18n-safe layouts
+- `font` shorthand is fine — rarely partially set, low risk. `margin: 0 auto` is fine — clear intent
+
+## Layout
+
+- **Flexbox or Grid** for layout. Never floats
+- **`gap` over margins** for flex/grid item spacing — margins on items create double-margin headaches
+- **`aspect-ratio`** instead of padding-bottom hacks (`padding-bottom: 56.25%`)
+- **`place-items` / `place-content`** when both axes share a value
+- **Container queries (`@container`)** when a component should respond to its container, not the viewport
+
+## Sizing & spacing
+
+- **Relative units** for typography and spacing — `rem` for sizes; `em` only when you want scaling with local font-size
+- **`clamp(min, ideal, max)`** for fluid type/spacing instead of stacked media queries
+- **Custom properties for design tokens** — `var(--space-md)`, `var(--color-accent)`, `var(--radius-lg)`. Don't hardcode in components
+- **No magic numbers** without a one-line WHY. `padding-top: 13px` raises questions; with `/* aligns optical baseline with sibling icon */` it doesn't
+
+## Colors
+
+- **Tokens via custom properties** — components consume `var(--color-accent)`, never hardcoded hex
+- **Color space**: prefer `oklch()` for new tokens (perceptually uniform), `hsl()` acceptable, hex/`rgb()` are legacy
+- **`color-mix()`** for tint/shade/alpha variants instead of duplicating tokens
+
+```scss
+// instead of duplicating tokens for hover states
+background-color: color-mix(in oklch, var(--color-accent), black 10%);
+```
+
+## Transitions & motion
+
+For anything beyond simple state transitions, hand off to **/ed-animate**.
+
+- **Animate `transform` and `opacity`** — compositor-friendly. Animating `width`/`height`/`top`/`margin` triggers layout/paint per frame
+- **`will-change`** only on elements actively animating; remove after. Don't sprinkle preemptively
+- **Always respect `prefers-reduced-motion`** for non-essential motion:
+
+  ```scss
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  ```
+
+- **Custom cubic-beziers** carry character — `ease`, `linear`, `ease-in-out` are starting points
+
+## Modern CSS to prefer
+
+- **`:has()`** for parent-aware styling — replaces JS-driven parent class toggles
+- **`@layer`** to control cascade across libraries / utilities / components
+- **`:where()` / `:is()`** for grouping
+- **`color-mix()`, `oklch()`, `clamp()`, `min()`/`max()`**
+- **Native CSS nesting** is fine in `.css`, but keep SCSS nesting in `.scss` files for consistency
+
+## Accessibility
+
+- **`:focus-visible`** for keyboard outlines, never bare `:focus`
+- **Never `outline: none`** without a replacement focus indicator
+- **`.sr-only` for screen-reader-only content**, never `display: none`:
+
+  ```scss
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  ```
+
+- **Contrast** — body text ≥ 4.5:1, large text ≥ 3:1
+
+## Performance
+
+- **Compositor-only animation** — `transform` / `opacity`, not box-model properties
+- **`content-visibility: auto`** on long sections far down the page to skip rendering until near viewport
+- **Avoid universal selectors in nested contexts** — `.card *` walks the whole subtree on every change
+- **`contain: layout / paint / content`** on isolated subtrees that don't affect outer layout
+
+## SCSS specifics
+
+- **`@use` not `@import`** (already global rule). Namespace explicitly when collisions are possible: `@use "tokens" as t;`
+- **`@forward`** for re-exports from index/barrel files
+- **Mixins for repeated declaration blocks** with 2+ usages. Extract on second occurrence, not first
+- **Functions for value transforms** — color manipulation, math, unit conversion
+- **No `@extend`** (repeated for emphasis)
+
+## Comments
+
+- **Default: no comment.** Module scoping + good names already carry the meaning
+- **WHY only, never WHAT.** `/* aligns optical baseline */` yes; `/* set padding */` no
+- **No section banners** (`/* ===== HEADER ===== */`). File structure is the section
+- **No autogenerated docs / SassDoc** unless explicitly asked
+
+---
+
+## Quick reference
+
+| Avoid                                  | Prefer                                              |
+| -------------------------------------- | --------------------------------------------------- |
+| `background: red url(...)`             | `background-color: red; background-image: url(...)` |
+| `transition: all 200ms`                | `transition: opacity 200ms, transform 200ms`        |
+| `padding-bottom: 56.25%` (aspect hack) | `aspect-ratio: 16 / 9`                              |
+| Float layouts                          | Flex / Grid                                         |
+| `margin` between flex items            | `gap`                                               |
+| `.parent .child .grandchild`           | Single class on the leaf                            |
+| `!important`                           | Restructure or use `@layer`                         |
+| `display: none` for SR-only            | `.sr-only` clip pattern                             |
+| `outline: none` without replacement    | `:focus-visible` styling                            |
+| `:focus` for outlines                  | `:focus-visible`                                    |
+| Hardcoded hex in components            | `var(--color-...)` from token layer                 |
+| `@import "file.scss"`                  | `@use "file" as f`                                  |
+| BEM (`block__elem--mod`)               | Short kebab-case in SCSS module                     |
+| Stacked media queries for sizes        | `clamp(min, ideal, max)`                            |
+| `width: 320px` magic                   | `var(--container-sm)`                               |
+| `@extend .button`                      | Mixin or composed class                             |
+| `margin-left` / `padding-right`        | `margin-inline-start` / `padding-inline-end`        |
+| `box-shadow` duplicated everywhere     | Token: `var(--shadow-md)`                           |
+| Animating `width` / `top`              | `transform: scaleX()` / `translate3d()`             |
+
+---
+
+## Rules
+
+- **House rules from CLAUDE.md are non-negotiable** — SCSS modules, bracket notation, kebab-case, `@use`, no `background` shorthand, no BEM
+- **Don't refactor existing code while adding new styles.** Note violations but only fix them if the user asks (separate /ed-refactor pass)
+- **No comments by default.** Add one only when the WHY is non-obvious
+- **Modern CSS over hacks** — `aspect-ratio` over padding-bottom, `clamp()` over media-query stacks, `:has()` over JS toggles, `gap` over item margins
+- **Animate transform & opacity only.** Anything else needs a real reason and probably belongs in /ed-animate
+- **Defer to /ed-animate** for motion beyond simple state transitions, to frontend-design for full component generation
+
+## Done when
+
+- New/edited styles satisfy CLAUDE.md house rules and this skill's guardrails
+- No `background` shorthand, no `transition: all`, no BEM, no `!important` without a captured reason
+- Class names kebab-case, consumed via `styles["class-name"]`
+- Colors and spacing come from tokens (`var(--...)`), not hardcoded values
+- `prefers-reduced-motion` honored if non-trivial motion was added
+- Comments are sparse and explain WHY, not WHAT

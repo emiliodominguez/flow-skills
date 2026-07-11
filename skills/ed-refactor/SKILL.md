@@ -1,0 +1,105 @@
+---
+name: ed-refactor
+description: Behavior-preserving improvement of existing code — find structural friction, deepen shallow modules, consolidate duplication, manage deprecations and migrations. Use when the user says "refactor this", "clean this up", "this is getting messy", "let's restructure", or when invoked as /ed-refactor. NOT for changing behavior (that's /ed-work) and NOT for line-level slop reduction (that's /ed-simplify). Hands off to /ed-work for the actual changes or /ed-review when done.
+---
+
+# Refactor
+
+Improve the structure of existing code **without changing what it does**. The behaviour observable from outside the changed code must be identical before and after.
+
+This is a **single-writer** edit. Its safety net is characterization tests you run after every step — not a review panel. The panel comes later, and separately: `/ed-review` runs *after* the refactor lands, on the diff. Don't fan out subagents to "refactor in parallel" — one writer, one green test suite.
+
+If you find yourself wanting to "also fix this small bug while I'm in here" — **don't**. That's a separate commit, and probably a separate skill (`/ed-diagnose` then `/ed-work`).
+
+---
+
+## Step 1: Scope explicitly
+
+Refactoring without scope is renovation. Ask the user (if not given):
+
+- **Which area?** A single file? A module? A boundary between two modules?
+- **What's the goal?** Readability, testability, removing duplication, preparing for a future change, deleting an obsolete pattern?
+- **What's off-limits?** Public API? Database schema? File names other modules import?
+
+Write the scope down in one sentence. Refer back to it whenever you're tempted to widen.
+
+---
+
+## Step 2: Snapshot the current behaviour
+
+Behavior preservation is only meaningful if you know what behavior to preserve.
+
+- **Run the existing tests** — they should pass before you start.
+- If the area is undertested, **write characterisation tests first**: tests that capture what the code does today (warts and all). Don't fix anything yet.
+- For UI: capture screenshots of the current state, or note user-visible behaviour to compare.
+
+You cannot refactor safely without a test net. These tests *are* the safety net — they're what makes a single-writer edit trustworthy without a reviewer watching every keystroke.
+
+---
+
+## Step 3: Pick a refactor pattern
+
+Common moves, by goal:
+
+### Deepen a module
+Move implementation details *into* the module; shrink the public surface to the smallest useful interface. The module should do one thing and expose few ways to ask it.
+
+### Pull up an abstraction
+Three near-duplicates → one abstraction. Two near-duplicates → keep them duplicated; the abstraction is premature.
+
+### Push down a detail
+A field/parameter/option used by only one caller doesn't belong in a shared type. Move it to the caller's local scope.
+
+### Replace inheritance with composition
+Subclassing for code reuse usually creates coupling that bites later. Prefer function passing or object composition.
+
+### Extract a pure core
+Side effects (I/O, time, randomness) at the edges; pure logic in the middle. Makes the core testable without mocks.
+
+### Migration / deprecation
+Old code lives alongside new for a transitional period. Steps:
+1. Add the new implementation
+2. Migrate callers one by one (each is its own commit)
+3. Mark the old code deprecated with a note pointing at the replacement
+4. After all callers migrate, delete the old code
+
+---
+
+## Step 4: Make the change in small steps
+
+- One refactor pattern per commit.
+- Run the tests after each step. They should still pass.
+- If a test starts failing, you changed behaviour by accident. Revert and try smaller.
+
+---
+
+## Step 5: Verify nothing changed downstream
+
+- Full test suite green
+- Type-check passes
+- For UI: visual check, no regressions
+- For perf-sensitive code: a quick before/after benchmark — refactoring sometimes silently changes hot paths
+
+---
+
+## Anti-patterns
+
+- ❌ "While I'm here" scope creep
+- ❌ Renaming variables along with structural changes (rename in a separate commit so the structural diff is readable)
+- ❌ Deleting comments you don't understand (read git blame first)
+- ❌ Extracting an abstraction from two examples
+- ❌ Rewriting a module instead of refactoring it — at that point, you're doing `/ed-work` with a "replace X" task, not a refactor
+- ❌ Refactoring untested code without writing characterisation tests first
+- ❌ Mixing a refactor commit with a behaviour-change commit
+- ❌ Fanning out parallel writers to "refactor faster" — one writer, one green suite
+
+---
+
+## Done when
+
+- Scope is met, nothing extra touched
+- Tests still pass, including any new characterisation tests
+- The diff is smaller or more readable than what was there
+- A future reader will be glad you made the change
+
+Then: if the refactor is large enough to be its own plan, hand the changes to `/ed-work`. Otherwise say **"Refactor complete. Ready for `/ed-review`?"** — then `/ed-ship`.

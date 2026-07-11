@@ -1,0 +1,7 @@
+node_modules/
+dist/
+pnpm-lock.yaml
+# Skills and templates are authored prose — don't let Prettier reflow tables/ASCII.
+skills/
+templates/
+.plans/

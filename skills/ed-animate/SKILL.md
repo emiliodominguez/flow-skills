@@ -1,0 +1,155 @@
+---
+name: ed-animate
+description: Build, refactor, and tune animated React interfaces using a storyboard DSL, live control panels, and structured design critique. Use when working with animations, transitions, motion, easing, springs, staggered reveals, entrance/exit, scroll-driven sequences, or when the user says "animate", "make it bouncy", "smoother transition", "polish this UI", "critique this design", or invokes /ed-animate. Has three sub-modes — storyboard (write/refactor animations), dials (add live tuning controls), and critique (audit a UI). Hands off to /ed-work for production wiring or /ed-review when polished.
+---
+
+# Animate
+
+For React UIs where motion matters. Three modes:
+
+| Mode | When | Trigger phrases |
+|---|---|---|
+| **Storyboard** | Writing or refactoring multi-stage animations into a readable DSL | "animate", "transition", "stage", "entrance", "stagger" |
+| **Dials** | Adding live control panels to tune values without re-running | "tune", "tweak", "controls", "sliders", "dialkit" |
+| **Critique** | Systematic visual audit of a UI | "critique", "review the design", "polish", "feedback on this screen" |
+
+---
+
+## Mode 1: Storyboard
+
+Animations get unreadable fast when timings, durations, and offsets are scattered across components. The storyboard pattern fixes this.
+
+### Pattern
+
+At the top of the file, write the animation as **prose** in a comment block, then capture all timing as **named constants**:
+
+```tsx
+/* ──────────────────────────────────────────────
+ * ANIMATION STORYBOARD
+ *
+ *    0ms   awaiting scroll-into-view
+ *  300ms   card fades in, scales 0.85 → 1.0
+ *  900ms   heading highlights, glow pulses
+ * 1500ms   rows slide up, staggered 200ms each
+ * ────────────────────────────────────────────── */
+
+const TIMING = {
+	cardAppear: 300,
+	heading: 900,
+	rows: 1500,
+	rowStagger: 200,
+};
+
+const SPRING = {
+	type: "spring",
+	visualDuration: 0.3,
+	bounce: 0.2,
+};
+```
+
+Then components reference these constants — never raw magic numbers.
+
+### Rules
+
+- **Storyboard comment goes at the top.** Anyone scanning the file should understand the sequence in 5 seconds.
+- **No raw numbers inside JSX/CSS.** Every timing/easing value comes from the constant block.
+- **Prefer springs over duration-based easing** for natural motion. Springs feel right at any speed; durations need to be re-tuned each time the design changes.
+- **One stage variable drives the sequence.** A single integer that goes 0 → 1 → 2 → 3, not a constellation of boolean flags.
+- **Stagger by `index * staggerStep`**, not by hand-coded delays per child.
+
+---
+
+## Mode 2: Dials (live tuning)
+
+When the design is "almost right" but needs visual tweaks, build a live control panel instead of editing the file, reloading, judging, repeat.
+
+Use a `useDialKit` style hook that renders a floating panel:
+
+```tsx
+const params = useDialKit("Card animation", {
+	scale: [1, 0.5, 2],                                // [default, min, max]
+	blur: [0, 0, 100],
+	cardAppearMs: [300, 0, 2000],
+	spring: { type: "spring", visualDuration: 0.3, bounce: 0.2 },
+});
+```
+
+### Rules
+
+- **One panel per logical group** (one for entrance, one for hover, etc.). Don't stuff every value into one panel.
+- **Default values are the values currently in the design.** Sliders adjust around them.
+- **Keep dials in dev only.** Don't ship them — wrap in `if (process.env.NODE_ENV === "development")` or strip at build.
+- **When tuning is done, lift the final values back into the storyboard's TIMING constants** and remove the dial. The dial was scaffolding.
+
+---
+
+## Mode 3: Critique
+
+Systematic UI review of a screenshot, page, or component. Cover these dimensions in order:
+
+### 1. Hierarchy
+- What's the user's eye drawn to first? Is that the right thing?
+- Is there a clear primary action vs. secondary actions?
+- Are there competing focal points?
+
+### 2. Rhythm & spacing
+- Consistent spacing scale (4/8/16/24/32)? Or random gaps?
+- Visual rhythm between sections — does the page breathe?
+- Cramped or floaty?
+
+### 3. Typography
+- Two or three sizes max? Too many sizes muddles hierarchy.
+- Line-height comfortable for body text? (≈1.4–1.6 for paragraphs)
+- Weight variation purposeful, or accidental?
+
+### 4. Colour
+- Limited palette (3–5 colours, plus neutrals)?
+- Contrast on text passes accessibility (AA at minimum)?
+- Brand colour used for action, not decoration?
+
+### 5. Motion (if any)
+- Does animation guide attention, or distract?
+- Are entrance times appropriate (≤300ms for instant feel; ≤800ms for character)?
+- Spring physics or duration easing — do they match the brand's "feel"?
+
+### 6. Affordances
+- Is it clear what's clickable, draggable, scrollable, dismissible?
+- Hover/focus states communicate interactivity?
+- Empty / loading / error states designed, or afterthought?
+
+### Output
+
+```
+## Strong
+- [observation about what's working]
+
+## Pull on these
+- [concrete change, with reasoning]
+- [concrete change]
+
+## Out of scope but worth noting
+- [systemic issues that aren't this screen's fault]
+```
+
+Don't critique what isn't there. Critique what is.
+
+---
+
+## Anti-patterns
+
+- ❌ Magic numbers scattered through components (`transition: { duration: 0.847 }`)
+- ❌ Per-child hand-coded delays for what should be a stagger
+- ❌ Five competing focal points on one screen
+- ❌ Dial panels shipped to production
+- ❌ Critique that's just personal preference without a usability reason
+- ❌ "It would be nice to also..." — that's scope creep, not critique
+
+---
+
+## Done when
+
+- For storyboard: file has a top comment + named TIMING/SPRING constants, no magic numbers below
+- For dials: live panel tunes the values, then those values land in the storyboard, then the panel is removed
+- For critique: prioritised list of changes with reasoning, not just opinions
+
+Then: `/ed-work` to wire in production-ready, or `/ed-review` if you're already done.

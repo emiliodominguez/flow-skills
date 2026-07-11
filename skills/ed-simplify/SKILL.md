@@ -1,0 +1,164 @@
+---
+name: ed-simplify
+description: Aggressively reduce code — strip AI slop, kill single-use abstractions, delete defensive checks for impossible cases, collapse indirection, and shrink files to essence WITHOUT changing behavior. Use when the user says "simplify", "deslop", "reduce", "trim", "make shorter", "too much code", "clean up", "bloated", "overengineered", or complains about AI artifacts (excessive comments, single-use helpers, defensive checks). Default scope is changed files on the current branch vs main; triggers automatically as a post-step in /ed-review when slop is detected. Hands off to /ed-review then /ed-ship.
+---
+
+# Simplify
+
+Every line must earn its place. Slop survives by hiding among useful code — this skill rips it out. The one discipline: **subtract without changing behaviour, and verify before you subtract.**
+
+**Default scope:** files changed on the current branch vs `main`. Override on request ("simplify this file", "simplify the whole repo").
+
+---
+
+## Step 1: Scope + green baseline
+
+```bash
+git diff --name-only main...HEAD
+```
+
+If the diff is large (>20 files), confirm with the user before proceeding. Otherwise just go.
+
+Then **capture a green baseline**: run the test suite now and confirm it passes. If it's already red, stop — you can't tell a simplification from a regression against a broken baseline.
+
+---
+
+## Step 2: Fan out the five reduction passes (parallel, read-only)
+
+Launch the five passes as **parallel subagents in one message** (Agent tool, `type: Explore` or `general-purpose` — **read-only, they never edit**). Each gets the file list, its one focused lens, and the **proposal schema**. They scan and propose deletions/edits; they do **not** touch files. **You**, the orchestrator, are the only writer.
+
+### Pass 1: AI artifacts
+- Comments that explain *what* the code does (delete; the code says it)
+- Comments referencing the prompt, the task, or "as requested"
+- Stale comments — what the code did three revisions ago
+- JSDoc that just restates parameter names
+- `// TODO`, `// FIXME` from earlier iterations that never got resolved
+- Variable names like `myFunction`, `helperFn`, `dataObj`
+
+### Pass 2: Single-use abstractions
+- Functions called from exactly one place — inline them
+- Components/types defined but only used once in the same file — inline
+- Constants used once that are obvious from context (`const ZERO = 0`)
+- Type aliases that wrap a single primitive for no reason
+- Wrapper classes around one method
+
+**Exception:** if extracting genuinely improves readability (e.g., a complex condition behind a clear name), keep it. The bar is "does this name save more than it costs?"
+
+### Pass 3: Defensive code for impossible cases
+- Null/undefined checks on values that can never be null/undefined per the type system
+- `try/catch` around code that cannot throw
+- `if (Array.isArray(x))` after a `T[]` parameter
+- Empty default cases on exhaustive switches
+- "Just in case" early returns
+
+### Pass 4: Bloat and indirection
+- Multi-line builders for objects that could be one literal
+- Chains of `.then().then().then()` that should be `await`
+- `Boolean()` / `!!` casts on already-boolean values
+- Re-declaring a value before returning it (`const result = x; return result;`)
+- Functions that just call another function with the same args
+
+### Pass 5: Dead and unused
+- Imports nothing in the file uses
+- Exports nothing in the project uses — **route to Step 4, never delete on the pass's word alone**
+- Variables assigned but never read
+- Conditional branches that can never execute given the inputs
+- Old code paths left behind a feature flag that's been on for months
+
+### Proposal schema (every pass returns this shape)
+
+```
+- file:line   path and 1-indexed line (or range)
+- pass        which reduction lens found it
+- kind        delete | inline | collapse | rename
+- target      the exact lines to remove or change
+- reason      why it's slop, not load-bearing
+- risk        safe | needs-caller-check
+```
+
+Mark `risk: needs-caller-check` for **any deletion of a public export or code the pass calls "dead/unused"**. A proposal with no `reason` is a vibe — tell passes to drop it.
+
+---
+
+## Step 3: Merge
+
+Collect all proposals, **dedup by `file:line`** (two passes often flag the same spot — keep the sharpest reason, note both lenses). You now have one ordered edit list.
+
+---
+
+## Step 4: Verify before you subtract
+
+The adversarial gate that keeps simplification safe. Every proposal tagged `risk: needs-caller-check` — public exports, and anything claimed dead — goes through a verifier whose *job is to prove a caller EXISTS*, before you delete anything:
+
+> *"Here is code proposed for deletion as unused: <target>. Prove it is still reachable — find a caller, a re-export, a dynamic/string reference, a DI registration, a test, or a config/route that names it, anywhere in the repo. If you cannot find one, say the grep came up empty. Default to KEEP if you're unsure it's dead."*
+
+Grep the **whole repo**, not just the diff — and account for indirection your first grep misses: re-exports, barrel files, string-keyed lookups, reflection, generated callers, public-API consumers you can't see.
+
+### Verdict schema
+
+```
+- verdict    CONFIRMED-DEAD (no caller found anywhere) | KEEP (caller/reference found, or reachability uncertain)
+- evidence   the grep that came up empty, or the exact caller found
+```
+
+**Default to KEEPING when a deletion's safety can't be confirmed.** Only `CONFIRMED-DEAD` proposals are cleared for removal. Everything else stays. `risk: safe` proposals (inlining, collapsing, comment strips inside the diff) skip this gate.
+
+---
+
+## Step 5: Apply in atomic chunks
+
+You hold the merged list; the passes proposed, you edit. Then:
+
+1. Apply edits in **atomic chunks** — one concern at a time (one pass, or one file).
+2. Run tests after **each** chunk.
+3. If a test fails — **STOP**. You crossed the behaviour-preserving line. **Revert that chunk** and look at why before touching anything else.
+
+---
+
+## Step 6: Report
+
+```
+Removed:
+- 47 lines of stale comments
+- 3 single-use helper functions
+- 2 defensive null checks
+- 1 dead export (verified: no callers repo-wide)
+
+Kept (couldn't confirm dead):
+- `parseLegacyToken` — referenced by a string key in config
+
+Result: X files, -204 / +18 lines, tests still green.
+```
+
+---
+
+## Anti-patterns
+
+- ❌ A pass agent editing real files — passes are read-only; only you write
+- ❌ Deleting a public export or "dead" code on a pass's word without the caller-check
+- ❌ Deleting when the caller-check was inconclusive (default is KEEP)
+- ❌ Simplifying against a red baseline — you can't tell cleanup from regression
+- ❌ Applying every chunk at once, then running tests — you lose which chunk broke it
+- ❌ Introducing a new abstraction "while you're in there" — that's `/ed-refactor`
+- ❌ Deleting a `// why` comment because it looks like slop
+
+---
+
+## Rules
+
+- **Behaviour must not change.** Tests green before, tests green after. If they don't, you didn't simplify — you regressed.
+- **Don't simplify code you don't understand.** Read it first. If the *why* of a defensive check is unclear, check git blame.
+- **Verify before you subtract.** No public export or dead-code deletion ships without a `CONFIRMED-DEAD` verdict.
+- **No new abstractions.** Simplify means subtract, not refactor-then-subtract. If a refactor would also help, that's `/ed-refactor`, not this skill.
+- **Preserve comments that explain *why*.** Delete only comments that explain *what*.
+
+---
+
+## Done when
+
+- Five passes ran read-only and returned structured proposals; you applied the edits
+- Every deletion of an export or dead code cleared the caller-check (`CONFIRMED-DEAD`); the rest were kept
+- Edits went in as atomic chunks, tests green after each
+- Diff is net-negative (almost always), no new abstractions introduced
+
+Then: `/ed-review` the cleanup, then `/ed-ship`.

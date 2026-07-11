@@ -1,0 +1,28 @@
+{
+	"$schema": "./agent-skills.schema.json",
+	"skillsDir": "skills",
+	"installMode": "symlink",
+	"defaultTargets": ["claude"],
+	"targets": {
+		"claude": {
+			"enabled": true,
+			"userPath": "~/.claude/skills",
+			"projectPath": ".claude/skills"
+		},
+		"cursor": {
+			"enabled": true,
+			"userPath": "~/.cursor/rules",
+			"projectPath": ".cursor/rules"
+		},
+		"codex": {
+			"enabled": true,
+			"userPath": "~/.codex/AGENTS.md",
+			"projectPath": "AGENTS.md"
+		},
+		"windsurf": {
+			"enabled": true,
+			"userPath": "~/.codeium/windsurf/memories",
+			"projectPath": ".windsurf/rules"
+		}
+	}
+}

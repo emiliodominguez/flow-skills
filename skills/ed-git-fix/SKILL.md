@@ -1,0 +1,167 @@
+---
+name: ed-git-fix
+description: Resolve git merge/rebase conflicts, restack dependent branches until the chain is clean, and clean up stale worktrees and merged branches. Use when the user says "fix the rebase", "fix conflicts", "resolve merge", "restack", "gt sr", "stack rebase", "clean up branches", "git is broken", or when invoked as /ed-git-fix. Works with any stacking tool (Graphite, git-spice, Git Town) or plain git. Hands off to /ed-ship to continue once the tree is clean.
+---
+
+# Git Fix
+
+When git stops you mid-operation. The one discipline: **investigate before you touch
+anything, and never let a destructive command run on a state you don't understand.**
+
+Two common shapes:
+
+1. **Conflicts** during rebase, merge, or restack — needs resolution
+2. **Cruft** — stale worktrees, branches for merged PRs, orphan refs
+
+Different sections below for each. Single agent throughout — this is surgical, not
+parallelizable.
+
+---
+
+## Conflicts
+
+### Step 1: Read the state
+
+```bash
+git status
+```
+
+Read the whole thing before you run anything else. Note:
+
+- Are you mid-rebase? `git status` will say so. Look for "interactive rebase in progress" or "you are currently rebasing".
+- Which files are conflicted? The status lines starting with `both modified:` / `both added:` / etc.
+- What's the operation? Rebase, merge, cherry-pick, restack — each has different `--continue` and abort commands. Don't guess which one you're in.
+
+### Step 2: For each conflicted file
+
+Open it. Find the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`).
+
+For each conflict:
+
+1. **Understand both sides.** What did HEAD intend? What did the incoming change intend?
+2. **Read git blame** on the surrounding lines if intent is unclear.
+3. **Choose:**
+	- Both changes apply (combine them)
+	- HEAD wins (keep ours, drop theirs)
+	- Incoming wins (keep theirs, drop ours)
+	- Neither — neither side captures the intent (rare, but possible — rewrite)
+4. **Delete the conflict markers.** All three of them per conflict.
+5. **Run any local checks** the change implies (type-check, the relevant test).
+
+**Never** just pick one side blindly. Conflicts usually mean both sides changed the same thing for different reasons — figure out both.
+
+### Step 3: Mark resolved and continue
+
+```bash
+git add <resolved-file>
+git rebase --continue          # if rebasing
+git merge --continue            # if merging
+git cherry-pick --continue      # if cherry-picking
+```
+
+For stacking tools:
+
+```bash
+gt continue                     # Graphite
+gs branch sync --continue       # git-spice
+```
+
+If more conflicts come, repeat Step 2 until clean.
+
+### Step 4: When restacking, keep going through the stack
+
+A stack has multiple branches dependent on each other. After resolving the first, the tool restacks the next — which may also conflict. Don't stop until the whole chain is clean.
+
+```bash
+gt sr           # restack everything (Graphite)
+gs stack restack
+git town sync   # Git Town
+```
+
+### Step 5: If you're lost — abort cleanly
+
+If the conflict resolution has gone sideways and you can't recover, **abort — don't keep hacking at a broken state.**
+
+```bash
+git rebase --abort
+git merge --abort
+git cherry-pick --abort
+gt abort        # Graphite
+```
+
+You'll be back where you started, no harm done. Try again with a clearer head, or with a different strategy (e.g. merge instead of rebase). This escape hatch is always available — reach for it before you make things worse.
+
+---
+
+## Cruft (cleanup)
+
+**Investigate before deleting.** An unfamiliar branch, worktree, or untracked file might be the user's in-progress work. When unsure, ask — deletion here is not always recoverable.
+
+### Stale branches
+
+```bash
+# List local branches whose PR is merged or closed
+gh pr list --state merged --json headRefName --jq '.[].headRefName'
+
+# Delete them (after confirming none are checked out)
+git branch -d <branch>          # safe: refuses if unmerged
+git branch -D <branch>          # force: only after manual check
+```
+
+Prefer `-d` (safe) and only fall back to `-D` (force) once you've confirmed by hand the branch is truly merged and not someone's unpushed work.
+
+### Stale worktrees
+
+```bash
+git worktree list
+git worktree prune              # removes refs to deleted dirs
+git worktree remove <path>      # removes a specific worktree
+```
+
+### Untracked junk
+
+Don't `git clean -fd` blindly — it deletes anything not tracked, including your in-progress prototype.
+
+Always dry-run first:
+
+```bash
+git clean -dn                   # dry run first; shows what would go
+git clean -fd -e prototypes/    # then run, excluding folders you care about
+```
+
+Read the dry-run output line by line before running the real thing. If anything on that list looks like real work, stop and confirm with the user.
+
+---
+
+## Rules
+
+- **Read the error before re-running.** If a `--continue`, restack, or clean failed, understand *why* before you run it again. Blindly re-running a destructive op on a confused state makes it worse.
+- **Never run a destructive op twice after the first failed.** Re-read the message; the state may not be what you assume.
+- **Never force-push to main / master.** Warn the user even if they ask.
+- **Never use `--no-verify`** to bypass hooks unless the user explicitly asks. Hooks fail for reasons — fix the cause, don't skip the check.
+- **Investigate before deleting.** Unfamiliar branches, worktrees, or files might be the user's in-progress work.
+- **Abort beats improvise.** A clean abort and a fresh attempt is better than digging a deeper hole.
+
+---
+
+## Anti-patterns
+
+- ❌ Running `git rebase --continue` (or `gt continue` / `gs …`) without first reading `git status`
+- ❌ Picking one side of a conflict blindly instead of understanding both intents
+- ❌ Leaving a conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`) behind and committing it
+- ❌ `git clean -fd` with no `-dn` dry-run first
+- ❌ `git branch -D` on a branch you haven't confirmed is merged
+- ❌ Re-running a destructive command after it failed without reading the error
+- ❌ Force-pushing to main/master, or passing `--no-verify`, because it "unblocks" faster
+- ❌ Grinding on a wrecked rebase instead of `--abort` and starting clean
+
+---
+
+## Done when
+
+- `git status` is clean (no conflicts, no in-progress rebase/merge/cherry-pick)
+- The stack restacks all the way through (if applicable)
+- No surprise files left in untracked state
+- The branch is ready to push
+
+Then say: **"Tree is clean. Back to `/ed-ship` to commit and push."**

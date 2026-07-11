@@ -1,0 +1,109 @@
+---
+name: ed-handoff
+description: Compact the current conversation into a handoff document so a fresh agent (or future-you) can pick up where this session left off without re-reading the entire transcript. Use when the conversation is getting long, when switching contexts, when the user says "save the state", "wrap this up", "handoff", or when invoked as /ed-handoff. Writes a portable markdown file with the essentials and points the next session at the right skill (a live plan → `/ed-work .plans/<file>` in a fresh context).
+---
+
+# Handoff
+
+End-of-session compaction. Capture what was decided, what's done, what's next — in a form a fresh agent can read in 30 seconds and continue.
+
+The handoff doc is not a summary of the conversation. It's a **starting point for the next session.**
+
+---
+
+## Process
+
+1. **Create the file** at a stable path:
+
+```bash
+mktemp -t handoff-XXXXXX.md
+```
+
+Save the path. Read the file (it's empty) before writing — required by the Write tool.
+
+2. **Check for a live plan.** If a `./.plans/*.md` exists (written by `/ed-plan`), it *is* most of the handoff — the next session should resume from it in a fresh context. If this session already produced a plan file, the handoff can be little more than a pointer to it. Note the plan path and how far its task checklist got.
+3. **Fill in the template** (below).
+4. **Print the path** to the user so they can pass it to the next session.
+
+---
+
+## Template
+
+```markdown
+# Handoff — [one-line topic]
+
+**Date:** YYYY-MM-DD
+**Branch:** [git branch if relevant]
+**Status:** [in-progress | blocked | review-pending | done-but-not-shipped]
+
+## What we set out to do
+
+[1–3 sentences. The goal, not the journey.]
+
+## What's been done
+
+- [bullet — what changed, where, why]
+- [bullet]
+- [bullet]
+
+## What's left
+
+- [bullet — concrete next action]
+- [bullet]
+- [bullet]
+
+## Key decisions
+
+- [decision] — [one-line reasoning, the *why* the next agent will need]
+
+## Things to watch out for
+
+- [gotcha encountered, dead-end ruled out, non-obvious constraint]
+
+## Suggested next skill
+
+[If a live plan exists:]
+`/ed-work .plans/<file>` in a FRESH session — [N of M tasks done; resume at T#].
+
+[Otherwise:]
+`/ed-plan` if [...], `/ed-work` if [...], `/ed-diagnose` if [...]
+
+## Useful context
+
+- Plan file: `.plans/<date>-<slug>.md` [or "none"]
+- Relevant files: `path/to/file.ts`, `path/to/other.ts`
+- Open PR: [link or "none yet"]
+- Related issue: [link or "none"]
+- Things the next agent should read first: [...]
+```
+
+---
+
+## Rules
+
+- **Compact, not comprehensive.** A handoff doc longer than the conversation isn't useful.
+- **A live plan carries most of the load.** When `.plans/<file>.md` exists, don't re-derive the plan into the handoff — point at it and record only what the plan file doesn't already have (branch, blockers hit, which task is next).
+- **Capture decisions and reasoning, not just outcomes.** "We chose X over Y because Z" is worth saving; "we chose X" is not.
+- **Name dead-ends explicitly.** Saves the next agent from repeating them.
+- **No transcript-style narration.** "Then I tried A. Then I tried B. Then..." — extract the lesson, drop the journey.
+- **Point at the next skill** with a one-line trigger condition. If there's a live plan, that's `/ed-work .plans/<file>` in a fresh context — the next agent should start cold and read the plan first.
+
+---
+
+## Anti-patterns
+
+- ❌ Dumping the whole transcript into the handoff
+- ❌ Re-writing the plan's tasks into the handoff when a `.plans/<file>.md` already holds them — point at the file
+- ❌ Skipping the *why* — the next agent will repeat your mistakes
+- ❌ Vague next steps ("continue the work") — be specific
+- ❌ Forgetting to mention which branch / which file / which commit / which plan
+- ❌ Saving the handoff but forgetting to tell the user where it is
+
+---
+
+## Done when
+
+- File exists, path is printed
+- Template fields are filled (skip a field only if it genuinely doesn't apply)
+- If a plan is live, the handoff names it and how far it got, and points at `/ed-work .plans/<file>` in a fresh session
+- The next agent could pick up cold and know what to do first

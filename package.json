@@ -1,6 +1,6 @@
 {
 	"name": "agent-skills",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Author agent skills once, install them into Claude Code, Cursor, Codex/AGENTS.md and Windsurf — with validation, scaffolding and a tested installer.",
 	"type": "module",
 	"private": true,
@@ -11,7 +11,9 @@
 		"dist",
 		"skills",
 		"templates",
-		"install.sh"
+		"install.sh",
+		"agent-skills.config.json",
+		"agent-skills.schema.json"
 	],
 	"engines": {
 		"node": ">=20"

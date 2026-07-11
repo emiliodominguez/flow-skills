@@ -11,6 +11,7 @@ export interface InstallOptions {
 	target?: string[];
 	scope?: "user" | "project";
 	copy?: boolean;
+	force?: boolean;
 	dryRun?: boolean;
 }
 
@@ -41,13 +42,11 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 		}
 		const target = getTarget(name);
 		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
-		const usedMode = target.name === "claude" ? installMode : "copy";
+		const usedMode = target.supportsSymlink ? installMode : "copy";
+		const ctx = { skills, dest, mode: usedMode, force: !!opts.force, dryRun: !!opts.dryRun };
 
-		log.heading(`${target.name} → ${prettyPath(dest)}${target.name === "claude" ? pc.dim(` (${usedMode})`) : ""}`);
-		const actions =
-			mode === "install"
-				? target.install({ skills, dest, mode: usedMode, dryRun: !!opts.dryRun })
-				: target.uninstall({ skills, dest, mode: usedMode, dryRun: !!opts.dryRun });
+		log.heading(`${target.name} → ${prettyPath(dest)}${target.supportsSymlink ? pc.dim(` (${usedMode})`) : ""}`);
+		const actions = mode === "install" ? target.install(ctx) : target.uninstall(ctx);
 		if (actions.length === 0) log.dim("  (nothing to do)");
 		else actions.forEach(printAction);
 	}

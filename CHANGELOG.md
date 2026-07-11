@@ -3,6 +3,32 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); this project uses [SemVer](https://semver.org/).
 
+## [0.1.1] — 2026-07-11
+
+Hardening pass from a multi-persona review of 0.1.0, each fix covered by a regression test.
+
+### Fixed
+
+- **Data loss (blocking):** the `claude` target now recognises entries it created (a symlink
+  into the repo, or a `.agent-skills` marker in a copy). `install` refuses to overwrite an
+  unmanaged directory without `--force`, and `uninstall` never deletes one.
+- **Windsurf invalid YAML:** frontmatter is rendered through the shared `frontmatter()`
+  helper, so a description containing `: ` (or `#`/`&`) is quoted instead of emitted raw.
+- **Codex clobbering:** `AGENTS.md` is now a section-level merge with per-skill markers, so a
+  partial `-t codex` install/uninstall only touches the named skills.
+- **`findRepoRoot` off-by-one:** the fallback walks up to the package root (works for the
+  bundled `dist/` and `tsx` layouts alike), so `npx github:…` from outside a checkout finds
+  the skills; `--version` reads the CLI's own package; `agent-skills.config.json` ships in
+  `files`.
+- **Robustness:** frontmatter parser tolerates multi-space key alignment; `AGENTS.md` markers
+  are line-anchored and duplicate/malformed pairs throw instead of corrupting content;
+  `prettyPath` respects path boundaries; `escapeYaml`, symlink capability (`supportsSymlink`),
+  and shared file-per-skill helpers replace dead/duplicated code.
+
+### Added
+
+- `--force` flag on `install`/`uninstall`.
+
 ## [0.1.0] — 2026-07-11
 
 Initial release.

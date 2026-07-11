@@ -38,16 +38,32 @@ const DEFAULTS: Config = {
  * @returns The repo/package root directory.
  */
 export function findRepoRoot(startDir: string = process.cwd()): string {
-	let dir = startDir;
-	for (;;) {
+	// 1. A repo checkout: walk up from cwd for the config file.
+	for (let dir = startDir; ;) {
 		if (fs.existsSync(path.join(dir, "agent-skills.config.json"))) return dir;
 		const parent = path.dirname(dir);
 		if (parent === dir) break;
 		dir = parent;
 	}
-	// Fallback: the package root (two levels up from this compiled file: dist/ -> root).
-	const here = path.dirname(fileURLToPath(import.meta.url));
-	return path.resolve(here, "..", "..");
+	// 2. Installed bin with no ancestor config: the package root that ships the skills.
+	return packageRoot();
+}
+
+/**
+ * Walk up from this module to the package root — the first ancestor holding a
+ * package.json next to the skills directory. Layout-independent, so it resolves
+ * correctly whether running from bundled `dist/index.js` or `tsx src/...`.
+ *
+ * @returns The package root directory.
+ */
+export function packageRoot(): string {
+	let dir = path.dirname(fileURLToPath(import.meta.url));
+	for (;;) {
+		if (fs.existsSync(path.join(dir, "package.json")) && fs.existsSync(path.join(dir, "skills"))) return dir;
+		const parent = path.dirname(dir);
+		if (parent === dir) return path.dirname(fileURLToPath(import.meta.url));
+		dir = parent;
+	}
 }
 
 /**
@@ -66,9 +82,8 @@ export function loadConfig(root: string): Config {
 
 function readJsonIfExists(file: string): Partial<Config> | undefined {
 	if (!fs.existsSync(file)) return undefined;
-	const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>;
-	delete parsed["$schema"];
-	return parsed as Partial<Config>;
+	// mergeInto only reads known keys, so a stray `$schema` is ignored — no cleanup needed.
+	return JSON.parse(fs.readFileSync(file, "utf8")) as Partial<Config>;
 }
 
 function mergeInto(base: Config, override?: Partial<Config>): void {

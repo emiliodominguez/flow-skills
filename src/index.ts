@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Command, Option } from "commander";
-import { findRepoRoot } from "./core/config.js";
+import { packageRoot } from "./core/config.js";
 import { log } from "./core/logger.js";
 import { listCommand } from "./commands/list.js";
 import { validateCommand } from "./commands/validate.js";
@@ -10,7 +10,8 @@ import { newCommand } from "./commands/new.js";
 
 function version(): string {
 	try {
-		const pkg = JSON.parse(fs.readFileSync(path.join(findRepoRoot(), "package.json"), "utf8")) as { version?: string };
+		// The CLI's own package.json, not the repo the user happens to be run from.
+		const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot(), "package.json"), "utf8")) as { version?: string };
 		return pkg.version ?? "0.0.0";
 	} catch {
 		return "0.0.0";
@@ -46,6 +47,7 @@ program
 	.addOption(targetOption)
 	.addOption(scopeOption)
 	.option("--copy", "copy files instead of symlinking (native target only)")
+	.option("--force", "overwrite entries not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
 	.action((skills, opts) => installCommand("install", skills, opts));
 
@@ -55,6 +57,7 @@ program
 	.argument("[skills...]", "specific skills to remove (default: all)")
 	.addOption(targetOption)
 	.addOption(scopeOption)
+	.option("--force", "remove entries even if not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
 	.action((skills, opts) => installCommand("uninstall", skills, opts));
 

@@ -35,7 +35,8 @@ export interface Issue {
 /** Max description length before we warn — long descriptions bloat the model's skill index. */
 export const DESCRIPTION_WARN_LIMIT = 1024;
 
-const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/** Canonical kebab-case check for skill ids — shared with the `new` command. */
+export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
  * Parse a SKILL.md's leading `---` frontmatter tolerantly — the way agent skill
@@ -52,7 +53,7 @@ export function parseFrontmatter(raw: string): { data: Record<string, string>; b
 	const data: Record<string, string> = {};
 	for (const line of match[1]!.split(/\r?\n/)) {
 		if (!line.trim() || line.trimStart().startsWith("#")) continue;
-		const kv = /^([A-Za-z0-9_-]+):[ \t]?(.*)$/.exec(line);
+		const kv = /^([A-Za-z0-9_-]+):[ \t]*(.*)$/.exec(line);
 		if (!kv) continue;
 		let value = kv[2] ?? "";
 		if (value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
@@ -96,15 +97,15 @@ export function validateSkill(skill: Skill): Issue[] {
 	const add = (level: Issue["level"], rule: string, message: string) => issues.push({ skill: skill.name, level, rule, message });
 	const fm = skill.frontmatter;
 
-	if (!fm.name || typeof fm.name !== "string") {
-		add("error", "frontmatter.name", "missing or non-string `name` in frontmatter");
+	if (!fm.name) {
+		add("error", "frontmatter.name", "missing `name` in frontmatter");
 	} else {
 		if (fm.name !== skill.name) add("error", "name.match-dir", `frontmatter name "${fm.name}" != directory "${skill.name}"`);
 		if (!KEBAB.test(fm.name)) add("error", "name.kebab", `name "${fm.name}" is not kebab-case`);
 	}
 
-	if (!fm.description || typeof fm.description !== "string") {
-		add("error", "frontmatter.description", "missing or non-string `description` in frontmatter");
+	if (!fm.description) {
+		add("error", "frontmatter.description", "missing `description` in frontmatter");
 	} else {
 		if (fm.description.includes("\n")) add("error", "description.single-line", "description must be a single line");
 		if (fm.description.length > DESCRIPTION_WARN_LIMIT) {

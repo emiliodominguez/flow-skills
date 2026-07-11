@@ -33,7 +33,7 @@ pnpm run build >/dev/null
 
 say "Installing skills"
 # Drop a leading `--` if present, then pass the rest to the CLI.
-[ "${1:-}" = "--" ] && shift || true
+if [ "${1:-}" = "--" ]; then shift; fi
 node dist/index.js install "$@"
 
 printf '\033[32m✓\033[0m Done. Try: \033[1mpnpm skills list --targets\033[0m\n'

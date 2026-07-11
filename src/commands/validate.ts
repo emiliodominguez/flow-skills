@@ -2,21 +2,31 @@ import path from "node:path";
 import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
-import { validateReferences, validateSkill, type Issue } from "../core/skill.js";
+import { validateReferences, validateSkill, type Issue, type Skill } from "../core/skill.js";
 import { log } from "../core/logger.js";
 
 /**
- * Run all validations over the repo's skills. Reused by the CLI and the test
- * suite so "the tests" and "the command" can never drift.
+ * Run all validations over an already-loaded skill set.
  *
- * @param skillsDir - Absolute path to the skills directory.
+ * @param skills - The loaded skills.
  * @returns All issues (errors + warnings) across every skill.
  */
-export function collectIssues(skillsDir: string): Issue[] {
-	const skills = discoverSkills(skillsDir);
+export function collectIssuesFor(skills: Skill[]): Issue[] {
 	const issues = skills.flatMap((skill) => validateSkill(skill));
 	issues.push(...validateReferences(skills));
 	return issues;
+}
+
+/**
+ * Validate a skills directory in one scan. Reused by the CLI and the test suite
+ * so "the tests" and "the command" can never drift.
+ *
+ * @param skillsDir - Absolute path to the skills directory.
+ * @returns The loaded skills and their issues.
+ */
+export function validateAll(skillsDir: string): { skills: Skill[]; issues: Issue[] } {
+	const skills = discoverSkills(skillsDir);
+	return { skills, issues: collectIssuesFor(skills) };
 }
 
 /**
@@ -27,9 +37,7 @@ export function collectIssues(skillsDir: string): Issue[] {
 export function validateCommand(opts: { strict?: boolean }): void {
 	const root = findRepoRoot();
 	const config = loadConfig(root);
-	const skillsDir = path.join(root, config.skillsDir);
-	const skills = discoverSkills(skillsDir);
-	const issues = collectIssues(skillsDir);
+	const { skills, issues } = validateAll(path.join(root, config.skillsDir));
 
 	const errors = issues.filter((i) => i.level === "error");
 	const warns = issues.filter((i) => i.level === "warn");

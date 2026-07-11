@@ -31,8 +31,7 @@ export function ensureDir(dir: string, dryRun: boolean): void {
  */
 export function isSymlinkTo(linkPath: string, target: string): boolean {
 	try {
-		const stat = fs.lstatSync(linkPath);
-		if (!stat.isSymbolicLink()) return false;
+		if (!fs.lstatSync(linkPath).isSymbolicLink()) return false;
 		return path.resolve(path.dirname(linkPath), fs.readlinkSync(linkPath)) === path.resolve(target);
 	} catch {
 		return false;
@@ -40,22 +39,14 @@ export function isSymlinkTo(linkPath: string, target: string): boolean {
 }
 
 /**
- * Remove a file, directory, or symlink if it exists.
+ * Remove a file, directory, or symlink. `force: true` no-ops on a missing path
+ * and removes broken symlinks, so no existence pre-check is needed.
  *
  * @param target - Path to remove.
  * @param dryRun - When true, do nothing.
  */
 export function removePath(target: string, dryRun: boolean): void {
-	if (dryRun) return;
-	if (fs.existsSync(target) || isLink(target)) fs.rmSync(target, { recursive: true, force: true });
-}
-
-function isLink(p: string): boolean {
-	try {
-		return fs.lstatSync(p).isSymbolicLink();
-	} catch {
-		return false;
-	}
+	if (!dryRun) fs.rmSync(target, { recursive: true, force: true });
 }
 
 /**
@@ -103,9 +94,40 @@ export function writeFile(dest: string, content: string, dryRun: boolean): Actio
 	return { verb: "write", path: dest };
 }
 
+// Markers are matched only when alone on their own line (multiline-anchored), so
+// the strings appearing inside a user's prose can never be mistaken for a boundary.
+function lineAnchored(marker: string, flags: string): RegExp {
+	return new RegExp(`^${escapeRe(marker)}$`, flags);
+}
+
+function assertSinglePair(existing: string, dest: string): number {
+	const starts = existing.match(lineAnchored(BLOCK_START, "gm"))?.length ?? 0;
+	const ends = existing.match(lineAnchored(BLOCK_END, "gm"))?.length ?? 0;
+	if (starts !== ends || starts > 1) {
+		throw new Error(`${dest} has malformed or duplicate agent-skills markers (${starts} start / ${ends} end). Fix them by hand and re-run.`);
+	}
+	return starts;
+}
+
+/**
+ * Read the content inside our managed block, or null if there is none. Used by
+ * bundle adapters to merge new skills with already-installed ones.
+ *
+ * @param dest - The bundle file.
+ * @returns The inner block content, or null.
+ */
+export function readManagedBlock(dest: string): string | null {
+	if (!fs.existsSync(dest)) return null;
+	const existing = fs.readFileSync(dest, "utf8");
+	assertSinglePair(existing, dest);
+	const match = new RegExp(`^${escapeRe(BLOCK_START)}$\\n([\\s\\S]*?)\\n^${escapeRe(BLOCK_END)}$`, "m").exec(existing);
+	return match ? match[1]! : null;
+}
+
 /**
  * Write a delimited managed block into a (possibly pre-existing) file, leaving
- * any surrounding user content intact. Used for bundle targets like AGENTS.md.
+ * surrounding user content intact. Throws if the file has duplicate/mismatched
+ * markers rather than guessing which pair is ours.
  *
  * @param dest - The bundle file.
  * @param content - The managed content to place between the markers.
@@ -117,8 +139,9 @@ export function writeManagedBlock(dest: string, content: string, dryRun: boolean
 	let next: string;
 	if (fs.existsSync(dest)) {
 		const existing = fs.readFileSync(dest, "utf8");
-		const re = new RegExp(`${escapeRe(BLOCK_START)}[\\s\\S]*?${escapeRe(BLOCK_END)}`);
-		next = re.test(existing) ? existing.replace(re, block) : existing.trimEnd() + "\n\n" + block + "\n";
+		const pairs = assertSinglePair(existing, dest);
+		const blockRe = new RegExp(`^${escapeRe(BLOCK_START)}$[\\s\\S]*?^${escapeRe(BLOCK_END)}$`, "m");
+		next = pairs === 1 ? existing.replace(blockRe, block) : existing.trimEnd() + "\n\n" + block + "\n";
 	} else {
 		next = block + "\n";
 	}
@@ -128,8 +151,9 @@ export function writeManagedBlock(dest: string, content: string, dryRun: boolean
 }
 
 /**
- * Remove our managed block from a bundle file (leaving user content). If the
- * file becomes only whitespace, it's removed entirely.
+ * Remove our managed block from a bundle file, leaving user content. If the file
+ * held nothing but our block (so we created it), it's removed; otherwise the
+ * user's surrounding content is preserved.
  *
  * @param dest - The bundle file.
  * @param dryRun - When true, only record the action.
@@ -138,9 +162,9 @@ export function writeManagedBlock(dest: string, content: string, dryRun: boolean
 export function removeManagedBlock(dest: string, dryRun: boolean): Action | null {
 	if (!fs.existsSync(dest)) return null;
 	const existing = fs.readFileSync(dest, "utf8");
-	const re = new RegExp(`\\n*${escapeRe(BLOCK_START)}[\\s\\S]*?${escapeRe(BLOCK_END)}\\n*`);
-	if (!re.test(existing)) return null;
-	const next = existing.replace(re, "\n").trim();
+	if (assertSinglePair(existing, dest) === 0) return null;
+	const blockRe = new RegExp(`\\n*^${escapeRe(BLOCK_START)}$[\\s\\S]*?^${escapeRe(BLOCK_END)}$\\n*`, "m");
+	const next = existing.replace(blockRe, "\n").trim();
 	if (!dryRun) {
 		if (next.length === 0) fs.rmSync(dest, { force: true });
 		else fs.writeFileSync(dest, next + "\n", "utf8");

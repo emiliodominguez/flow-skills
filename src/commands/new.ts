@@ -1,9 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { findRepoRoot, loadConfig } from "../core/config.js";
+import { KEBAB } from "../core/skill.js";
 import { log } from "../core/logger.js";
-
-const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
  * Turn a kebab-case id into a Title Case heading (`ed-plan` → `Ed Plan`).

@@ -1,8 +1,6 @@
-import path from "node:path";
 import type { Action } from "../core/install-fs.js";
-import { writeFile } from "../core/install-fs.js";
 import type { InstallContext, Target } from "./types.js";
-import { frontmatter, MANAGED_LINE, removeIfManaged } from "./render.js";
+import { frontmatter, installFilePerSkill, MANAGED_LINE, uninstallFilePerSkill } from "./render.js";
 
 /**
  * Cursor — one `.mdc` rule file per skill under `.cursor/rules/`. `alwaysApply:
@@ -12,19 +10,16 @@ import { frontmatter, MANAGED_LINE, removeIfManaged } from "./render.js";
 export const cursorTarget: Target = {
 	name: "cursor",
 	describe: "Cursor — .cursor/rules/<name>.mdc (agent-requested rule per skill)",
-	bundle: false,
+	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {
-		return ctx.skills.map((skill) => {
-			const dest = path.join(ctx.dest, `${skill.name}.mdc`);
-			const content = `${frontmatter({ description: skill.frontmatter.description, globs: "", alwaysApply: false })}\n${MANAGED_LINE}\n\n${skill.body}\n`;
-			return writeFile(dest, content, ctx.dryRun);
+		return installFilePerSkill(ctx, "mdc", (skill) => {
+			const front = frontmatter({ description: skill.frontmatter.description, globs: "", alwaysApply: false });
+			return `${front}\n${MANAGED_LINE}\n\n${skill.body}\n`;
 		});
 	},
 
 	uninstall(ctx: InstallContext): Action[] {
-		return ctx.skills
-			.map((skill) => removeIfManaged(path.join(ctx.dest, `${skill.name}.mdc`), ctx.dryRun))
-			.filter((a): a is Action => a !== null);
+		return uninstallFilePerSkill(ctx, "mdc");
 	},
 };

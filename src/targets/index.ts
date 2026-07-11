@@ -25,4 +25,4 @@ export function getTarget(name: string): Target {
 	return target;
 }
 
-export type { Target, InstallContext, TargetResult } from "./types.js";
+export type { Target, InstallContext } from "./types.js";

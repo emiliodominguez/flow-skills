@@ -9,14 +9,10 @@ export interface InstallContext {
 	dest: string;
 	/** symlink (native only) or copy/generate. */
 	mode: "symlink" | "copy";
+	/** Overwrite / remove entries this tool did not create. */
+	force: boolean;
 	/** When true, compute actions but touch nothing. */
 	dryRun: boolean;
-}
-
-/** Result of an install/uninstall for one target. */
-export interface TargetResult {
-	target: string;
-	actions: Action[];
 }
 
 /** A destination adapter: turns skills into one tool's on-disk convention. */
@@ -25,8 +21,8 @@ export interface Target {
 	name: string;
 	/** One-line description of what it emits. */
 	describe: string;
-	/** Whether `dest` is a directory (false) or a single bundle file (true). */
-	bundle: boolean;
+	/** Whether this target can install by symlink (native format) or only generate. */
+	supportsSymlink: boolean;
 	/** Install the skills. */
 	install(ctx: InstallContext): Action[];
 	/** Remove previously-installed skills. */

@@ -35,5 +35,6 @@ export function resolveTargetPath(configured: string, baseDir: string): string {
  */
 export function prettyPath(p: string): string {
 	const home = os.homedir();
-	return p.startsWith(home) ? "~" + p.slice(home.length) : p;
+	if (p === home) return "~";
+	return p.startsWith(home + path.sep) ? "~" + p.slice(home.length) : p;
 }

@@ -24,8 +24,10 @@ export function listCommand(opts: { targets?: boolean }): void {
 
 	if (opts.targets) {
 		log.heading("Targets");
-		for (const target of Object.values(TARGETS)) {
-			console.log(`  ${pc.bold(target.name.padEnd(width))}  ${pc.dim(target.describe)}`);
+		const targets = Object.values(TARGETS);
+		const targetWidth = Math.max(...targets.map((t) => t.name.length), 0);
+		for (const target of targets) {
+			console.log(`  ${pc.bold(target.name.padEnd(targetWidth))}  ${pc.dim(target.describe)}`);
 		}
 	}
 }

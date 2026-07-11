@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverSkills } from "../src/core/registry";
 import { validateReferences, validateSkill } from "../src/core/skill";
-import { collectIssues } from "../src/commands/validate";
+import { validateAll } from "../src/commands/validate";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const skillsDir = path.join(root, "skills");
@@ -20,7 +20,7 @@ describe("skills corpus", () => {
 	});
 
 	it("has zero validation ERRORS across the corpus", () => {
-		const errors = collectIssues(skillsDir).filter((i) => i.level === "error");
+		const errors = validateAll(skillsDir).issues.filter((i) => i.level === "error");
 		expect(errors, JSON.stringify(errors, null, 2)).toEqual([]);
 	});
 

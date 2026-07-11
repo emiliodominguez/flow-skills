@@ -26,7 +26,7 @@ A "bulletproof" hardening pass across correctness, operations, and process.
 - One target failing no longer aborts the others (per-target error handling; non-zero exit).
 - On Windows the native target falls back to copy (no symlink privilege).
 - Typecheck now covers `test/` and `scripts/` (they were silently excluded); the CI test job
-  runs on a Node 20/22/24 matrix.
+  runs on a Node 22/24 matrix.
 
 ### Fixed
 

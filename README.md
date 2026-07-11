@@ -48,7 +48,7 @@ planning and building don't share a crowded context window.
 
 ## Install
 
-**Requirements:** Node ≥ 20. pnpm is auto-enabled via corepack if missing.
+**Requirements:** Node ≥ 22. pnpm is auto-enabled via corepack if missing.
 
 ### Option A — bootstrap script (no setup)
 
@@ -203,7 +203,7 @@ pnpm run build          # bundle to dist/ (tsup)
 
 A husky pre-commit hook runs prettier + eslint on staged files. CI runs three jobs on every
 push and PR: **lint** (eslint, format, docs-freshness, prod-dependency audit), **test**
-(typecheck, validate, coverage on a Node 20/22/24 matrix), and **pack** (the packaging smoke
+(typecheck, validate, coverage on a Node 22/24 matrix), and **pack** (the packaging smoke
 test). Pushing a `v*` tag runs the release workflow.
 
 ---

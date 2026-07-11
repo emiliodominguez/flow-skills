@@ -15,6 +15,21 @@ export interface InstallContext {
 	dryRun: boolean;
 }
 
+/** On-disk state of one skill for a target, reported by `doctor`. */
+export type SkillState =
+	| "linked" // native symlink into the repo (live)
+	| "copied" // native copy, matches source
+	| "generated" // adapter file/section, matches source
+	| "drifted" // installed but differs from source
+	| "conflict" // present but not created by this tool
+	| "missing"; // not installed
+
+/** A skill's install state at a target. */
+export interface SkillStatus {
+	skill: string;
+	state: SkillState;
+}
+
 /** A destination adapter: turns skills into one tool's on-disk convention. */
 export interface Target {
 	/** Stable id (matches config keys and `--target`). */
@@ -27,4 +42,6 @@ export interface Target {
 	install(ctx: InstallContext): Action[];
 	/** Remove previously-installed skills. */
 	uninstall(ctx: InstallContext): Action[];
+	/** Report each skill's on-disk state (for `doctor`); read-only. */
+	status(ctx: InstallContext): SkillStatus[];
 }

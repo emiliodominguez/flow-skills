@@ -1,6 +1,6 @@
 import type { Action } from "../core/install-fs.js";
 import { readManagedBlock, removeManagedBlock, writeManagedBlock } from "../core/install-fs.js";
-import type { InstallContext, Target } from "./types.js";
+import type { InstallContext, SkillStatus, Target } from "./types.js";
 import type { Skill } from "../core/skill.js";
 
 const HEADING = "# Agent skills";
@@ -54,5 +54,14 @@ export const codexTarget: Target = {
 			return action ? [action] : [];
 		}
 		return [writeManagedBlock(ctx.dest, renderBlock(map), ctx.dryRun)];
+	},
+
+	status(ctx: InstallContext): SkillStatus[] {
+		const map = parseSections(readManagedBlock(ctx.dest));
+		return ctx.skills.map((skill) => {
+			const existing = map.get(skill.name);
+			if (existing === undefined) return { skill: skill.name, state: "missing" };
+			return { skill: skill.name, state: existing === section(skill) ? "generated" : "drifted" };
+		});
 	},
 };

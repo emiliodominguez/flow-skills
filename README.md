@@ -83,6 +83,7 @@ agent-skills list [--targets]         List skills (and, with --targets, the adap
 agent-skills validate [--strict]      Validate frontmatter, naming, cross-references
 agent-skills install [skills...]      Install skills into target(s)
 agent-skills uninstall [skills...]    Remove installed skills
+agent-skills doctor                   Report install state per target; flag drift/conflicts
 agent-skills new <name> [-d "desc"]   Scaffold a new skill from the template
 ```
 
@@ -93,7 +94,11 @@ agent-skills new <name> [-d "desc"]   Scaffold a new skill from the template
 | `-t, --target <name...>` | `claude`, `cursor`, `codex`, `windsurf` (default: config)     |
 | `-s, --scope <scope>`    | `user` (global, default) or `project` (into the current repo) |
 | `--copy`                 | copy files instead of symlinking (native `claude` target)     |
+| `--force`                | overwrite/remove entries not created by agent-skills          |
 | `--dry-run`              | print the plan without touching anything                      |
+
+Run **`agent-skills doctor`** any time to see what's installed where and whether anything
+has drifted from the source or conflicts with a hand-written file.
 
 Pass specific skills to scope an operation: `agent-skills install ed-plan ed-work`.
 
@@ -119,10 +124,13 @@ not create:
 - **claude** only overwrites/removes a directory that is _its own_ symlink or a copy it
   marked. A hand-authored `~/.claude/skills/<name>/` that collides with a skill name is
   **left alone** unless you pass `--force`.
-- **cursor/windsurf** files carry a marker; `uninstall` removes only marked files.
+- **cursor/windsurf** files carry a marker; both `install` and `uninstall` touch only
+  marked files.
 - **codex** edits stay inside a delimited block in `AGENTS.md`; your surrounding content is
   preserved.
-- `--dry-run` previews every action; `--force` is the explicit override.
+- `--force` never deletes outright — it **backs the entry up** to a `.bak-<n>` sibling first.
+- On Windows (no symlink privilege), the native target automatically falls back to `--copy`.
+- `--dry-run` previews every action; `doctor` reports drift without changing anything.
 
 Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety-model--what-the-tool-will-and-wont-touch).
 

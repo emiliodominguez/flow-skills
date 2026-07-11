@@ -18,6 +18,7 @@ const VERB_COLOR: Record<Action["verb"], (s: string) => string> = {
 	copy: pc.blue,
 	write: pc.blue,
 	remove: pc.red,
+	backup: pc.yellow,
 	skip: pc.dim,
 };
 

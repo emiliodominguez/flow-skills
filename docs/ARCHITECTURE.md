@@ -14,6 +14,7 @@ src/
   index.ts              CLI wiring (commander) — parses args, dispatches to commands
   commands/
     install.ts          install / uninstall — resolves config + targets, runs adapters
+    doctor.ts           doctor — report install state + drift/conflicts per target
     validate.ts         validate — one scan, shared with the test suite
     list.ts             list — skills and target adapters
     new.ts              new — scaffold a skill from templates/SKILL.md.tmpl
@@ -48,6 +49,7 @@ interface Target {
 	supportsSymlink: boolean; // true only for the native (claude) format
 	install(ctx: InstallContext): Action[];
 	uninstall(ctx: InstallContext): Action[];
+	status(ctx: InstallContext): SkillStatus[]; // for `doctor`: linked/generated/drifted/conflict/missing
 }
 ```
 
@@ -92,14 +94,19 @@ deliberately conservative about **destroying anything it did not create**.
   unmanaged `~/.claude/skills/<name>/` (a directory you hand-authored) unless you pass
   `--force`; `uninstall` **skips** unmanaged entries entirely. So a name collision with your
   own skill can never silently delete your work.
-- **File-per-skill (cursor, windsurf).** Generated files carry a marker comment. `uninstall`
-  removes a file **only if it carries that marker**, never a hand-written rule of the same
-  name.
+- **File-per-skill (cursor, windsurf).** Generated files carry a marker comment. Both
+  `install` and `uninstall` touch a file **only if it carries that marker**, never a
+  hand-written rule of the same name.
 - **Bundle (codex).** Edits are confined to a delimited managed block inside `AGENTS.md`.
   Surrounding content you wrote is preserved. Markers are matched only when alone on their
   own line, and duplicate/malformed marker pairs cause a hard error instead of a guess.
-- **`--force`** is the explicit escape hatch: overwrite/remove even unmanaged entries.
-- **`--dry-run`** prints every action without touching the filesystem.
+- **`--force`** is the explicit escape hatch — but it **backs up** (moves to a `.bak-<n>`
+  sibling), never deletes outright.
+- **Windows** has no symlink privilege by default, so the native target falls back to copy.
+- **`--dry-run`** prints every action without touching the filesystem; **`doctor`** reports
+  drift/conflicts read-only.
+- One target throwing (e.g. a malformed `AGENTS.md`) is caught and reported — the other
+  targets still run, and the command exits non-zero.
 
 ## Parsing note
 

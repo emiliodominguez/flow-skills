@@ -1,6 +1,13 @@
 import type { Action } from "../core/install-fs.js";
-import type { InstallContext, Target } from "./types.js";
-import { frontmatter, installFilePerSkill, MANAGED_LINE, uninstallFilePerSkill } from "./render.js";
+import type { Skill } from "../core/skill.js";
+import type { InstallContext, SkillStatus, Target } from "./types.js";
+import { frontmatter, installFilePerSkill, MANAGED_LINE, statusFilePerSkill, uninstallFilePerSkill } from "./render.js";
+
+/** Render a skill's Windsurf `.md` rule (shared by install and drift detection). */
+function build(skill: Skill): string {
+	const front = frontmatter({ trigger: "model_decision", description: skill.frontmatter.description });
+	return `${front}\n${MANAGED_LINE}\n\n${skill.body}\n`;
+}
 
 /**
  * Windsurf — one Markdown rule per skill under `.windsurf/rules/`. The frontmatter
@@ -13,13 +20,14 @@ export const windsurfTarget: Target = {
 	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {
-		return installFilePerSkill(ctx, "md", (skill) => {
-			const front = frontmatter({ trigger: "model_decision", description: skill.frontmatter.description });
-			return `${front}\n${MANAGED_LINE}\n\n${skill.body}\n`;
-		});
+		return installFilePerSkill(ctx, "md", build);
 	},
 
 	uninstall(ctx: InstallContext): Action[] {
 		return uninstallFilePerSkill(ctx, "md");
+	},
+
+	status(ctx: InstallContext): SkillStatus[] {
+		return statusFilePerSkill(ctx, "md", build);
 	},
 };

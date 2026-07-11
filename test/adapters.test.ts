@@ -72,8 +72,12 @@ describe("claude target", () => {
 		expect(fs.readFileSync(path.join(userDir, "SKILL.md"), "utf8")).toBe("the user's own file");
 
 		const forced = claudeTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink", force: true }));
-		expect(forced[0]!.verb).toBe("symlink");
+		// --force backs the user's dir up (never deletes) then symlinks ours in.
+		expect(forced.map((a) => a.verb)).toEqual(["backup", "symlink"]);
 		expect(fs.lstatSync(userDir).isSymbolicLink()).toBe(true);
+		const bak = fs.readdirSync(dest).find((e) => e.startsWith(`${skills[0]!.name}.bak-`));
+		expect(bak, "backup dir should exist").toBeTruthy();
+		expect(fs.readFileSync(path.join(dest, bak!, "SKILL.md"), "utf8")).toBe("the user's own file");
 	});
 
 	it("dry-run touches nothing", () => {
@@ -137,5 +141,61 @@ describe("codex target (bundle merge)", () => {
 
 		codexTarget.uninstall(ctx({ dest, skills: [b] }));
 		expect(fs.existsSync(dest)).toBe(false); // last skill out removes the file we created
+	});
+});
+
+describe("force + backup (never delete unmanaged)", () => {
+	it("cursor install backs up an unmanaged file under --force instead of overwriting it", () => {
+		const dest = path.join(tmp, "rules");
+		const file = path.join(dest, `${skills[0]!.name}.mdc`);
+		fs.mkdirSync(dest, { recursive: true });
+		fs.writeFileSync(file, "the user's own mdc");
+
+		const skipped = cursorTarget.install(ctx({ dest, skills: [skills[0]!] }));
+		expect(skipped[0]!.verb).toBe("skip");
+		expect(fs.readFileSync(file, "utf8")).toBe("the user's own mdc");
+
+		const forced = cursorTarget.install(ctx({ dest, skills: [skills[0]!], force: true }));
+		expect(forced.map((a) => a.verb)).toEqual(["backup", "write"]);
+		const bak = fs.readdirSync(dest).find((e) => e.startsWith(`${skills[0]!.name}.mdc.bak-`));
+		expect(bak, "backup file should exist").toBeTruthy();
+		expect(fs.readFileSync(path.join(dest, bak!), "utf8")).toBe("the user's own mdc");
+	});
+});
+
+describe("status (doctor)", () => {
+	it("claude: linked, then conflict for a foreign dir, then missing", () => {
+		const dir = path.join(tmp, "claude");
+		claudeTarget.install(ctx({ dest: dir, mode: "symlink" }));
+		expect(claudeTarget.status(ctx({ dest: dir, mode: "symlink" })).every((s) => s.state === "linked")).toBe(true);
+
+		const foreign = path.join(tmp, "foreign");
+		fs.mkdirSync(path.join(foreign, skills[0]!.name), { recursive: true });
+		expect(claudeTarget.status(ctx({ dest: foreign, skills: [skills[0]!] }))[0]!.state).toBe("conflict");
+
+		expect(claudeTarget.status(ctx({ dest: path.join(tmp, "empty"), skills: [skills[0]!] }))[0]!.state).toBe("missing");
+	});
+
+	it("claude copy: copied, then drifted after editing the copy", () => {
+		const dir = path.join(tmp, "claude-copy");
+		claudeTarget.install(ctx({ dest: dir, skills: [skills[0]!], mode: "copy" }));
+		expect(claudeTarget.status(ctx({ dest: dir, skills: [skills[0]!] }))[0]!.state).toBe("copied");
+		fs.appendFileSync(path.join(dir, skills[0]!.name, "SKILL.md"), "\ndrift\n");
+		expect(claudeTarget.status(ctx({ dest: dir, skills: [skills[0]!] }))[0]!.state).toBe("drifted");
+	});
+
+	it("cursor: generated, then drifted after editing the file", () => {
+		const dest = path.join(tmp, "rules");
+		cursorTarget.install(ctx({ dest, skills: [skills[0]!] }));
+		expect(cursorTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("generated");
+		fs.appendFileSync(path.join(dest, `${skills[0]!.name}.mdc`), "\nDRIFT\n");
+		expect(cursorTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("drifted");
+	});
+
+	it("codex: generated for an installed skill, missing for one that isn't", () => {
+		const dest = path.join(tmp, "AGENTS.md");
+		codexTarget.install(ctx({ dest, skills: [skills[0]!] }));
+		expect(codexTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("generated");
+		expect(codexTarget.status(ctx({ dest, skills: [skills[1]!] }))[0]!.state).toBe("missing");
 	});
 });

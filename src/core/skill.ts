@@ -114,6 +114,9 @@ export function validateSkill(skill: Skill): Issue[] {
 	}
 
 	if (skill.body.length < 40) add("warn", "body.thin", "body is very short — is this skill complete?");
+	if (!/^##\s+Done when/im.test(skill.body)) add("warn", "structure.done-when", "no `## Done when` completion gate");
+	if (!/^##.*(anti-pattern|rules|does not do)/im.test(skill.body))
+		add("warn", "structure.guardrails", "no guardrails section (Anti-patterns / Rules / does-NOT-do)");
 
 	return issues;
 }
@@ -134,7 +137,9 @@ export function validateReferences(skills: Skill[]): Issue[] {
 
 	for (const skill of skills) {
 		const seen = new Set<string>();
-		for (const match of skill.body.matchAll(refPattern)) {
+		// Scan the description too — the handoff clause lives there and is load-bearing.
+		const haystack = `${skill.body}\n${skill.frontmatter.description}`;
+		for (const match of haystack.matchAll(refPattern)) {
 			const token = match[1]!;
 			if (seen.has(token) || names.has(token)) continue;
 			seen.add(token);

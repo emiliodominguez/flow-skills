@@ -7,7 +7,7 @@ export const BLOCK_END = "<!-- agent-skills:end -->";
 
 /** One recorded filesystem action, for the install/uninstall report. */
 export interface Action {
-	verb: "symlink" | "copy" | "write" | "remove" | "skip";
+	verb: "symlink" | "copy" | "write" | "remove" | "backup" | "skip";
 	path: string;
 	note?: string;
 }
@@ -47,6 +47,22 @@ export function isSymlinkTo(linkPath: string, target: string): boolean {
  */
 export function removePath(target: string, dryRun: boolean): void {
 	if (!dryRun) fs.rmSync(target, { recursive: true, force: true });
+}
+
+/**
+ * Move an existing entry aside to a timestamped `.bak-<n>` sibling instead of
+ * deleting it. Used before a `--force` overwrite/removal of something the tool
+ * did not create, so nothing is ever destroyed outright.
+ *
+ * @param target - The path to move aside.
+ * @param stamp - A monotonic-ish suffix (caller passes Date.now()).
+ * @param dryRun - When true, only record the action.
+ * @returns The recorded action.
+ */
+export function backup(target: string, stamp: number, dryRun: boolean): Action {
+	const dest = `${target}.bak-${stamp}`;
+	if (!dryRun) fs.renameSync(target, dest);
+	return { verb: "backup", path: target, note: `→ ${path.basename(dest)}` };
 }
 
 /**

@@ -31,9 +31,13 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 	const scope = opts.scope ?? "user";
 	const installMode = opts.copy ? "copy" : config.installMode;
 
+	// Windows can't create symlinks without elevation; fall back to copy for the native target.
+	const onWindows = process.platform === "win32";
+
 	if (opts.dryRun) log.warn("dry run — no files will be changed");
 	log.info(pc.dim(`${mode} ${skills.length} skill(s) → [${targets.join(", ")}] (${scope} scope)`));
 
+	const failures: string[] = [];
 	for (const name of targets) {
 		const tc = config.targets[name];
 		if (!tc || !tc.enabled) {
@@ -42,14 +46,29 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 		}
 		const target = getTarget(name);
 		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
-		const usedMode = target.supportsSymlink ? installMode : "copy";
+		let usedMode = target.supportsSymlink ? installMode : "copy";
+		if (usedMode === "symlink" && onWindows) {
+			usedMode = "copy";
+			log.warn(`${name}: symlinks need elevation on Windows — using copy mode`);
+		}
 		const ctx = { skills, dest, mode: usedMode, force: !!opts.force, dryRun: !!opts.dryRun };
 
 		log.heading(`${target.name} → ${prettyPath(dest)}${target.supportsSymlink ? pc.dim(` (${usedMode})`) : ""}`);
-		const actions = mode === "install" ? target.install(ctx) : target.uninstall(ctx);
-		if (actions.length === 0) log.dim("  (nothing to do)");
-		else actions.forEach(printAction);
+		try {
+			const actions = mode === "install" ? target.install(ctx) : target.uninstall(ctx);
+			if (actions.length === 0) log.dim("  (nothing to do)");
+			else actions.forEach(printAction);
+		} catch (err) {
+			// One target failing (e.g. malformed AGENTS.md) shouldn't abort the others.
+			failures.push(name);
+			log.error(`${name}: ${err instanceof Error ? err.message : String(err)}`);
+		}
 	}
 
-	if (!opts.dryRun) log.ok(`${mode} complete`);
+	if (failures.length > 0) {
+		log.error(`${mode} failed for: ${failures.join(", ")}`);
+		process.exitCode = 1;
+	} else if (!opts.dryRun) {
+		log.ok(`${mode} complete`);
+	}
 }

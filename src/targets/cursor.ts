@@ -1,6 +1,13 @@
 import type { Action } from "../core/install-fs.js";
-import type { InstallContext, Target } from "./types.js";
-import { frontmatter, installFilePerSkill, MANAGED_LINE, uninstallFilePerSkill } from "./render.js";
+import type { Skill } from "../core/skill.js";
+import type { InstallContext, SkillStatus, Target } from "./types.js";
+import { frontmatter, installFilePerSkill, MANAGED_LINE, statusFilePerSkill, uninstallFilePerSkill } from "./render.js";
+
+/** Render a skill's `.mdc` file contents (shared by install and drift detection). */
+function build(skill: Skill): string {
+	const front = frontmatter({ description: skill.frontmatter.description, globs: "", alwaysApply: false });
+	return `${front}\n${MANAGED_LINE}\n\n${skill.body}\n`;
+}
 
 /**
  * Cursor — one `.mdc` rule file per skill under `.cursor/rules/`. `alwaysApply:
@@ -13,13 +20,14 @@ export const cursorTarget: Target = {
 	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {
-		return installFilePerSkill(ctx, "mdc", (skill) => {
-			const front = frontmatter({ description: skill.frontmatter.description, globs: "", alwaysApply: false });
-			return `${front}\n${MANAGED_LINE}\n\n${skill.body}\n`;
-		});
+		return installFilePerSkill(ctx, "mdc", build);
 	},
 
 	uninstall(ctx: InstallContext): Action[] {
 		return uninstallFilePerSkill(ctx, "mdc");
+	},
+
+	status(ctx: InstallContext): SkillStatus[] {
+		return statusFilePerSkill(ctx, "mdc", build);
 	},
 };

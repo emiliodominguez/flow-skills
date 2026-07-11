@@ -6,6 +6,7 @@ import { log } from "./core/logger.js";
 import { listCommand } from "./commands/list.js";
 import { validateCommand } from "./commands/validate.js";
 import { installCommand } from "./commands/install.js";
+import { doctorCommand } from "./commands/doctor.js";
 import { newCommand } from "./commands/new.js";
 
 function version(): string {
@@ -60,6 +61,13 @@ program
 	.option("--force", "remove entries even if not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
 	.action((skills, opts) => installCommand("uninstall", skills, opts));
+
+program
+	.command("doctor")
+	.description("Report install state per target and flag drift or conflicts")
+	.addOption(targetOption)
+	.addOption(scopeOption)
+	.action((opts) => doctorCommand(opts));
 
 program
 	.command("new")

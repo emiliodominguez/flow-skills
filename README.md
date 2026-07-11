@@ -31,15 +31,16 @@ tool's native format on install. One source, many destinations.
 A connected workflow that moves work from idea to shipped. See the full map in
 [`docs/OVERVIEW.md`](docs/OVERVIEW.md).
 
-| Phase       | Skills                                                                              |
-| ----------- | ----------------------------------------------------------------------------------- |
-| **Think**   | `ed-brainstorm` · `ed-prototype`                                                    |
-| **Plan**    | `ed-plan` — parallel research, writes `.plans/<file>`                               |
-| **Build**   | `ed-work` — executes a plan in a fresh context, slice by slice                      |
-| **Check**   | `ed-review` (persona panel + verification) · `ed-adversarial-review` (red-team)     |
-| **Polish**  | `ed-simplify` · `ed-refactor`                                                       |
-| **Ship**    | `ed-ship` · `ed-pr-fix` · `ed-git-fix`                                              |
-| **Support** | `ed-diagnose` · `ed-handoff` · `ed-styles` · `ed-animate` · `ed-prune-claude-setup` |
+| Phase          | Skills                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Think**      | `ed-brainstorm` · `ed-prototype`                                                                                   |
+| **Understand** | `ed-onboard` — map an unfamiliar codebase fast                                                                     |
+| **Plan**       | `ed-plan` — parallel research, writes `.plans/<file>`                                                              |
+| **Build**      | `ed-work` · `ed-test` (test strategy) · `ed-migrate` (cross-file sweeps)                                           |
+| **Check**      | `ed-review` (persona panel + verification) · `ed-adversarial-review` (red-team)                                    |
+| **Polish**     | `ed-simplify` · `ed-refactor`                                                                                      |
+| **Ship**       | `ed-ship` · `ed-docs` · `ed-pr-fix` · `ed-git-fix`                                                                 |
+| **Support**    | `ed-diagnose` · `ed-triage` · `ed-benchmark` · `ed-handoff` · `ed-styles` · `ed-animate` · `ed-prune-claude-setup` |
 
 `ed-plan` writes a plan file, then you execute it in a **fresh session** with `/ed-work` —
 planning and building don't share a crowded context window.

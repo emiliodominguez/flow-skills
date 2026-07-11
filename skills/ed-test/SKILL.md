@@ -1,0 +1,71 @@
+---
+name: ed-test
+description: Design and write tests that pin behaviour, not implementation — choose the right level (unit / integration / e2e), pin legacy code with characterization tests before changing it, and kill flakiness at its source. Use when adding tests, deciding what to test, testing untested code before a refactor, or when a suite is flaky (also /ed-test, "write tests for this", "what should I test", "these tests are flaky"). Hands off to /ed-work to build against the tests, or /ed-review when the suite is the deliverable.
+version: 0.1.0
+---
+
+# Test
+
+A test earns its place by **failing when behaviour breaks and only then**. A test coupled to implementation fails on every refactor and catches no bugs — it's a liability wearing a green check. The discipline below keeps tests behavioural, at the right level, and deterministic.
+
+---
+
+## Phase 1: Choose the level
+
+Push each test to the **lowest level that still exercises the real risk**.
+
+- **Unit** — pure logic, branches, edge cases. Fast, many, no I/O. Most tests live here.
+- **Integration** — the seams: a module against a real database, two components wired together, a serialization boundary. Where unit mocks lie to you.
+- **End-to-end** — one or two per critical user journey. Slow and flaky by nature; spend them only where a broken seam would reach the user.
+
+A test that needs five mocks to stand up is telling you it's at the wrong level, or the code under it wants decoupling.
+
+---
+
+## Phase 2: Pin before you change (characterization)
+
+Before refactoring code with no tests, **capture what it does now** — bugs included.
+
+- Write tests that assert the *current* observable output for representative inputs. Don't fix anything yet.
+- If you can't tell whether an output is correct, pin it anyway and mark it `// characterization — verify intent`. The goal is a tripwire, not a blessing.
+- Now refactor. The pinned tests catch any behaviour you change by accident. Fix the ones you *meant* to change, deliberately.
+
+---
+
+## Phase 3: Write the test
+
+- **Assert behaviour, not internals.** Call the public surface; check the result and observable effects. Don't assert on private fields or call order unless the order *is* the contract.
+- **One reason to fail.** A test that checks five unrelated things hides which broke. Split them.
+- **Arrange / act / assert**, in that shape. The name says what breaks when it fails (`rejects a negative amount`, not `test amount`).
+- **Test the edges**: empty, zero, negative, boundary, the null, the duplicate, the concurrent case — that's where bugs live.
+- The test should survive a refactor of the implementation and fail on a change of behaviour. If it's the other way round, rewrite it.
+
+---
+
+## Phase 4: Kill flakiness at the source
+
+A flaky test is worse than no test — it trains everyone to ignore red. When one flaps, **find the nondeterminism; never add a blind retry**.
+
+Usual sources: real time/`sleep`, unseeded randomness, test-order coupling (shared mutable state), unawaited async, network/clock, filesystem leftovers. Isolate the source, control it (inject a clock, seed the RNG, await the promise, reset state in teardown), and prove the fix by running the test many times (`--repeat`) rather than once.
+
+---
+
+## Anti-patterns
+
+- ❌ Asserting on implementation details, so every refactor rewrites the tests
+- ❌ Mocking the very thing under test until the test only proves the mock works
+- ❌ One giant test that checks ten things and hides which one failed
+- ❌ Chasing 100% coverage with tests that assert nothing meaningful
+- ❌ Papering over a flaky test with `retry(3)` instead of finding the nondeterminism
+- ❌ Changing behaviour and the pinning test in the same motion, so nothing guards you
+
+---
+
+## Done when
+
+- Each new test fails when the behaviour it names is broken, and survives a pure refactor
+- The level matches the risk (no e2e for what a unit test proves)
+- Legacy code touched by a change is pinned by characterization tests first
+- Any flaky test is fixed at its source, proven by repeated runs — not retried
+
+Then: pick up `/ed-work` to build against the tests, or `/ed-review` if the test suite itself is the deliverable.

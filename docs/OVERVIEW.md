@@ -3,14 +3,16 @@
 A connected workflow. Each skill does one job and hands off to the next.
 
 ```
-ed-brainstorm ──idea → sharp design──┐
-ed-prototype  ──throwaway answer──────┤
-                                      ▼
+ed-onboard    ──map an unfamiliar codebase──┐
+ed-brainstorm ──idea → sharp design──────────┤
+ed-prototype  ──throwaway answer──────────────┤
+                                              ▼
 ed-plan ──parallel research + design → writes .plans/<date>-<slug>.md
    │
    │   ⟢ start a FRESH session (plan is on disk)
    ▼
 ed-work ──executes the plan task-by-task in clean context
+ed-test ──test strategy + authoring        ed-migrate ──large cross-file sweeps
    │
    ▼
 ed-review ───────── multi-persona review + adversarial verification
@@ -21,8 +23,9 @@ ed-simplify ──de-slop      ed-refactor ──structure-only
    │
    ▼
 ed-ship ──commits + PR──► ed-pr-fix ──► ed-git-fix (when git snags)
+ed-docs ──explain the why, land it with the change
 
-support: ed-diagnose · ed-handoff · ed-styles · ed-animate · ed-prune-claude-setup
+support: ed-diagnose · ed-triage (route it) · ed-benchmark (measure first) · ed-handoff · ed-styles · ed-animate · ed-prune-claude-setup
 ```
 
 ## The seven practices threaded through the suite

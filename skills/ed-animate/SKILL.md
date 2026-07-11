@@ -47,7 +47,7 @@ const SPRING = {
 };
 ```
 
-Then components reference these constants — never raw magic numbers.
+Then components reference these constants — never raw magic numbers. (The `SPRING` shape here — `type` / `visualDuration` / `bounce` — is Framer Motion / `motion`; on a different animation library keep the named-constant discipline but adapt the spring fields to that library's API.)
 
 ### Rules
 
@@ -63,7 +63,7 @@ Then components reference these constants — never raw magic numbers.
 
 When the design is "almost right" but needs visual tweaks, build a live control panel instead of editing the file, reloading, judging, repeat.
 
-Use a `useDialKit` style hook that renders a floating panel:
+Use a live-controls panel — a real library like **leva** (`pmndrs/leva`), or a small hook you build. The `useDialKit` below is illustrative shorthand, not an npm package:
 
 ```tsx
 const params = useDialKit("Card animation", {

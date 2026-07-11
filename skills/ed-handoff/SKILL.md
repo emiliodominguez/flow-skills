@@ -13,13 +13,12 @@ The handoff doc is not a summary of the conversation. It's a **starting point fo
 
 ## Process
 
-1. **Create the file** at a stable path:
-
-```bash
-mktemp -t handoff-XXXXXX.md
-```
-
-Save the path. Read the file (it's empty) before writing — required by the Write tool.
+1. **Write the file** to a durable, discoverable path in the repo:
+   `./.handoffs/<YYYY-MM-DD>-<topic-slug>.md`. Not `mktemp`/`/tmp` — a temp file is wiped on
+   reboot and gone on another machine, the opposite of what a doc meant to survive into the
+   *next* session needs; a repo path also travels with the code. Keep it out of git: if a
+   `.gitignore` exists and doesn't ignore `.handoffs/`, append a `.handoffs/` line (create
+   one if there's none); if the project isn't a git repo, just write the file and say so.
 
 2. **Check for a live plan.** If a `./.plans/*.md` exists (written by `/ed-plan`), it *is* most of the handoff — the next session should resume from it in a fresh context. If this session already produced a plan file, the handoff can be little more than a pointer to it. Note the plan path and how far its task checklist got.
 3. **Fill in the template** (below).
@@ -103,7 +102,7 @@ Save the path. Read the file (it's empty) before writing — required by the Wri
 
 ## Done when
 
-- File exists, path is printed
+- File exists at `./.handoffs/<date>-<slug>.md` (git-ignored in a git repo), path is printed
 - Template fields are filled (skip a field only if it genuinely doesn't apply)
 - If a plan is live, the handoff names it and how far it got, and points at `/ed-work .plans/<file>` in a fresh session
 - The next agent could pick up cold and know what to do first

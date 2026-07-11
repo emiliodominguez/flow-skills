@@ -97,7 +97,7 @@ Only after explicit confirmation, in this order:
 
 1. Delete or edit memory files; update `MEMORY.md` to match
 2. Edit `CLAUDE.md`
-3. Edit `settings.json` (back up first: `cp settings.json settings.json.bak-$(date +%Y%m%d)`)
+3. Edit `settings.json` (back up first with the full path: `cp ~/.claude/settings.json ~/.claude/settings.json.bak-$(date +%Y%m%d)`), then confirm it still parses as JSON after editing — a malformed `settings.json` can wedge the CLI
 4. Skills: never auto-delete a skill directory — print the `rm -rf` command and let the user run it
 
 After applying, re-read `MEMORY.md` and confirm the index matches the actual files on disk.

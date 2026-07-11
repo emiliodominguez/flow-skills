@@ -99,7 +99,8 @@ For anything beyond simple state transitions, hand off to **/ed-animate**.
     padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+    clip: rect(0, 0, 0, 0); /* legacy fallback */
+    clip-path: inset(50%); /* modern equivalent */
     white-space: nowrap;
     border: 0;
   }

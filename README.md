@@ -3,8 +3,9 @@
 Author agent skills **once**, install them **anywhere**.
 
 A source-of-truth repo for a suite of workflow skills (the `ed-*` family) plus a small,
-tested CLI that installs them into **Claude Code**, **Cursor**, **Codex / AGENTS.md**, and
-**Windsurf** — with validation, scaffolding, and a symlink-or-copy installer.
+tested CLI that installs them into **Claude Code**, **Cursor**, **Codex / AGENTS.md**,
+**Windsurf**, **GitHub Copilot**, **Zed**, **aider**, **Cline**, and **Continue** — with
+validation, scaffolding, and a symlink-or-copy installer.
 
 ```sh
 ./install.sh                 # all skills → Claude Code (symlinked, edit-live)
@@ -19,7 +20,8 @@ pnpm skills validate
 
 Every assistant has its own place and format for "always-available instructions": Claude
 Code has `~/.claude/skills/<name>/SKILL.md`, Cursor has `.cursor/rules/*.mdc`, Codex reads
-`AGENTS.md`, Windsurf has `.windsurf/rules`. Writing the same guidance four times rots fast.
+`AGENTS.md`, Windsurf has `.windsurf/rules`, and Copilot, Zed, aider, Cline and Continue each
+have their own. Writing the same guidance over and over rots fast.
 
 Here each skill is written once as a `SKILL.md`. Target **adapters** transform it into each
 tool's native format on install. One source, many destinations.
@@ -80,42 +82,55 @@ npx github:emiliodominguez/agent-skills install -t claude
 ## Usage
 
 ```
-agent-skills list [--targets]         List skills (and, with --targets, the adapters)
+agent-skills list [--targets] [--profiles]   List skills (and, optionally, adapters / profiles)
 agent-skills validate [--strict]      Validate frontmatter, naming, cross-references
 agent-skills install [skills...]      Install skills into target(s)
 agent-skills uninstall [skills...]    Remove installed skills
+agent-skills sync                     Re-install whatever is already installed (propagate edits)
 agent-skills doctor                   Report install state per target; flag drift/conflicts
 agent-skills new <name> [-d "desc"]   Scaffold a new skill from the template
 ```
 
 **Common flags** (`install` / `uninstall`):
 
-| Flag                     | Meaning                                                       |
-| ------------------------ | ------------------------------------------------------------- |
-| `-t, --target <name...>` | `claude`, `cursor`, `codex`, `windsurf` (default: config)     |
-| `-s, --scope <scope>`    | `user` (global, default) or `project` (into the current repo) |
-| `--copy`                 | copy files instead of symlinking (native `claude` target)     |
-| `--force`                | overwrite/remove entries not created by agent-skills          |
-| `--dry-run`              | print the plan without touching anything                      |
+| Flag                     | Meaning                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `-t, --target <name...>` | `claude`, `cursor`, `codex`, `windsurf`, `copilot`, `zed`, `aider`, `cline`, `continue` (default: config) |
+| `-s, --scope <scope>`    | `user` (global, default) or `project` (into the current repo)                                             |
+| `--profile <name...>`    | install/remove a named set of skills from config `profiles`                                               |
+| `--copy`                 | copy files instead of symlinking (native `claude` target)                                                 |
+| `--force`                | overwrite/remove entries not created by agent-skills                                                      |
+| `--dry-run`              | print the plan without touching anything                                                                  |
+| `--watch`                | (`install`) keep running and re-generate targets on source change                                         |
 
 Run **`agent-skills doctor`** any time to see what's installed where and whether anything
-has drifted from the source or conflicts with a hand-written file.
+has drifted from the source or conflicts with a hand-written file. Run **`agent-skills sync`**
+to re-generate whatever is currently installed across all targets, so a source edit
+propagates everywhere with one command.
 
-Pass specific skills to scope an operation: `agent-skills install ed-plan ed-work`.
+Pass specific skills to scope an operation: `agent-skills install ed-plan ed-work`. Or install
+a curated subset with a profile: `agent-skills install --profile frontend`.
 
 ---
 
 ## Targets
 
-| Target       | Emits                        | Install shape                                                      |
-| ------------ | ---------------------------- | ------------------------------------------------------------------ |
-| **claude**   | `SKILL.md` (unchanged)       | one directory per skill; **symlink** (live) or copy                |
-| **cursor**   | `.mdc` rule with frontmatter | one file per skill in `.cursor/rules/`                             |
-| **codex**    | `AGENTS.md` sections         | all skills in one **managed block** (preserves your other content) |
-| **windsurf** | `.md` rule                   | one file per skill in `.windsurf/rules/`                           |
+| Target       | Emits                             | Install shape                                                      |
+| ------------ | --------------------------------- | ------------------------------------------------------------------ |
+| **claude**   | `SKILL.md` (unchanged)            | one directory per skill; **symlink** (live) or copy                |
+| **cursor**   | `.mdc` rule with frontmatter      | one file per skill in `.cursor/rules/`                             |
+| **codex**    | `AGENTS.md` sections              | all skills in one **managed block** (preserves your other content) |
+| **windsurf** | `.md` rule                        | one file per skill in `.windsurf/rules/`                           |
+| **copilot**  | `.github/copilot-instructions.md` | all skills in one **managed block**                                |
+| **zed**      | `.rules`                          | all skills in one **managed block**                                |
+| **aider**    | `CONVENTIONS.md`                  | all skills in one **managed block**                                |
+| **cline**    | `.md` rule                        | one file per skill in `.clinerules/`                               |
+| **continue** | `.md` rule                        | one file per skill in `.continue/rules/`                           |
 
 Only the `claude` target supports symlinking (the format is identical to the source). The
-others are transformed, so they're always generated fresh — re-run `install` to sync.
+others are transformed, so they're always generated fresh — re-run `install` (or `sync`) to
+update. The bundle targets (codex, copilot, zed, aider) merge every skill into one delimited
+managed block, preserving any surrounding content you wrote in the same file.
 
 ### Safety — what it will and won't touch
 
@@ -145,18 +160,23 @@ Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety
 {
 	"installMode": "symlink", // or "copy"
 	"defaultTargets": ["claude"],
+	"profiles": {
+		// named install sets: `install --profile frontend`
+		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
+	},
 	"targets": {
 		"claude": { "enabled": true, "userPath": "~/.claude/skills", "projectPath": ".claude/skills" },
 		"cursor": { "enabled": true, "userPath": "~/.cursor/rules", "projectPath": ".cursor/rules" },
-		// codex, windsurf ...
+		// codex, windsurf, copilot, zed, aider, cline, continue ...
 	},
 }
 ```
 
-Paths for Cursor/Codex/Windsurf follow each tool's documented convention; adjust them here
-if your version differs. Keep machine-specific overrides in a git-ignored
-`.agent-skills.local.json` (same shape, deep-merged on top). Full reference:
-[docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+Paths for the non-native targets follow each tool's documented convention; adjust them here
+if your version differs (the newer tools' rules directories move — re-check yours). A
+`profiles` map lets you curate subsets for `install --profile <name>`. Keep machine-specific
+overrides in a git-ignored `.agent-skills.local.json` (same shape, deep-merged on top). Full
+reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ---
 

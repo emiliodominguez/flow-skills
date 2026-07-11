@@ -8,6 +8,11 @@ import { claudeTarget } from "../src/targets/claude";
 import { cursorTarget } from "../src/targets/cursor";
 import { codexTarget } from "../src/targets/codex";
 import { windsurfTarget } from "../src/targets/windsurf";
+import { clineTarget } from "../src/targets/cline";
+import { continueTarget } from "../src/targets/continue";
+import { copilotTarget } from "../src/targets/copilot";
+import { zedTarget } from "../src/targets/zed";
+import { aiderTarget } from "../src/targets/aider";
 import { MANAGED_LINE } from "../src/targets/render";
 import { BLOCK_START } from "../src/core/install-fs";
 import type { InstallContext } from "../src/targets/types";
@@ -142,6 +147,44 @@ describe("codex target (bundle merge)", () => {
 		codexTarget.uninstall(ctx({ dest, skills: [b] }));
 		expect(fs.existsSync(dest)).toBe(false); // last skill out removes the file we created
 	});
+});
+
+describe("file-per-skill targets (windsurf / cline / continue)", () => {
+	for (const [name, target, ext] of [
+		["windsurf", windsurfTarget, "md"],
+		["cline", clineTarget, "md"],
+		["continue", continueTarget, "md"],
+	] as const) {
+		it(`${name}: install → generated → uninstall round-trip`, () => {
+			const dest = path.join(tmp, name);
+			target.install(ctx({ dest, skills: [skills[0]!] }));
+			const file = path.join(dest, `${skills[0]!.name}.${ext}`);
+			expect(fs.readFileSync(file, "utf8")).toContain(MANAGED_LINE);
+			expect(target.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("generated");
+			target.uninstall(ctx({ dest, skills: [skills[0]!] }));
+			expect(fs.existsSync(file)).toBe(false);
+		});
+	}
+});
+
+describe("new bundle targets (copilot / zed / aider)", () => {
+	for (const [name, target, filename] of [
+		["copilot", copilotTarget, "copilot-instructions.md"],
+		["zed", zedTarget, ".rules"],
+		["aider", aiderTarget, "CONVENTIONS.md"],
+	] as const) {
+		it(`${name}: merges into a managed block and removes cleanly`, () => {
+			const dest = path.join(tmp, filename);
+			target.install(ctx({ dest, skills: [skills[0]!] }));
+			const content = fs.readFileSync(dest, "utf8");
+			expect(content).toContain(BLOCK_START);
+			expect(content).toContain(`## ${skills[0]!.name}`);
+			expect(target.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("generated");
+			expect(target.status(ctx({ dest, skills: [skills[1]!] }))[0]!.state).toBe("missing");
+			target.uninstall(ctx({ dest, skills: [skills[0]!] }));
+			expect(fs.existsSync(dest)).toBe(false); // sole skill removed → file we created is gone
+		});
+	}
 });
 
 describe("force + backup (never delete unmanaged)", () => {

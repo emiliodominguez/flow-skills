@@ -5,8 +5,28 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+
+- **`sync` command** — re-installs whatever is already installed across all targets (via
+  `Target.status()`), so a source edit propagates everywhere with one command.
+- **`install --watch`** — keeps running and re-generates targets on source change (debounced).
+- **Five new targets** — GitHub Copilot (`.github/copilot-instructions.md`), Zed (`.rules`),
+  aider (`CONVENTIONS.md`), Cline (`.clinerules/`), and Continue (`.continue/rules/`). The
+  bundle adapters (codex, copilot, zed, aider) now share one `makeBundleTarget` factory.
+- **Profiles** — a `profiles` map in config plus `install/uninstall --profile <name...>` to
+  install curated subsets; `list --profiles` prints them.
+- **Per-skill `version`** frontmatter, validated as semver-ish and surfaced by `list`.
+- **Golden snapshot tests** freezing each adapter's exact output for a synthetic fixture skill.
+- **Generated per-skill docs** — `docs/skills/<name>.md` for each skill, linked from the
+  catalog; CI docs-freshness now covers the whole `docs/` tree.
+- **Six new skills** — `ed-test`, `ed-onboard`, `ed-migrate`, `ed-benchmark`, `ed-docs`, and
+  `ed-triage`.
+
 ### Changed
 
+- **Package is now published to npm** as the scoped `@emiliodominguez/agent-skills` (no longer
+  `private`); the release workflow runs `pnpm publish` on a `v*` tag (needs the `NPM_TOKEN`
+  secret).
 - Dependencies brought to their latest majors: `commander` 15, `eslint`/`@eslint/js` 10,
   `vitest` 4 (+ explicit `vite` 8, which vitest 4 requires for its module runner),
   `js-yaml` 5, `lint-staged` 17, `@types/node` 26, and the CI GitHub Actions.

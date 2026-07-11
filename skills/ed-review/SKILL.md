@@ -20,18 +20,25 @@ Override on request. If the diff is empty, say so and stop.
 git diff --stat main...HEAD
 ```
 
-Read the diff yourself first — enough to know the shape and pick the reviewer set. Small,
-low-risk diff → 3 personas. Large or risky (auth, money, migrations, concurrency) → all 6,
-and follow with `/ed-adversarial-review`.
+Read the diff yourself first — enough to know the shape and pick the reviewer set.
+**Correctness is always on**, and **Security is always on whenever the diff touches input,
+auth, filesystem, db, or shell** — those two are the coverage floor and "low-risk" is a
+guess you make _before_ the review finds anything, so never drop them. Scale the rest
+(readability, architecture, performance, simplicity): small diff → just those two plus one
+or two; large or risky (auth, money, migrations, concurrency) → all 6, and follow with
+`/ed-adversarial-review`.
 
 ---
 
 ## Step 2: Fan out the persona reviewers (parallel, read-only)
 
 Launch the chosen personas as **parallel subagents in one message** (Agent tool,
-`type: Explore` or `general-purpose` — **read-only, they never edit**). Give each the diff
-scope, its lens, and the **findings schema**. Each persona has a distinct mental model, so
-they surface different classes of problem:
+`type: general-purpose` for full-file reads, or `Explore` — **run them read-only: instruct
+them not to edit, and remember only you, the orchestrator, write files**). Give each the
+diff scope, its lens, and the **findings schema**. Each persona has a distinct mental model,
+so they surface different classes of problem. **For a very large diff (hundreds of files),
+shard the diff across agents by directory/file** rather than handing every persona the whole
+thing — adding lenses multiplies load, it doesn't split it:
 
 1. **Correctness — the Skeptical Senior.** Does it do what it claims? Logic errors
    (off-by-one, wrong predicate/branch), unhandled edge cases (null/empty/max/concurrent),
@@ -73,8 +80,10 @@ A finding with no concrete `scenario` is a vibe, not a bug — tell reviewers to
 
 ## Step 3: Merge
 
-Collect all findings, **dedup by `file:line`** (two personas often flag the same spot —
-keep the sharpest claim, note both lenses). You now have one candidate list.
+Collect all findings, **dedup by `file:line` + claim** (two personas often flag the same
+spot — merge only when they describe the _same_ defect, keeping the sharpest claim and both
+lenses). Two _different_ defects on one line (say a wrong predicate and an unhandled null)
+stay as separate findings. You now have one candidate list.
 
 ---
 
@@ -83,12 +92,16 @@ keep the sharpest claim, note both lenses). You now have one candidate list.
 This is the step that makes the review trustworthy. For each surviving candidate, spawn an
 independent **verifier subagent** (parallel; read-only) whose *job is to refute it*:
 
-> *"Here is a claimed defect: <claim + scenario>. Prove it is NOT a real problem — find
-> the guard, the caller contract, the type, or the test that makes the scenario
-> impossible. If you cannot refute it, say why it holds. Default to REFUTED if you're
-> uncertain the scenario is reachable."*
+> *"Here is a claimed defect: <claim + scenario>. Try to prove it is NOT a real problem —
+> name the guard, caller contract, type, or test that makes the scenario impossible. Then
+> verdict it: **REFUTED** only if you can name what makes it impossible or show the code
+> isn't reachable from the diff; **CONFIRMED** if you can reproduce it or prove it reaches;
+> otherwise **PLAUSIBLE** — you couldn't prove it impossible but couldn't reproduce it
+> either. Do NOT drop an unproven-but-unblocked finding to REFUTED."*
 
-For a small candidate list, verify every finding. For a large one, batch by file.
+Reserve REFUTED for a _named_ blocker (or code not present) — "I couldn't confirm
+reachability" is PLAUSIBLE, not REFUTED, or the tier that keeps true-but-unproven bugs would
+never fire. For a small candidate list, verify every finding. For a large one, batch by file.
 
 ### Verdict schema
 

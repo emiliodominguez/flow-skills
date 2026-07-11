@@ -10,12 +10,17 @@ shippable tasks — then **write the plan to a file** so the work runs in a fres
 context instead of a window already crowded with research.
 
 **No implementation code in this phase.** Sketches and pseudocode are fine; real edits to
-project files are not. The one file you DO write is the plan itself.
+project files are not — the only writes are the plan file itself and a one-line `.plans/`
+entry in `.gitignore` (Phase 4).
 
 **Why a file + fresh session?** Planning is research-heavy and fills the context window
 with exploration you won't need while coding. Executing from a written plan in a new
 session is cheaper (warm cache, less to re-read), cleaner (no stale detours), and
 reproducible (anyone can pick up the file).
+
+**Too small to plan?** If the change is 1–2 tasks, skip the file and go straight to
+`/ed-work <description>` (ad-hoc mode). A plan file earns its keep at 3+ tasks or when the
+work spans sessions.
 
 ---
 
@@ -23,8 +28,9 @@ reproducible (anyone can pick up the file).
 
 Before designing anything, find out what the codebase already gives you. **Always first** —
 it kills bad plans before they cost time. Run these as **parallel subagents in one
-message** (Agent tool, `type: Explore` or `general-purpose` — read-only, they never edit).
-Give each a narrow angle:
+message** (Agent tool — prefer `type: Explore`, which is genuinely read-only; if you use
+`general-purpose`, instruct it to read only, and remember only you, the orchestrator, write
+files). Give each a narrow angle:
 
 1. **Precedent** — has the team solved something similar nearby? Where? Match that style.
 2. **Constraints** — build system, lint rules, framework gotchas, perf budgets, the
@@ -37,6 +43,8 @@ Give each a narrow angle:
 Each subagent returns a tight findings list (paths + line refs, not prose essays). You
 synthesize into a **3–6 line "what I found" summary** and **surface anything that
 invalidates the brainstorm** loudly — a wrong premise here is worth more than a whole plan.
+If two agents' findings conflict, re-open the source file yourself before designing on it —
+never build on an unreconciled premise.
 
 For a tiny change, skip the fan-out and read the 2–3 relevant files yourself. Match effort
 to risk.
@@ -116,8 +124,9 @@ migration story, failure modes. Prose + sketches, no implementation code.>
 <what's still undecided, what could go wrong>
 ```
 
-`/ed-work` flips `- [ ]` → `- [x]` in this file as each task's acceptance is proven, so the
-file stays an accurate live checklist across sessions.
+`/ed-work` flips `- [ ]` → `- [x]` in this file as each task's acceptance is proven, and sets
+`Status: done` when the whole plan is complete — so the file stays an accurate live
+checklist across sessions and a bare `/ed-work` can tell in-progress plans from finished ones.
 
 ---
 
@@ -138,7 +147,7 @@ file stays an accurate live checklist across sessions.
 - Parallel research findings are synthesized and written into the plan
 - Design fits in <50 lines, and any brainstorm-invalidating surprise was surfaced
 - Tasks are ordered, sized, and have acceptance criteria
-- The plan file exists at `./.plans/<date>-<slug>.md` and `.plans/` is git-ignored
+- The plan file exists at `./.plans/<date>-<slug>.md` and (in a git repo) `.plans/` is git-ignored
 - You can name what could still go wrong and what's not yet decided
 
 Then print the path and say:

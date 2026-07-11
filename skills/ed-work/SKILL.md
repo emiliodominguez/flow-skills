@@ -8,19 +8,26 @@ description: Execute work as thin, verified vertical slices — either from a pl
 Turn a plan (or a request) into working code, one small verified slice at a time. Each
 slice is a change you can *prove* works before moving on.
 
-It has two modes; pick by whether a plan file exists.
+It has two modes. **Pick by the argument, not merely by whether a plan file exists** —
+completed plans accumulate in `.plans/`, so "a plan is present" is the steady state:
+
+- an explicit path (`/ed-work .plans/<file>`) → **Mode A** on that file;
+- a description (`/ed-work add a logout button`) → **Mode B**, ad-hoc;
+- bare `/ed-work` → **Mode A** on the one plan whose `**Status:**` is `ready` and that still
+  has unchecked `- [ ]` tasks. If several qualify (or none), list the candidates and ask.
 
 ---
 
 ## Mode A: Execute a plan (fresh context)
 
-Triggered by `/ed-work .plans/<file>`, or `/ed-work` when a `.plans/*.md` is present, or
-"run the plan".
+Triggered by `/ed-work .plans/<file>`, a bare `/ed-work` with a single in-progress plan, or
+"run the plan" (see the selection rule above).
 
 **Assume you are starting cold.** Do not rely on prior conversation.
 
-1. **Read the plan file** in full. Then read the files it names in `Touches:` — get the
-   real code in front of you, not your memory of it.
+1. **Read the plan file** in full. If the named plan is missing, unreadable, or has no
+   `- [ ]` tasks, **stop and report** before touching code — don't guess a plan. Then read
+   the files it names in `Touches:` — get the real code in front of you, not your memory.
 2. **Restate** the goal and the task list back to the user in 3–4 lines, and name the
    first task you'll execute. If the plan and the current code already disagree (the code
    moved since the plan was written), say so before touching anything.
@@ -29,7 +36,8 @@ Triggered by `/ed-work .plans/<file>`, or `/ed-work` when a `.plans/*.md` is pre
    `- [ ]` → `- [x]` and append a one-line evidence note, e.g.
    `- [x] **T1 — add token endpoint** ✓ test `auth.test.ts` green`.
    The plan file stays a live, accurate checklist across sessions.
-5. When all tasks are `- [x]`, stop and hand off to review.
+5. When all tasks are `- [x]`, set `**Status:** done` in the plan file (so it's no longer a
+   bare-`/ed-work` candidate), then stop and hand off to review.
 
 If a task turns out to be wrong or impossible as written, **stop and report** — don't
 silently improvise a different plan. The plan may need a fix (`/ed-plan`), not a workaround.

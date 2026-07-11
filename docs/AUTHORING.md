@@ -51,7 +51,7 @@ pass: review, adversarial review, research, large-scale simplification. The shar
 
 ```
 1. SCOPE   — determine the target.
-2. FAN OUT — launch distinct-PERSONA agents in parallel (read-only; they never edit).
+2. FAN OUT — launch distinct-PERSONA agents in parallel (run read-only; only you write).
              Each returns findings in ONE fixed schema.
 3. MERGE   — dedup by file:line.
 4. VERIFY  — an independent agent tries to REFUTE each finding. Keep survivors, tagged

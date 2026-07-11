@@ -33,6 +33,11 @@ Before attacking, sketch what the change exposes (do this yourself from the diff
 - **Invariants** — what must always be true (balance ≥ 0, one owner per record, idempotent
   retry)? These are the things to try to violate.
 
+**If there's no entry point, sensitive sink, or invariant to violate** — a docs-only, CSS,
+or pure-refactor diff — say so and **stop**: this is the wrong tool, `/ed-review` suffices.
+Attacking a change with no surface only manufactures the theoretical findings this skill
+forbids.
+
 ---
 
 ## Step 2: Fan out the attacker personas (parallel, read-only)
@@ -79,12 +84,16 @@ schema below — not "this could be unsafe", but "*this input → this bad outco
 ## Step 3: Verify — is the break actually reachable?
 
 Attackers over-claim. For each scenario, spawn an independent **verifier subagent**
-(parallel, read-only) that must confirm the attack is reachable **in this code**:
+(parallel, read-only) that must confirm the attack is reachable **in this code**. Verify
+every scenario for a small list; batch by file or persona for a large one.
 
 > *"Here is a claimed break: <attack → outcome>. Trace the actual code path. Is there a
-> guard, validation, type, framework default, or auth check that already stops it? If the
-> attack requires code that doesn't exist here, mark it out-of-scope. Confirm only if you
-> can name the reachable path. Default to REFUTED when the path can't be traced."*
+> guard, validation, type, framework default, or auth check that already stops it? Verdict:
+> **REFUTED** only if you can NAME the blocker, or the attack needs code not present here
+> (out-of-scope); **CONFIRMED** if you can name a reachable path; otherwise **PLAUSIBLE** —
+> no named blocker, but the trace is incomplete. Do NOT drop to REFUTED just because the
+> path is hard to trace: in a red-team pass a missed exploit is the expensive error, so an
+> unblocked-but-untraced attack stays PLAUSIBLE."*
 
 ### Verdict schema
 

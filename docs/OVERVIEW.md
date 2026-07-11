@@ -35,7 +35,8 @@ support: ed-diagnose · ed-handoff · ed-styles · ed-animate · ed-prune-claude
 claim · scenario · fix`) so results dedup and rank deterministically.
 4. **Plan / execute separation.** Write the plan to disk; execute it in a fresh session.
    Cheaper (warm cache), cleaner (no stale exploration), reproducible.
-5. **Read-only reviewers, one writer.** Review/research agents can't edit; only the
+5. **Read-only reviewers, one writer.** Review/research agents are run read-only (prefer
+   `Explore`; instruct `general-purpose` not to edit); only the
    orchestrator writes. No parallel-edit corruption.
 6. **Evidence gates.** "Done" needs observable proof — a test, a reproduced break, a
    screenshot. A green typecheck is never, alone, evidence a feature works.

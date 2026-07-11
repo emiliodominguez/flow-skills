@@ -6,6 +6,7 @@ import { log } from "./core/logger.js";
 import { listCommand } from "./commands/list.js";
 import { validateCommand } from "./commands/validate.js";
 import { installCommand } from "./commands/install.js";
+import { syncCommand } from "./commands/sync.js";
 import { doctorCommand } from "./commands/doctor.js";
 import { newCommand } from "./commands/new.js";
 
@@ -38,7 +39,10 @@ program
 	.option("--strict", "fail on warnings too")
 	.action((opts) => validateCommand(opts));
 
-const targetOption = new Option("-t, --target <name...>", "target(s): claude, cursor, codex, windsurf, copilot, zed, aider, cline, continue (default: config)");
+const targetOption = new Option(
+	"-t, --target <name...>",
+	"target(s): claude, cursor, codex, windsurf, copilot, zed, aider, cline, continue (default: config)",
+);
 const scopeOption = new Option("-s, --scope <scope>", "install scope").choices(["user", "project"]).default("user");
 
 program
@@ -50,6 +54,7 @@ program
 	.option("--copy", "copy files instead of symlinking (native target only)")
 	.option("--force", "overwrite entries not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
+	.option("--watch", "keep running and re-generate targets on source change")
 	.action((skills, opts) => installCommand("install", skills, opts));
 
 program
@@ -61,6 +66,14 @@ program
 	.option("--force", "remove entries even if not created by agent-skills")
 	.option("--dry-run", "show what would happen without changing anything")
 	.action((skills, opts) => installCommand("uninstall", skills, opts));
+
+program
+	.command("sync")
+	.description("Re-install whatever is currently installed, across targets, to propagate source edits")
+	.addOption(targetOption)
+	.addOption(scopeOption)
+	.option("--dry-run", "show what would happen without changing anything")
+	.action((opts) => syncCommand(opts));
 
 program
 	.command("doctor")

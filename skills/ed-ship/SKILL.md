@@ -13,6 +13,8 @@ Move reviewed changes through commit → PR → production. Each step catches a 
 
 ## Step 1: Atomic commits
 
+**Preflight:** confirm you're on a branch, not a detached HEAD — `git symbolic-ref -q HEAD` should succeed. If it's detached (post-bisect, a checked-out tag/sha), stop and create a branch first, or the commits can't be published as a PR.
+
 Group changes by intent, not by file. One concern per commit. Use conventional-commit prefixes:
 
 - `feat:` — new capability
@@ -35,6 +37,8 @@ Group changes by intent, not by file. One concern per commit. Use conventional-c
 
 Draft first — a PR marked ready pings reviewers, and you're not ready until Step 4.
 
+**Preflight:** confirm `gh` is installed and authed (`gh auth status`) and the branch has a remote. If `gh` is missing/unauthed or there's no remote, stop and tell the user — or `git push -u origin HEAD` and hand over the compare URL — rather than erroring on `gh pr create`.
+
 ```bash
 gh pr create --draft --title "..." --body "..."
 ```
@@ -56,7 +60,7 @@ PR body template:
 - [ ] Any manual steps
 ```
 
-**If a pre-commit hook fails:** read the failure. Fix the underlying issue. Re-stage the fix. Then make a **NEW** commit — **never `--amend` after a hook failure.** The blocked commit never happened, so `--amend` would rewrite the *previous* (good) commit instead. Verify with `git log` before and after if unsure.
+**If a pre-commit hook fails:** read the failure. Fix the underlying issue. Re-stage the fix. Then re-commit — **after a failed plain `git commit`, make a NEW commit** (the blocked commit never happened, so `--amend` would rewrite the *previous*, good commit). The one exception: if the aborted operation was itself a `git commit --amend`, HEAD is unchanged, so re-run `--amend` — a new commit there would leave an unwanted extra one. Verify with `git log` if unsure. **If the hook keeps failing and you can't resolve the cause after a reasonable attempt, stop and report to the user** — don't loop.
 
 **Never bypass the hook** (`--no-verify`) to force it through. Fix the cause.
 
@@ -81,7 +85,10 @@ Skip for internal refactors. Apply to anything that hits production behavior.
 
 ## Step 4: Promote to ready, request review
 
+**First confirm CI is green.** The pre-launch checklist covers only *local* checks, but CI runs the moment the PR opens — don't `gh pr ready` on a red pipeline (that's the mistake this skill exists to catch before reviewers see it):
+
 ```bash
+gh pr checks   # wait for green; if red, fix via /ed-work before promoting
 gh pr ready
 ```
 

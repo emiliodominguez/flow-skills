@@ -36,7 +36,7 @@ Read the whole thing before you run anything else. Note:
 
 Open it. Find the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`).
 
-For each conflict:
+**Marker-less conflicts first** — binary files, or `deleted by us` / `deleted by them` / `both added` states, have no markers to edit. Resolve those by picking a side: `git checkout --ours <file>` or `git checkout --theirs <file>` (or `git rm <file>` to accept a deletion), then `git add <file>`. For ordinary text conflicts, for each conflict:
 
 1. **Understand both sides.** What did HEAD intend? What did the incoming change intend?
 2. **Read git blame** on the surrounding lines if intent is unclear.
@@ -63,7 +63,8 @@ For stacking tools:
 
 ```bash
 gt continue                     # Graphite
-gs branch sync --continue       # git-spice
+gs rebase continue              # git-spice (alias: gs rbc)
+git town continue               # Git Town
 ```
 
 If more conflicts come, repeat Step 2 until clean.
@@ -86,7 +87,9 @@ If the conflict resolution has gone sideways and you can't recover, **abort — 
 git rebase --abort
 git merge --abort
 git cherry-pick --abort
-gt abort        # Graphite
+gt abort            # Graphite (older versions: git rebase --abort)
+gs rebase abort     # git-spice (alias: gs rba)
+git town undo       # Git Town (reverts the last town command)
 ```
 
 You'll be back where you started, no harm done. Try again with a clearer head, or with a different strategy (e.g. merge instead of rebase). This escape hatch is always available — reach for it before you make things worse.
@@ -138,6 +141,7 @@ Read the dry-run output line by line before running the real thing. If anything 
 - **Read the error before re-running.** If a `--continue`, restack, or clean failed, understand *why* before you run it again. Blindly re-running a destructive op on a confused state makes it worse.
 - **Never run a destructive op twice after the first failed.** Re-read the message; the state may not be what you assume.
 - **Never force-push to main / master.** Warn the user even if they ask.
+- **When a restacked feature branch must be pushed** (plain-git restack rewrites already-pushed history), use `git push --force-with-lease`, never a raw `--force` — the lease refuses if someone else pushed in the meantime.
 - **Never use `--no-verify`** to bypass hooks unless the user explicitly asks. Hooks fail for reasons — fix the cause, don't skip the check.
 - **Investigate before deleting.** Unfamiliar branches, worktrees, or files might be the user's in-progress work.
 - **Abort beats improvise.** A clean abort and a fresh attempt is better than digging a deeper hole.

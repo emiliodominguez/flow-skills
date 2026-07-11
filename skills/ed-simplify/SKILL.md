@@ -21,11 +21,13 @@ If the diff is large (>20 files), confirm with the user before proceeding. Other
 
 Then **capture a green baseline**: run the test suite now and confirm it passes. If it's already red, stop — you can't tell a simplification from a regression against a broken baseline.
 
+**No test suite?** Then behaviour can't be verified after each cut — say so to the user, and fall back to the strongest signal available: typecheck + build + lint, plus driving the affected flow by hand (the `/verify` skill). If none of those exist either, restrict yourself to **provably-safe** edits only — comment strips, dead-import removal, formatting — and skip every pass that changes runtime shape (inlining, collapsing, deletions). Never claim behaviour is preserved on faith.
+
 ---
 
 ## Step 2: Fan out the five reduction passes (parallel, read-only)
 
-Launch the five passes as **parallel subagents in one message** (Agent tool, `type: Explore` or `general-purpose` — **read-only, they never edit**). Each gets the file list, its one focused lens, and the **proposal schema**. They scan and propose deletions/edits; they do **not** touch files. **You**, the orchestrator, are the only writer.
+Launch the five passes as **parallel subagents in one message** (Agent tool — prefer `type: Explore`, read-only by construction; if you use `general-purpose`, instruct it not to edit). Each gets the file list, its one focused lens, and the **proposal schema**. They scan and propose deletions/edits; they do **not** touch files. **You**, the orchestrator, are the only writer.
 
 ### Pass 1: AI artifacts
 - Comments that explain *what* the code does (delete; the code says it)
@@ -41,6 +43,8 @@ Launch the five passes as **parallel subagents in one message** (Agent tool, `ty
 - Constants used once that are obvious from context (`const ZERO = 0`)
 - Type aliases that wrap a single primitive for no reason
 - Wrapper classes around one method
+
+**"Called once" is measured only in the changed files a pass is given** — the symbol may also be called from an unchanged file, or be exported. Before inlining away a definition, if it's exported or you only counted call-sites in scope, route it through the Step 4 caller-check (repo-wide) exactly like a deletion.
 
 **Exception:** if extracting genuinely improves readability (e.g., a complex condition behind a clear name), keep it. The bar is "does this name save more than it costs?"
 
@@ -101,7 +105,7 @@ Grep the **whole repo**, not just the diff — and account for indirection your 
 - evidence   the grep that came up empty, or the exact caller found
 ```
 
-**Default to KEEPING when a deletion's safety can't be confirmed.** Only `CONFIRMED-DEAD` proposals are cleared for removal. Everything else stays. `risk: safe` proposals (inlining, collapsing, comment strips inside the diff) skip this gate.
+**Default to KEEPING when a deletion's safety can't be confirmed.** Only `CONFIRMED-DEAD` proposals are cleared for removal. Everything else stays. And a symbol on the package's **published surface** — a `package.json` `exports`/`main`/`bin` entry, or a root barrel/`index` re-export — is **never `CONFIRMED-DEAD` by repo grep alone**: grep can't see consumers in other packages, so KEEP it unless the user confirms nothing outside the repo imports it. `risk: safe` proposals (inlining, collapsing, comment strips inside the diff) skip this gate.
 
 ---
 
@@ -111,7 +115,7 @@ You hold the merged list; the passes proposed, you edit. Then:
 
 1. Apply edits in **atomic chunks** — one concern at a time (one pass, or one file).
 2. Run tests after **each** chunk.
-3. If a test fails — **STOP**. You crossed the behaviour-preserving line. **Revert that chunk** and look at why before touching anything else.
+3. If a test fails — **STOP**. You crossed the behaviour-preserving line. **Revert that chunk** and look at why before touching anything else. First rule out a **flake**: re-run once against a clean tree — an intermittently-failing suite can neither confirm nor deny a regression, so note known-flaky tests during Step 1 and don't let a flake trigger a false revert (or mask a real break).
 
 ---
 

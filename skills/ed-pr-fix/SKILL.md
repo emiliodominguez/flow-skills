@@ -14,10 +14,20 @@ fixed it.** A reviewer must be able to trace your reply straight to the diff.
 
 ## Phase 1: Pull all the feedback
 
+First resolve the PR number — the `gh api` calls need it:
+
 ```bash
-gh pr view --comments                              # top-level conversation
-gh api repos/:owner/:repo/pulls/<NUM>/comments     # inline review comments (per file/line)
-gh api repos/:owner/:repo/pulls/<NUM>/reviews      # full review bodies + verdicts
+PR=$(gh pr view --json number -q .number)     # auto-detects from the current branch
+```
+
+If that errors (no PR for this branch) or the branch maps to several candidates, **stop and
+ask which PR** before continuing. Then pull everything — `--paginate` so nothing is silently
+capped at 30 results on a big PR:
+
+```bash
+gh pr view "$PR" --comments                                    # top-level conversation
+gh api --paginate "repos/{owner}/{repo}/pulls/$PR/comments"    # inline review comments (per file/line)
+gh api --paginate "repos/{owner}/{repo}/pulls/$PR/reviews"     # full review bodies + verdicts
 ```
 
 Read **every** comment before touching code — including resolved ones (they carry context
@@ -79,7 +89,12 @@ For each fix:
 1. Make the change.
 2. Run the test that covers that area — or write one if it's missing (a blocker with no
    test is a blocker waiting to come back).
-3. **Reply to the thread**, and link the commit sha so the reviewer can trace it:
+3. **Reply to the specific thread** — an inline review comment takes a _threaded_ reply
+   (not one blanket top-level comment), with the commit sha so the reviewer can trace it:
+   ```bash
+   gh api --method POST "repos/{owner}/{repo}/pulls/$PR/comments/<COMMENT_ID>/replies" \
+     -f body="Fixed in abc1234."
+   ```
    - Fixed → *"Fixed in `abc1234`."*
    - Fixed + hardened → *"Good catch — fixed in `abc1234`, added a regression test."*
    - Nit you took → *"Done in `abc1234`."*
@@ -88,8 +103,11 @@ For each fix:
    - Disagreement → *"Disagree — [reasoning]. Keep as-is?"* Leave it **open**; the
      reviewer decides, not you.
    - Question → answer it plainly; change code only if the answer revealed a real bug.
-4. Resolve threads you've genuinely addressed. Leave open the ones you pushed back on or
-   left unchanged by design.
+4. Resolve threads you've genuinely addressed; leave open the ones you pushed back on or
+   left unchanged by design. (Resolving a review conversation isn't a `gh` subcommand — it's
+   the GraphQL `resolveReviewThread` mutation on a thread id from `pullRequest.reviewThreads`;
+   if you don't want to script that, resolve by hand in the UI. The _reply_ is mandatory;
+   resolving is optional.)
 
 **Every single comment ends in one of three states:** fixed-and-replied,
 pushed-back-with-reasoning, or nit-acknowledged. None left silent.

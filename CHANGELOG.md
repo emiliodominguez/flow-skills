@@ -3,6 +3,22 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); this project uses [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- Dependencies brought to their latest majors: `commander` 15, `eslint`/`@eslint/js` 10,
+  `vitest` 4 (+ explicit `vite` 8, which vitest 4 requires for its module runner),
+  `js-yaml` 5, `lint-staged` 17, `@types/node` 26, and the CI GitHub Actions.
+- Dropped `@types/js-yaml` (js-yaml 5 ships its own types); tsup target bumped to node22.
+
+### Held back
+
+- **TypeScript stays on 5.x.** TypeScript 7 (the native compiler) is blocked upstream:
+  `typescript-eslint` declares `peerDependencies.typescript >=4.8.4 <6.1.0`, so type-aware
+  linting cannot run on TS 7 yet. Dependabot is configured to skip the TS major until
+  typescript-eslint ships support.
+
 ## [0.2.0] — 2026-07-11
 
 A "bulletproof" hardening pass across correctness, operations, and process.

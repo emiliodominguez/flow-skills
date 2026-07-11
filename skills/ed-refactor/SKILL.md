@@ -30,10 +30,10 @@ Write the scope down in one sentence. Refer back to it whenever you're tempted t
 Behavior preservation is only meaningful if you know what behavior to preserve.
 
 - **Run the existing tests** — they should pass before you start.
-- If the area is undertested, **write characterisation tests first**: tests that capture what the code does today (warts and all). Don't fix anything yet.
+- If the area is undertested, **write characterisation tests first**: tests that capture what the code does today (warts and all). Don't fix anything yet. If a characterisation test surfaces a pre-existing bug, **preserve** the buggy behaviour for now, note it, and hand it to `/ed-diagnose` after the refactor — don't quietly fix it inline.
 - For UI: capture screenshots of the current state, or note user-visible behaviour to compare.
 
-You cannot refactor safely without a test net. These tests *are* the safety net — they're what makes a single-writer edit trustworthy without a reviewer watching every keystroke.
+You cannot refactor safely without a test net. These tests *are* the safety net — they're what makes a single-writer edit trustworthy without a reviewer watching every keystroke. **If the code resists testing** (unmockable I/O, nondeterminism), your FIRST refactor is "Extract a pure core" (below) so the logic becomes testable; if even that's impossible, stop and escalate rather than refactor blind.
 
 ---
 
@@ -59,8 +59,8 @@ Side effects (I/O, time, randomness) at the edges; pure logic in the middle. Mak
 ### Migration / deprecation
 Old code lives alongside new for a transitional period. Steps:
 1. Add the new implementation
-2. Migrate callers one by one (each is its own commit)
-3. Mark the old code deprecated with a note pointing at the replacement
+2. Mark the old code deprecated with a note pointing at the replacement — **before** migrating, so in-flight and newly-written callers are steered to the replacement during the transition
+3. Migrate callers one by one (each is its own commit)
 4. After all callers migrate, delete the old code
 
 ---
@@ -69,7 +69,7 @@ Old code lives alongside new for a transitional period. Steps:
 
 - One refactor pattern per commit.
 - Run the tests after each step. They should still pass.
-- If a test starts failing, you changed behaviour by accident. Revert and try smaller.
+- If a test starts failing, you changed behaviour by accident. Revert and try smaller. First rule out a **flaky baseline** — a suite that fails intermittently can't tell "I broke it" from "flake"; if Step 2's baseline was flaky, stabilise or quarantine those tests before trusting any red.
 
 ---
 
@@ -102,4 +102,4 @@ Old code lives alongside new for a transitional period. Steps:
 - The diff is smaller or more readable than what was there
 - A future reader will be glad you made the change
 
-Then: if the refactor is large enough to be its own plan, hand the changes to `/ed-work`. Otherwise say **"Refactor complete. Ready for `/ed-review`?"** — then `/ed-ship`.
+Then: if the refactor is large enough to need its own plan, hand it to `/ed-plan` (which decomposes it and routes execution to `/ed-work`). Otherwise say **"Refactor complete. Ready for `/ed-review`?"** — then `/ed-ship`.

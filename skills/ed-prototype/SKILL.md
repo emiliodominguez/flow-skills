@@ -44,8 +44,8 @@ Optimise for:
 ## Rules
 
 - **Write WORSE code than usual on purpose.** No abstractions, no error handling, no tests, no types beyond what makes the IDE happy. Refactoring a prototype is wasted time.
-- **Keep it in a `prototypes/` or `playground/` folder** so it doesn't get confused with real code.
-- **Time-box it.** 30–60 min for terminal, 1–2 hours for UI. If you're over the box, the question is too big — split it or narrow it.
+- **Keep it in a `prototypes/` or `playground/` folder** so it doesn't get confused with real code. (Branch B on a file-routed framework needs a real route to render — use a throwaway/dev-only route with its components under `playground/`, not wired into production navigation.)
+- **Time-box it.** ~30–60 min for terminal, 1–2 hours for UI — but since an agent can't reliably feel elapsed time, watch the *observable* proxy: once you're past ~1–2 files or a second abstraction starts appearing, the question is too big — split it or narrow it.
 - **Don't commit a prototype to the main branch** unless explicitly asked. A scratch branch or leaving it uncommitted is fine.
 
 ---
@@ -67,6 +67,7 @@ The prototype isn't the deliverable. The **answer** is.
 After the user has played with it:
 - "Did this answer the question?" — if yes, capture the answer in 1–2 sentences.
 - If no, what changed? Adjust the prototype, or admit it can't answer this question (sometimes the answer is: "we need to ship a real version to find out").
+- **"This one's great, let's build on it"** — that means the DESIGN is settled, not that the scratch code ships. Restate the answer and hand to `/ed-plan` to rebuild it properly; the throwaway code still doesn't become the implementation.
 
 Then either delete the prototype or move it to an `archive/` folder. **Don't let it linger as half-real code** that someone later mistakes for the plan.
 

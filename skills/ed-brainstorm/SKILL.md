@@ -57,7 +57,8 @@ When you do convene it, keep it light:
 1. **Brief** — one paragraph: the idea, its goal, its load-bearing assumptions. There's no
    code to diff yet, so you're briefing the panel on the *design*.
 2. **Fan out** — launch **2–3 subagents in parallel** (one message, N calls; Agent tool,
-   `type: Explore` or `general-purpose` — **read-only, they never edit**). Give each the
+   **prefer `type: Explore`**, read-only by construction; if you use `general-purpose`, tell
+   it not to edit — no code is written in this phase). Give each the
    brief plus one distinct attack angle:
    - **Edge-cases & failure modes** — boundaries, degraded network, dead dependency, partial failure.
    - **Abuse / hostile user** — exploitation, exhaustion, gaming the mechanics, cost amplification.

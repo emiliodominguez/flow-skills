@@ -1,6 +1,6 @@
 ---
 name: ed-diagnose
-description: Root-cause a bug or performance regression through a disciplined loop — reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says "debug this", "why isn't this working", "it's broken", "investigate"). Hands off to /ed-work to fix once the root cause is known, then back here to verify.
+description: Root-cause a bug or performance regression through a disciplined loop — reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says "debug this", "why isn't this working", "it's broken", "investigate"). Makes the minimal root-cause fix and locks it in with a regression test, escalating to /ed-work when the fix spans multiple slices.
 ---
 
 # Diagnose
@@ -72,10 +72,12 @@ Add observation, not fixes. Yet.
 
 Re-run the reproduction. Read what the instrumentation says. Compare it to the prediction your hypothesis made in Phase 3.
 
+**When observation perturbs the bug:** if adding instrumentation makes it vanish or shift (an observer effect on timing-sensitive code), switch to lower-perturbation observation — sampling, a ring buffer, a post-hoc trace, hardware counters — rather than heavier logging. And if the repro is flaky, one clean re-run neither confirms nor refutes: require N runs or a before/after failure-rate delta before you trust the result.
+
 **This is the evidence gate.** A hypothesis is confirmed only when the instrumentation output **matches its prediction** — the value you expected to be null is null, the branch you expected to run ran, the query you blamed is the one that's slow. "It seems likely" and "that would explain it" are not confirmation.
 
 If reality matches the prediction → you've found it.
-If not → the hypothesis is wrong, no matter how plausible it felt. Back to Phase 3 with what you learned.
+If not → the hypothesis is wrong, no matter how plausible it felt. Back to Phase 3 with what you learned. If several hypotheses in a row fail against the evidence, stop trusting the reproduction or the minimal case and redo Phases 1–2 — a wrong repro sends every hypothesis astray — and escalate rather than keep looping if it still won't yield.
 
 ---
 

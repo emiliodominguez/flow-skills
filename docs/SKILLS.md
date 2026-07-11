@@ -20,7 +20,7 @@ Turn a vague idea into a clear, well-stress-tested design through dialogue befor
 
 ## ed-diagnose
 
-Root-cause a bug or performance regression through a disciplined loop — reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says "debug this", "why isn't this working", "it's broken", "investigate"). Hands off to /ed-work to fix once the root cause is known, then back here to verify.
+Root-cause a bug or performance regression through a disciplined loop — reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says "debug this", "why isn't this working", "it's broken", "investigate"). Makes the minimal root-cause fix and locks it in with a regression test, escalating to /ed-work when the fix spans multiple slices.
 
 ## ed-git-fix
 

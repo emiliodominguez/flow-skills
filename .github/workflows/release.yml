@@ -9,6 +9,9 @@ permissions:
 
 env:
   HUSKY: "0"
+  # Hoisted to workflow scope so a step `if:` can gate on it — the `secrets`
+  # context itself is not allowed in `if:` conditions.
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   release:
@@ -37,7 +40,7 @@ jobs:
       # npm publish only when the token exists — a tag without NPM_TOKEN skips
       # this step (stays green) instead of failing the whole run.
       - name: Publish to npm
-        if: ${{ secrets.NPM_TOKEN != '' }}
+        if: ${{ env.NPM_TOKEN != '' }}
         run: pnpm publish --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}

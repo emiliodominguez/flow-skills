@@ -5,8 +5,16 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Deeper skill lint** — `validate` now warns on filler/weasel words in the body, a
+  too-thin description (`< 80` chars), and a description that doesn't name its own
+  `/<skill>` trigger, on top of the existing structural checks.
+
 ### Changed
 
+- **CI runs on Windows too** — a `windows-latest` job joins the test matrix, exercising the
+  native target's copy fallback (no unprivileged symlinks there).
 - **Polished CLI output** — one shared logging vocabulary (glyphs + color) across every
   command. Install/uninstall/sync now print a target section header, aligned per-skill lines
   showing the skill name with a `+` / `−` / `·` outcome glyph and a dim outcome word, and a

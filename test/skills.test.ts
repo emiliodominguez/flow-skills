@@ -37,4 +37,20 @@ describe("skills corpus", () => {
 
 		expect(issues.some((i) => i.rule === "frontmatter.description")).toBe(true);
 	});
+
+	it("warns on filler words, a too-thin description, and a missing self-trigger", () => {
+		const skill = {
+			name: "ed-demo",
+			dir: "",
+			file: "",
+			frontmatter: { name: "ed-demo", description: "Too short." },
+			body: "Do it. This is basically trivially done.\n\n## Done when\n- done\n\n## Anti-patterns\n- none",
+			raw: "",
+		};
+		const rules = validateSkill(skill).map((i) => i.rule);
+
+		expect(rules).toContain("prose.weasel");
+		expect(rules).toContain("description.thin");
+		expect(rules).toContain("description.trigger");
+	});
 });

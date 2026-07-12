@@ -35,6 +35,12 @@ export interface Issue {
 /** Max description length before we warn — long descriptions bloat the model's skill index. */
 export const DESCRIPTION_WARN_LIMIT = 1024;
 
+/** Below this, a description gives the model too little to match the skill on. */
+export const DESCRIPTION_MIN_LENGTH = 80;
+
+/** Low-value filler that weakens instructions; flagged so skills stay crisp. */
+export const WEASEL_WORDS = ["simply", "basically", "effortlessly", "trivially", "needless to say", "as you can see", "it goes without saying"];
+
 /** Canonical kebab-case check for skill ids — shared with the `new` command. */
 export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -125,6 +131,19 @@ export function validateSkill(skill: Skill): Issue[] {
 		if (fm.description.length > DESCRIPTION_WARN_LIMIT) {
 			add("warn", "description.length", `description is ${fm.description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
 		}
+
+		if (fm.description.length < DESCRIPTION_MIN_LENGTH) {
+			add(
+				"warn",
+				"description.thin",
+				`description is only ${fm.description.length} chars (< ${DESCRIPTION_MIN_LENGTH}); say what it does, when to use it, and its handoff`,
+			);
+		}
+
+		// The convention is to name the skill's own /trigger in its description so it's discoverable.
+		if (fm.name && !fm.description.toLowerCase().includes(`/${fm.name.toLowerCase()}`)) {
+			add("warn", "description.trigger", `description should name its own /${skill.name} trigger so users can invoke it`);
+		}
 	}
 
 	// `version` is optional, but if present it should be a semver-ish string so `list` can surface it.
@@ -133,6 +152,10 @@ export function validateSkill(skill: Skill): Issue[] {
 	}
 
 	if (skill.body.length < 40) add("warn", "body.thin", "body is very short — is this skill complete?");
+
+	const weasel = WEASEL_WORDS.filter((w) => new RegExp(`\\b${w}\\b`, "i").test(skill.body));
+
+	if (weasel.length > 0) add("warn", "prose.weasel", `filler that weakens instructions: ${weasel.join(", ")}`);
 
 	if (!/^##\s+Done when/im.test(skill.body)) add("warn", "structure.done-when", "no `## Done when` completion gate");
 

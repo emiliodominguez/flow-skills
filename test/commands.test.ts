@@ -45,6 +45,7 @@ describe("sync", () => {
 	it("re-installs only what is currently installed at a target", () => {
 		// Install one skill into project-scope cursor rules under the throwaway cwd.
 		const dest = path.join(tmp, ".cursor", "rules");
+
 		cursorTarget.install({ skills: [skills[0]!], dest, mode: "copy", force: false, dryRun: false });
 		const file = path.join(dest, `${skills[0]!.name}.mdc`);
 		const before = fs.readFileSync(file, "utf8");

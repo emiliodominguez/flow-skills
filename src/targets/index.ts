@@ -31,7 +31,9 @@ export const TARGETS: Record<string, Target> = {
  */
 export function getTarget(name: string): Target {
 	const target = TARGETS[name];
+
 	if (!target) throw new Error(`Unknown target "${name}". Known: ${Object.keys(TARGETS).join(", ")}`);
+
 	return target;
 }
 

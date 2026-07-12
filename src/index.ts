@@ -10,10 +10,16 @@ import { syncCommand } from "./commands/sync.js";
 import { doctorCommand } from "./commands/doctor.js";
 import { newCommand } from "./commands/new.js";
 
+/**
+ * Read the CLI's own version from its package.json, falling back to "0.0.0".
+ *
+ * @returns The package version string.
+ */
 function version(): string {
 	try {
 		// The CLI's own package.json, not the repo the user happens to be run from.
 		const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot(), "package.json"), "utf8")) as { version?: string };
+
 		return pkg.version ?? "0.0.0";
 	} catch {
 		return "0.0.0";

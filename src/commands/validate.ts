@@ -13,7 +13,9 @@ import { log } from "../core/logger.js";
  */
 export function collectIssuesFor(skills: Skill[]): Issue[] {
 	const issues = skills.flatMap((skill) => validateSkill(skill));
+
 	issues.push(...validateReferences(skills));
+
 	return issues;
 }
 
@@ -26,6 +28,7 @@ export function collectIssuesFor(skills: Skill[]): Issue[] {
  */
 export function validateAll(skillsDir: string): { skills: Skill[]; issues: Issue[] } {
 	const skills = discoverSkills(skillsDir);
+
 	return { skills, issues: collectIssuesFor(skills) };
 }
 
@@ -44,10 +47,12 @@ export function validateCommand(opts: { strict?: boolean }): void {
 
 	for (const issue of issues) {
 		const tag = issue.level === "error" ? pc.red("error") : pc.yellow("warn ");
+
 		console.log(`  ${tag} ${pc.bold(issue.skill)} ${pc.dim(issue.rule)} — ${issue.message}`);
 	}
 
 	log.heading(`Checked ${skills.length} skills`);
+
 	if (errors.length === 0 && warns.length === 0) log.ok("all clean");
 	else log.info(`${errors.length} error(s), ${warns.length} warning(s)`);
 

@@ -21,17 +21,20 @@ describe("skills corpus", () => {
 
 	it("has zero validation ERRORS across the corpus", () => {
 		const errors = validateAll(skillsDir).issues.filter((i) => i.level === "error");
+
 		expect(errors, JSON.stringify(errors, null, 2)).toEqual([]);
 	});
 
 	it("has no dangling cross-references", () => {
 		const dangling = validateReferences(skills).filter((i) => i.rule === "reference.dangling");
+
 		expect(dangling).toEqual([]);
 	});
 
 	it("flags a skill missing its description", () => {
 		const broken = { name: "x", dir: "", file: "", frontmatter: { name: "x", description: "" }, body: "hello world ".repeat(10), raw: "" };
 		const issues = validateSkill(broken);
+
 		expect(issues.some((i) => i.rule === "frontmatter.description")).toBe(true);
 	});
 });

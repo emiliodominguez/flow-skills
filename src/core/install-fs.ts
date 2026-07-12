@@ -32,6 +32,7 @@ export function ensureDir(dir: string, dryRun: boolean): void {
 export function isSymlinkTo(linkPath: string, target: string): boolean {
 	try {
 		if (!fs.lstatSync(linkPath).isSymbolicLink()) return false;
+
 		return path.resolve(path.dirname(linkPath), fs.readlinkSync(linkPath)) === path.resolve(target);
 	} catch {
 		return false;
@@ -61,7 +62,9 @@ export function removePath(target: string, dryRun: boolean): void {
  */
 export function backup(target: string, stamp: number, dryRun: boolean): Action {
 	const dest = `${target}.bak-${stamp}`;
+
 	if (!dryRun) fs.renameSync(target, dest);
+
 	return { verb: "backup", path: target, note: `→ ${path.basename(dest)}` };
 }
 
@@ -75,9 +78,12 @@ export function backup(target: string, stamp: number, dryRun: boolean): Action {
  */
 export function symlink(src: string, dest: string, dryRun: boolean): Action {
 	if (isSymlinkTo(dest, src)) return { verb: "skip", path: dest, note: "already linked" };
+
 	ensureDir(path.dirname(dest), dryRun);
 	removePath(dest, dryRun);
+
 	if (!dryRun) fs.symlinkSync(src, dest, "dir");
+
 	return { verb: "symlink", path: dest, note: `→ ${src}` };
 }
 
@@ -92,7 +98,9 @@ export function symlink(src: string, dest: string, dryRun: boolean): Action {
 export function copyDir(src: string, dest: string, dryRun: boolean): Action {
 	ensureDir(path.dirname(dest), dryRun);
 	removePath(dest, dryRun);
+
 	if (!dryRun) fs.cpSync(src, dest, { recursive: true });
+
 	return { verb: "copy", path: dest };
 }
 
@@ -106,22 +114,41 @@ export function copyDir(src: string, dest: string, dryRun: boolean): Action {
  */
 export function writeFile(dest: string, content: string, dryRun: boolean): Action {
 	ensureDir(path.dirname(dest), dryRun);
+
 	if (!dryRun) fs.writeFileSync(dest, content, "utf8");
+
 	return { verb: "write", path: dest };
 }
 
 // Markers are matched only when alone on their own line (multiline-anchored), so
 // the strings appearing inside a user's prose can never be mistaken for a boundary.
+/**
+ * Build a multiline-anchored regex matching `marker` only when alone on its line.
+ *
+ * @param marker - The literal marker string to anchor.
+ * @param flags - Regex flags (callers pass "gm" or "m").
+ * @returns A regex matching the marker on its own line.
+ */
 function lineAnchored(marker: string, flags: string): RegExp {
 	return new RegExp(`^${escapeRe(marker)}$`, flags);
 }
 
+/**
+ * Verify the file holds at most one matched start/end marker pair, throwing on a
+ * mismatched or duplicate set.
+ *
+ * @param existing - The current file contents.
+ * @param dest - The file path (for the error message).
+ * @returns The number of start markers found (0 or 1).
+ */
 function assertSinglePair(existing: string, dest: string): number {
 	const starts = existing.match(lineAnchored(BLOCK_START, "gm"))?.length ?? 0;
 	const ends = existing.match(lineAnchored(BLOCK_END, "gm"))?.length ?? 0;
+
 	if (starts !== ends || starts > 1) {
 		throw new Error(`${dest} has malformed or duplicate agent-skills markers (${starts} start / ${ends} end). Fix them by hand and re-run.`);
 	}
+
 	return starts;
 }
 
@@ -134,9 +161,12 @@ function assertSinglePair(existing: string, dest: string): number {
  */
 export function readManagedBlock(dest: string): string | null {
 	if (!fs.existsSync(dest)) return null;
+
 	const existing = fs.readFileSync(dest, "utf8");
+
 	assertSinglePair(existing, dest);
 	const match = new RegExp(`^${escapeRe(BLOCK_START)}$\\n([\\s\\S]*?)\\n^${escapeRe(BLOCK_END)}$`, "m").exec(existing);
+
 	return match ? match[1]! : null;
 }
 
@@ -153,16 +183,21 @@ export function readManagedBlock(dest: string): string | null {
 export function writeManagedBlock(dest: string, content: string, dryRun: boolean): Action {
 	const block = `${BLOCK_START}\n${content}\n${BLOCK_END}`;
 	let next: string;
+
 	if (fs.existsSync(dest)) {
 		const existing = fs.readFileSync(dest, "utf8");
 		const pairs = assertSinglePair(existing, dest);
 		const blockRe = new RegExp(`^${escapeRe(BLOCK_START)}$[\\s\\S]*?^${escapeRe(BLOCK_END)}$`, "m");
+
 		next = pairs === 1 ? existing.replace(blockRe, block) : existing.trimEnd() + "\n\n" + block + "\n";
 	} else {
 		next = block + "\n";
 	}
+
 	ensureDir(path.dirname(dest), dryRun);
+
 	if (!dryRun) fs.writeFileSync(dest, next, "utf8");
+
 	return { verb: "write", path: dest, note: "managed block" };
 }
 
@@ -177,17 +212,28 @@ export function writeManagedBlock(dest: string, content: string, dryRun: boolean
  */
 export function removeManagedBlock(dest: string, dryRun: boolean): Action | null {
 	if (!fs.existsSync(dest)) return null;
+
 	const existing = fs.readFileSync(dest, "utf8");
+
 	if (assertSinglePair(existing, dest) === 0) return null;
+
 	const blockRe = new RegExp(`\\n*^${escapeRe(BLOCK_START)}$[\\s\\S]*?^${escapeRe(BLOCK_END)}$\\n*`, "m");
 	const next = existing.replace(blockRe, "\n").trim();
+
 	if (!dryRun) {
 		if (next.length === 0) fs.rmSync(dest, { force: true });
 		else fs.writeFileSync(dest, next + "\n", "utf8");
 	}
+
 	return { verb: next.length === 0 ? "remove" : "write", path: dest, note: "managed block" };
 }
 
+/**
+ * Escape a string for safe literal use inside a regex.
+ *
+ * @param s - The string to escape.
+ * @returns The regex-escaped string.
+ */
 function escapeRe(s: string): string {
 	return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

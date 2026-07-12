@@ -31,6 +31,19 @@ All notable changes to this project are documented here. Format follows
   `vitest` 4 (+ explicit `vite` 8, which vitest 4 requires for its module runner),
   `js-yaml` 5, `lint-staged` 17, `@types/node` 26, and the CI GitHub Actions.
 - Dropped `@types/js-yaml` (js-yaml 5 ships its own types); tsup target bumped to node22.
+- **Stricter ESLint** — `@stylistic/padding-line-between-statements` enforces vertical
+  spacing (blank lines around returns, declarations, functions, and control blocks), and
+  `eslint-plugin-jsdoc` requires complete JSDoc (`@param` descriptions + `@returns`) on every
+  `src/` function.
+
+### Fixed
+
+- From a multi-persona `/ed-review` of the roadmap work: an **empty `--profile` no longer
+  selects all skills** (`uninstall --profile <empty>` used to remove everything — now errors);
+  `--watch` survives a throw instead of crashing; `sync` skips an unknown target instead of
+  aborting; the `cline` adapter handles a legacy single-file `.clinerules` (skip / `--force`
+  backup) instead of throwing `EEXIST`; and the `CHANGELOG` no longer claims a publish that
+  hasn't happened.
 
 ### Held back
 

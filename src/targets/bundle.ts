@@ -17,23 +17,42 @@ export interface BundleOptions {
  * Render one skill as a delimited section. The `<!-- skill:name -->` markers
  * (not `##` or `---`, both of which appear inside skill bodies) are what we parse
  * on, so a section can always be found and replaced unambiguously.
+ *
+ * @param skill - The skill to render.
+ * @returns The delimited section markdown.
  */
 function section(skill: Skill): string {
 	return `<!-- skill:${skill.name} -->\n## ${skill.name}\n\n_${skill.frontmatter.description}_\n\n${skill.body}\n<!-- /skill:${skill.name} -->`;
 }
 
-/** Parse an existing managed block into a name → delimited-section map. */
+/**
+ * Parse an existing managed block into a name → delimited-section map.
+ *
+ * @param inner - The managed block content, or null when absent.
+ * @returns A map of skill name to its delimited section.
+ */
 function parseSections(inner: string | null): Map<string, string> {
 	const map = new Map<string, string>();
+
 	if (!inner) return map;
+
 	const re = /<!-- skill:(\S+) -->\n[\s\S]*?\n<!-- \/skill:\1 -->/g;
+
 	for (const match of inner.matchAll(re)) map.set(match[1]!, match[0]);
+
 	return map;
 }
 
-/** Render the full managed block from the section map, sorted for stable diffs. */
+/**
+ * Render the full managed block from the section map, sorted for stable diffs.
+ *
+ * @param heading - Heading placed at the top of the block.
+ * @param map - Skill name → delimited section.
+ * @returns The rendered managed block.
+ */
 function renderBlock(heading: string, map: Map<string, string>): string {
 	const sections = [...map.keys()].sort().map((name) => map.get(name)!);
+
 	return `${heading}\n\n${sections.join("\n\n")}`;
 }
 
@@ -54,25 +73,34 @@ export function makeBundleTarget(opts: BundleOptions): Target {
 
 		install(ctx: InstallContext): Action[] {
 			const map = parseSections(readManagedBlock(ctx.dest));
+
 			for (const skill of ctx.skills) map.set(skill.name, section(skill));
+
 			return [writeManagedBlock(ctx.dest, renderBlock(opts.heading, map), ctx.dryRun)];
 		},
 
 		uninstall(ctx: InstallContext): Action[] {
 			const map = parseSections(readManagedBlock(ctx.dest));
+
 			for (const skill of ctx.skills) map.delete(skill.name);
+
 			if (map.size === 0) {
 				const action = removeManagedBlock(ctx.dest, ctx.dryRun);
+
 				return action ? [action] : [];
 			}
+
 			return [writeManagedBlock(ctx.dest, renderBlock(opts.heading, map), ctx.dryRun)];
 		},
 
 		status(ctx: InstallContext): SkillStatus[] {
 			const map = parseSections(readManagedBlock(ctx.dest));
+
 			return ctx.skills.map((skill) => {
 				const existing = map.get(skill.name);
+
 				if (existing === undefined) return { skill: skill.name, state: "missing" };
+
 				return { skill: skill.name, state: existing === section(skill) ? "generated" : "drifted" };
 			});
 		},

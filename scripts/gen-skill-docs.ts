@@ -27,14 +27,17 @@ const catalog = [
 
 for (const skill of skills) {
 	const ver = version(skill) ? ` \`v${version(skill)}\`` : "";
+
 	catalog.push(`## [${skill.name}](skills/${skill.name}.md)${ver}`, "", skill.frontmatter.description, "");
 }
 
 const catalogOut = path.join(root, "docs", "SKILLS.md");
+
 fs.writeFileSync(catalogOut, catalog.join("\n").trimEnd() + "\n", "utf8");
 
 // --- Per-skill pages: docs/skills/<name>.md ------------------------------------
 const skillsDocDir = path.join(root, "docs", "skills");
+
 // Rebuild the dir from scratch so a removed skill's page doesn't linger.
 fs.rmSync(skillsDocDir, { recursive: true, force: true });
 fs.mkdirSync(skillsDocDir, { recursive: true });
@@ -52,6 +55,7 @@ for (const skill of skills) {
 		"",
 		skill.body,
 	];
+
 	fs.writeFileSync(path.join(skillsDocDir, `${skill.name}.md`), page.join("\n").trimEnd() + "\n", "utf8");
 }
 

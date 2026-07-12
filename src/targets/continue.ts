@@ -3,11 +3,17 @@ import type { Skill } from "../core/skill.js";
 import type { InstallContext, SkillStatus, Target } from "./types.js";
 import { frontmatter, installFilePerSkill, MANAGED_LINE, statusFilePerSkill, uninstallFilePerSkill } from "./render.js";
 
-/** Render a skill's Continue rule file (shared by install and drift detection). */
+/**
+ * Render a skill's Continue rule file (shared by install and drift detection).
+ *
+ * @param skill - The skill to render.
+ * @returns The rule file contents.
+ */
 function build(skill: Skill): string {
 	// Continue rules use `globs`/`alwaysApply` frontmatter; an empty glob + description
 	// makes it a model-requested rule, mirroring on-demand skill invocation.
 	const front = frontmatter({ description: skill.frontmatter.description, alwaysApply: false });
+
 	return `${front}\n${MANAGED_LINE}\n\n${skill.body}\n`;
 }
 

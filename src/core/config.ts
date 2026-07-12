@@ -50,10 +50,14 @@ export function findRepoRoot(startDir: string = process.cwd()): string {
 	// 1. A repo checkout: walk up from cwd for the config file.
 	for (let dir = startDir; ;) {
 		if (fs.existsSync(path.join(dir, "agent-skills.config.json"))) return dir;
+
 		const parent = path.dirname(dir);
+
 		if (parent === dir) break;
+
 		dir = parent;
 	}
+
 	// 2. Installed bin with no ancestor config: the package root that ships the skills.
 	return packageRoot();
 }
@@ -67,10 +71,14 @@ export function findRepoRoot(startDir: string = process.cwd()): string {
  */
 export function packageRoot(): string {
 	let dir = path.dirname(fileURLToPath(import.meta.url));
+
 	for (;;) {
 		if (fs.existsSync(path.join(dir, "package.json")) && fs.existsSync(path.join(dir, "skills"))) return dir;
+
 		const parent = path.dirname(dir);
+
 		if (parent === dir) return path.dirname(fileURLToPath(import.meta.url));
+
 		dir = parent;
 	}
 }
@@ -84,25 +92,45 @@ export function packageRoot(): string {
  */
 export function loadConfig(root: string): Config {
 	const cfg: Config = structuredClone(DEFAULTS);
+
 	mergeInto(cfg, readJsonIfExists(path.join(root, "agent-skills.config.json")));
 	mergeInto(cfg, readJsonIfExists(path.join(root, ".agent-skills.local.json")));
+
 	return cfg;
 }
 
+/**
+ * Parse a JSON config file, returning undefined when it doesn't exist.
+ *
+ * @param file - Absolute path to the JSON file.
+ * @returns The parsed partial config, or undefined if the file is absent.
+ */
 function readJsonIfExists(file: string): Partial<Config> | undefined {
 	if (!fs.existsSync(file)) return undefined;
+
 	// mergeInto only reads known keys, so a stray `$schema` is ignored — no cleanup needed.
 	return JSON.parse(fs.readFileSync(file, "utf8")) as Partial<Config>;
 }
 
+/**
+ * Deep-merge an override into a base config in place, key by key.
+ *
+ * @param base - The config mutated in place.
+ * @param override - The partial config to apply (no-op when undefined).
+ */
 function mergeInto(base: Config, override?: Partial<Config>): void {
 	if (!override) return;
+
 	if (override.skillsDir) base.skillsDir = override.skillsDir;
+
 	if (override.installMode) base.installMode = override.installMode;
+
 	if (override.defaultTargets) base.defaultTargets = override.defaultTargets;
+
 	if (override.profiles) {
 		for (const [name, list] of Object.entries(override.profiles)) base.profiles[name] = list;
 	}
+
 	if (override.targets) {
 		for (const [name, tc] of Object.entries(override.targets)) {
 			base.targets[name] = { ...(base.targets[name] ?? { enabled: true, userPath: "", projectPath: "" }), ...tc };

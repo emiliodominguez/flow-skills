@@ -30,5 +30,6 @@ const VERB_COLOR: Record<Action["verb"], (s: string) => string> = {
 export function printAction(action: Action): void {
 	const verb = VERB_COLOR[action.verb](action.verb.padEnd(7));
 	const note = action.note ? pc.dim(" " + action.note) : "";
+
 	console.log(`  ${verb} ${prettyPath(action.path)}${note}`);
 }

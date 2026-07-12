@@ -29,25 +29,32 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 
 	const failures: string[] = [];
 	let synced = 0;
+
 	for (const name of targets) {
 		const tc = config.targets[name];
+
 		if (!tc || !tc.enabled) {
 			log.warn(`target "${name}" is disabled or unknown — skipping`);
 			continue;
 		}
+
 		try {
 			const target = getTarget(name);
 			const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
+
 			log.heading(`${target.name} → ${prettyPath(dest)}`);
 
 			const statuses = target.status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
 			const installedNames = new Set(statuses.filter((s) => INSTALLED.has(s.state)).map((s) => s.skill));
 			const toSync = skills.filter((s) => installedNames.has(s.name));
+
 			if (toSync.length === 0) {
 				log.dim("  (nothing installed here)");
 				continue;
 			}
+
 			const actions = target.install({ skills: toSync, dest, mode: config.installMode, force: false, dryRun: !!opts.dryRun });
+
 			actions.forEach(printAction);
 			synced += toSync.length;
 		} catch (err) {
@@ -62,6 +69,7 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 		process.exitCode = 1;
 	} else {
 		log.info(pc.dim(`\nsynced ${synced} installed skill(s)`));
+
 		if (!opts.dryRun) log.ok("sync complete");
 	}
 }

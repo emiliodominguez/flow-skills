@@ -49,18 +49,27 @@ export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  */
 export function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
 	const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n([\s\S]*))?$/.exec(raw);
+
 	if (!match) return { data: {}, body: raw.trim() };
+
 	const data: Record<string, string> = {};
+
 	for (const line of match[1]!.split(/\r?\n/)) {
 		if (!line.trim() || line.trimStart().startsWith("#")) continue;
+
 		const kv = /^([A-Za-z0-9_-]+):[ \t]*(.*)$/.exec(line);
+
 		if (!kv) continue;
+
 		let value = kv[2] ?? "";
+
 		if (value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
 			value = value.slice(1, -1);
 		}
+
 		data[kv[1]!] = value;
 	}
+
 	return { data, body: (match[2] ?? "").trim() };
 }
 
@@ -72,9 +81,12 @@ export function parseFrontmatter(raw: string): { data: Record<string, string>; b
  */
 export function loadSkill(dir: string): Skill {
 	const file = path.join(dir, "SKILL.md");
+
 	if (!fs.existsSync(file)) throw new Error(`No SKILL.md in ${dir}`);
+
 	const raw = fs.readFileSync(file, "utf8");
 	const { data, body } = parseFrontmatter(raw);
+
 	return {
 		name: path.basename(dir),
 		dir,
@@ -101,6 +113,7 @@ export function validateSkill(skill: Skill): Issue[] {
 		add("error", "frontmatter.name", "missing `name` in frontmatter");
 	} else {
 		if (fm.name !== skill.name) add("error", "name.match-dir", `frontmatter name "${fm.name}" != directory "${skill.name}"`);
+
 		if (!KEBAB.test(fm.name)) add("error", "name.kebab", `name "${fm.name}" is not kebab-case`);
 	}
 
@@ -108,6 +121,7 @@ export function validateSkill(skill: Skill): Issue[] {
 		add("error", "frontmatter.description", "missing `description` in frontmatter");
 	} else {
 		if (fm.description.includes("\n")) add("error", "description.single-line", "description must be a single line");
+
 		if (fm.description.length > DESCRIPTION_WARN_LIMIT) {
 			add("warn", "description.length", `description is ${fm.description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
 		}
@@ -119,7 +133,9 @@ export function validateSkill(skill: Skill): Issue[] {
 	}
 
 	if (skill.body.length < 40) add("warn", "body.thin", "body is very short — is this skill complete?");
+
 	if (!/^##\s+Done when/im.test(skill.body)) add("warn", "structure.done-when", "no `## Done when` completion gate");
+
 	if (!/^##.*(anti-pattern|rules|does not do)/im.test(skill.body))
 		add("warn", "structure.guardrails", "no guardrails section (Anti-patterns / Rules / does-NOT-do)");
 
@@ -144,11 +160,15 @@ export function validateReferences(skills: Skill[]): Issue[] {
 		const seen = new Set<string>();
 		// Scan the description too — the handoff clause lives there and is load-bearing.
 		const haystack = `${skill.body}\n${skill.frontmatter.description}`;
+
 		for (const match of haystack.matchAll(refPattern)) {
 			const token = match[1]!;
+
 			if (seen.has(token) || names.has(token)) continue;
+
 			seen.add(token);
 			const family = token.split("-")[0] + "-";
+
 			if (families.has(family)) {
 				issues.push({
 					skill: skill.name,
@@ -159,5 +179,6 @@ export function validateReferences(skills: Skill[]): Issue[] {
 			}
 		}
 	}
+
 	return issues;
 }

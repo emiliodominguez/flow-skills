@@ -53,9 +53,11 @@ let ctx: InstallContext;
 beforeAll(() => {
 	tmp = fs.mkdtempSync(path.join(os.tmpdir(), "agent-skills-snap-"));
 	const skillDir = path.join(tmp, "ed-fixture");
+
 	fs.mkdirSync(skillDir, { recursive: true });
 	fs.writeFileSync(path.join(skillDir, "SKILL.md"), FIXTURE);
 	const skill = loadSkill(skillDir);
+
 	ctx = { skills: [skill], dest: "", mode: "copy", force: false, dryRun: false };
 });
 afterAll(() => fs.rmSync(tmp, { recursive: true, force: true }));
@@ -74,7 +76,9 @@ interface Case {
 function render(c: Case): string {
 	const work = fs.mkdtempSync(path.join(tmp, `${c.target}-`));
 	const out = path.join(work, c.rel);
+
 	getTarget(c.target).install({ ...ctx, dest: c.bundle ? out : work });
+
 	return fs.readFileSync(out, "utf8");
 }
 

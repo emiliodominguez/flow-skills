@@ -32,21 +32,29 @@ export interface InstallOptions {
  */
 export function resolveSelection(skillNames: string[], profiles: string[] | undefined, config: Config): string[] {
 	if (skillNames.length > 0) return skillNames;
+
 	if (!profiles?.length) return [];
+
 	const names = new Set<string>();
+
 	for (const name of profiles) {
 		const list = config.profiles[name];
+
 		if (!list) {
 			const known = Object.keys(config.profiles);
+
 			throw new Error(`Unknown profile "${name}".${known.length ? ` Known: ${known.join(", ")}.` : " No profiles configured."}`);
 		}
+
 		for (const skill of list) names.add(skill);
 	}
+
 	// An empty union would fall through to "all skills" downstream — catastrophic for
 	// `uninstall --profile <empty>` (removes everything). Refuse it explicitly.
 	if (names.size === 0) {
 		throw new Error(`Profile ${profiles.map((p) => `"${p}"`).join(", ")} lists no skills; add skills to it, or omit --profile to act on all.`);
 	}
+
 	return [...names];
 }
 
@@ -61,10 +69,13 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const skillsDir = path.join(root, config.skillsDir);
+
 	if (skillNames.length > 0 && opts.profile?.length) log.warn("--profile ignored: explicit skill names take precedence");
+
 	const selected = resolveSelection(skillNames, opts.profile, config);
 
 	const failures = runOnce(mode, selected, opts, config, skillsDir);
+
 	if (failures.length > 0) {
 		log.error(`${mode} failed for: ${failures.join(", ")}`);
 		process.exitCode = 1;
@@ -78,6 +89,13 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 /**
  * Run one install/uninstall pass and return the ids of targets that failed.
  * Reloaded skills each call so `--watch` picks up source edits.
+ *
+ * @param mode - Which operation to run.
+ * @param skillNames - Specific skills, or empty for all.
+ * @param opts - Targets, scope, copy/symlink, dry-run, watch.
+ * @param config - The resolved config.
+ * @param skillsDir - Absolute path to the skills directory.
+ * @returns The ids of targets that failed.
  */
 function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: InstallOptions, config: Config, skillsDir: string): string[] {
 	const skills = selectSkills(skillsDir, skillNames);
@@ -89,27 +107,35 @@ function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: Inst
 	const onWindows = process.platform === "win32";
 
 	if (opts.dryRun) log.warn("dry run — no files will be changed");
+
 	log.info(pc.dim(`${mode} ${skills.length} skill(s) → [${targets.join(", ")}] (${scope} scope)`));
 
 	const failures: string[] = [];
+
 	for (const name of targets) {
 		const tc = config.targets[name];
+
 		if (!tc || !tc.enabled) {
 			log.warn(`target "${name}" is disabled or unknown in config — skipping`);
 			continue;
 		}
+
 		const target = getTarget(name);
 		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
 		let usedMode = target.supportsSymlink ? installMode : "copy";
+
 		if (usedMode === "symlink" && onWindows) {
 			usedMode = "copy";
 			log.warn(`${name}: symlinks need elevation on Windows — using copy mode`);
 		}
+
 		const ctx = { skills, dest, mode: usedMode, force: !!opts.force, dryRun: !!opts.dryRun };
 
 		log.heading(`${target.name} → ${prettyPath(dest)}${target.supportsSymlink ? pc.dim(` (${usedMode})`) : ""}`);
+
 		try {
 			const actions = mode === "install" ? target.install(ctx) : target.uninstall(ctx);
+
 			if (actions.length === 0) log.dim("  (nothing to do)");
 			else actions.forEach(printAction);
 		} catch (err) {
@@ -118,6 +144,7 @@ function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: Inst
 			log.error(`${name}: ${err instanceof Error ? err.message : String(err)}`);
 		}
 	}
+
 	return failures;
 }
 
@@ -126,14 +153,21 @@ function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: Inst
  * native installs are already live, so watch is only useful when a generated
  * (non-native) target is selected — but we re-run every selected target for
  * simplicity; the native one just no-ops ("already linked").
+ *
+ * @param skillNames - Specific skills, or empty for all.
+ * @param opts - Targets, scope, copy/symlink, dry-run, watch.
+ * @param config - The resolved config.
+ * @param skillsDir - Absolute path to the skills directory (watched recursively).
  */
 function watch(skillNames: string[], opts: InstallOptions, config: Config, skillsDir: string): void {
 	log.info(pc.dim(`\nwatching ${prettyPath(skillsDir)} for changes — Ctrl-C to stop`));
 	let timer: NodeJS.Timeout | undefined;
+
 	fs.watch(skillsDir, { recursive: true }, () => {
 		clearTimeout(timer);
 		timer = setTimeout(() => {
 			log.step("change detected — re-installing");
+
 			try {
 				runOnce("install", skillNames, opts, config, skillsDir);
 			} catch (err) {

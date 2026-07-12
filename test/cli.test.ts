@@ -32,6 +32,7 @@ describe("installCommand (project scope)", () => {
 		installCommand("install", [], { target: ["claude"], scope: "project" });
 		const dir = path.join(tmp, ".claude", "skills");
 		const entries = fs.readdirSync(dir);
+
 		expect(entries.length).toBeGreaterThanOrEqual(16);
 		expect(fs.lstatSync(path.join(dir, entries[0]!)).isSymbolicLink()).toBe(true);
 

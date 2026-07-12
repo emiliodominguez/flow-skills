@@ -27,14 +27,18 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	if (!KEBAB.test(name)) {
 		log.error(`"${name}" is not kebab-case (a-z, 0-9, hyphens).`);
 		process.exitCode = 1;
+
 		return;
 	}
+
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const dir = path.join(root, config.skillsDir, name);
+
 	if (fs.existsSync(dir)) {
 		log.error(`Skill "${name}" already exists at ${dir}`);
 		process.exitCode = 1;
+
 		return;
 	}
 

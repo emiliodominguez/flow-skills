@@ -9,7 +9,9 @@ import path from "node:path";
  */
 export function expandHome(p: string): string {
 	if (p === "~") return os.homedir();
+
 	if (p.startsWith("~/")) return path.join(os.homedir(), p.slice(2));
+
 	return p;
 }
 
@@ -24,6 +26,7 @@ export function expandHome(p: string): string {
  */
 export function resolveTargetPath(configured: string, baseDir: string): string {
 	const expanded = expandHome(configured);
+
 	return path.isAbsolute(expanded) ? expanded : path.resolve(baseDir, expanded);
 }
 
@@ -35,6 +38,8 @@ export function resolveTargetPath(configured: string, baseDir: string): string {
  */
 export function prettyPath(p: string): string {
 	const home = os.homedir();
+
 	if (p === home) return "~";
+
 	return p.startsWith(home + path.sep) ? "~" + p.slice(home.length) : p;
 }

@@ -33,16 +33,21 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 	const targets = opts.target?.length ? opts.target : Object.keys(config.targets).filter((name) => config.targets[name]?.enabled);
 
 	let problems = 0;
+
 	for (const name of targets) {
 		const tc = config.targets[name];
+
 		if (!tc || !tc.enabled) {
 			log.warn(`target "${name}" is disabled or unknown — skipping`);
 			continue;
 		}
+
 		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
+
 		log.heading(`${name} → ${prettyPath(dest)}`);
 
 		let statuses;
+
 		try {
 			statuses = getTarget(name).status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
 		} catch (err) {
@@ -52,11 +57,14 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 		}
 
 		const counts = new Map<SkillState, number>();
+
 		for (const status of statuses) counts.set(status.state, (counts.get(status.state) ?? 0) + 1);
+
 		log.info("  " + [...counts.entries()].map(([state, n]) => STATE_COLOR[state](`${n} ${state}`)).join("  "));
 
 		for (const status of statuses) {
 			if (HEALTHY.has(status.state)) continue;
+
 			problems++;
 			log.info(`    ${STATE_COLOR[status.state](status.state.padEnd(9))} ${status.skill}`);
 		}

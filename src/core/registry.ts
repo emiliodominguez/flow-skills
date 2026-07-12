@@ -10,12 +10,17 @@ import { loadSkill, type Skill } from "./skill.js";
  */
 export function discoverSkills(skillsDir: string): Skill[] {
 	if (!fs.existsSync(skillsDir)) return [];
+
 	const skills: Skill[] = [];
+
 	for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
 		if (!entry.isDirectory()) continue;
+
 		const dir = path.join(skillsDir, entry.name);
+
 		if (fs.existsSync(path.join(dir, "SKILL.md"))) skills.push(loadSkill(dir));
 	}
+
 	return skills.sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -29,11 +34,16 @@ export function discoverSkills(skillsDir: string): Skill[] {
  */
 export function selectSkills(skillsDir: string, names?: string[]): Skill[] {
 	const all = discoverSkills(skillsDir);
+
 	if (!names || names.length === 0) return all;
+
 	const byName = new Map(all.map((s) => [s.name, s]));
+
 	return names.map((n) => {
 		const skill = byName.get(n);
+
 		if (!skill) throw new Error(`Unknown skill "${n}". Run \`agent-skills list\` to see available skills.`);
+
 		return skill;
 	});
 }

@@ -21,9 +21,11 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean }): vo
 	// Reserve a version column only if at least one skill declares a version.
 	const versionOf = (s: (typeof skills)[number]) => (typeof s.frontmatter.version === "string" ? s.frontmatter.version : "");
 	const verWidth = Math.max(...skills.map((s) => versionOf(s).length), 0);
+
 	for (const skill of skills) {
 		const summary = skill.frontmatter.description.split(/[.—]/)[0]!.trim().slice(0, 90);
 		const ver = verWidth > 0 ? pc.dim(("v" + (versionOf(skill) || "—")).padEnd(verWidth + 2)) + " " : "";
+
 		console.log(`  ${pc.bold(skill.name.padEnd(width))}  ${ver}${pc.dim(summary)}`);
 	}
 
@@ -31,6 +33,7 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean }): vo
 		log.heading("Targets");
 		const targets = Object.values(TARGETS);
 		const targetWidth = Math.max(...targets.map((t) => t.name.length), 0);
+
 		for (const target of targets) {
 			console.log(`  ${pc.bold(target.name.padEnd(targetWidth))}  ${pc.dim(target.describe)}`);
 		}
@@ -38,11 +41,14 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean }): vo
 
 	if (opts.profiles) {
 		const names = Object.keys(config.profiles);
+
 		log.heading(`Profiles (${names.length})`);
+
 		if (names.length === 0) {
 			console.log(pc.dim("  (none configured — add a `profiles` map to agent-skills.config.json)"));
 		} else {
 			const profileWidth = Math.max(...names.map((n) => n.length), 0);
+
 			for (const name of names) {
 				console.log(`  ${pc.bold(name.padEnd(profileWidth))}  ${pc.dim(config.profiles[name]!.join(", "))}`);
 			}

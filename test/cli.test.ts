@@ -34,7 +34,12 @@ describe("installCommand (project scope)", () => {
 		const entries = fs.readdirSync(dir);
 
 		expect(entries.length).toBeGreaterThanOrEqual(16);
-		expect(fs.lstatSync(path.join(dir, entries[0]!)).isSymbolicLink()).toBe(true);
+
+		const stat = fs.lstatSync(path.join(dir, entries[0]!));
+
+		// Windows has no unprivileged symlinks → installCommand falls back to a copy there.
+		if (process.platform === "win32") expect(stat.isDirectory()).toBe(true);
+		else expect(stat.isSymbolicLink()).toBe(true);
 
 		installCommand("uninstall", [], { target: ["claude"], scope: "project" });
 		expect(fs.existsSync(dir) ? fs.readdirSync(dir).length : 0).toBe(0);

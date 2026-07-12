@@ -35,11 +35,17 @@ jobs:
         run: pnpm audit --prod --audit-level=high
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         node: [22, 24]
+        # Windows has no unprivileged symlinks, so the native target falls back to
+        # copy there — one Windows job exercises that path.
+        include:
+          - os: windows-latest
+            node: 22
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

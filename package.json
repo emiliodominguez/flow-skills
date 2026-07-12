@@ -35,6 +35,7 @@
 		"dev": "tsx src/index.ts",
 		"validate": "tsx src/index.ts validate",
 		"docs:gen": "tsx scripts/gen-skill-docs.ts",
+		"eval:llm": "tsx scripts/eval-llm.ts",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",

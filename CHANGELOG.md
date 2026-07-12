@@ -7,6 +7,11 @@ All notable changes to this project are documented here. Format follows
 
 ### Added
 
+- **Skill evals** — each skill now has a behavioral contract in `evals/beats.json` (3–5
+  "beats" naming its distinctive mechanics). A model-free check in `pnpm test` asserts every
+  skill's body still delivers its beats (catching drift and forcing new skills to declare a
+  contract), and an optional `pnpm eval:llm [skill]` grades them with a judge model (gated on
+  `ANTHROPIC_API_KEY`).
 - **Interactive picker, completions, and `--json`** — running `agent-skills` with no
   arguments in a terminal opens an interactive picker (via `@clack/prompts`); a new
   `completion [bash|zsh|fish]` command prints a shell-completion script; and `list` and

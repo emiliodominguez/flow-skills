@@ -2,8 +2,8 @@ import path from "node:path";
 import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
-import { resolveTargetPath, prettyPath } from "../core/paths.js";
-import { log } from "../core/logger.js";
+import { resolveTargetPath } from "../core/paths.js";
+import { log, targetHeader, sym } from "../core/logger.js";
 import { getTarget } from "../targets/index.js";
 import type { SkillState } from "../targets/types.js";
 
@@ -44,7 +44,7 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 
 		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
 
-		log.heading(`${name} → ${prettyPath(dest)}`);
+		targetHeader(name, dest);
 
 		let statuses;
 
@@ -60,18 +60,18 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 
 		for (const status of statuses) counts.set(status.state, (counts.get(status.state) ?? 0) + 1);
 
-		log.info("  " + [...counts.entries()].map(([state, n]) => STATE_COLOR[state](`${n} ${state}`)).join("  "));
+		log.info("  " + [...counts.entries()].map(([state, n]) => STATE_COLOR[state](`${sym.bullet} ${n} ${state}`)).join("   "));
 
 		for (const status of statuses) {
 			if (HEALTHY.has(status.state)) continue;
 
 			problems++;
-			log.info(`    ${STATE_COLOR[status.state](status.state.padEnd(9))} ${status.skill}`);
+			log.info(`    ${STATE_COLOR[status.state](status.state.padEnd(9))} ${pc.bold(status.skill)}`);
 		}
 	}
 
 	if (problems > 0) {
-		log.warn(`${problems} item(s) need attention. Re-run \`install\` to fix drift; inspect conflicts by hand (or --force).`);
+		log.warn(`${problems} item(s) need attention. Re-run \`install\` to fix drift; inspect conflicts by hand (or \`--force\`).`);
 		process.exitCode = 1;
 	} else {
 		log.ok("all installed skills are healthy");

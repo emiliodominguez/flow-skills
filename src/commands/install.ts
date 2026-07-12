@@ -4,7 +4,8 @@ import pc from "picocolors";
 import { findRepoRoot, loadConfig, type Config } from "../core/config.js";
 import { selectSkills } from "../core/registry.js";
 import { resolveTargetPath, prettyPath } from "../core/paths.js";
-import { log, printAction } from "../core/logger.js";
+import { log, printActions, targetHeader, summarize, sym } from "../core/logger.js";
+import type { Action } from "../core/install-fs.js";
 import { getTarget } from "../targets/index.js";
 
 /** Options shared by `install` and `uninstall`. */
@@ -74,13 +75,16 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 
 	const selected = resolveSelection(skillNames, opts.profile, config);
 
-	const failures = runOnce(mode, selected, opts, config, skillsDir);
+	const { failures, actions } = runOnce(mode, selected, opts, config, skillsDir);
 
 	if (failures.length > 0) {
 		log.error(`${mode} failed for: ${failures.join(", ")}`);
 		process.exitCode = 1;
-	} else if (!opts.dryRun) {
-		log.ok(`${mode} complete`);
+	} else {
+		const phrase = summarize(actions) || "no changes";
+
+		if (opts.dryRun) log.muted(`\ndry run ${sym.dot} ${phrase}`);
+		else log.ok(`${mode} complete ${pc.dim(`${sym.dot} ${phrase}`)}`);
 	}
 
 	if (mode === "install" && opts.watch && !opts.dryRun) watch(selected, opts, config, skillsDir);
@@ -95,9 +99,15 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
  * @param opts - Targets, scope, copy/symlink, dry-run, watch.
  * @param config - The resolved config.
  * @param skillsDir - Absolute path to the skills directory.
- * @returns The ids of targets that failed.
+ * @returns The ids of targets that failed and every action taken.
  */
-function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: InstallOptions, config: Config, skillsDir: string): string[] {
+function runOnce(
+	mode: "install" | "uninstall",
+	skillNames: string[],
+	opts: InstallOptions,
+	config: Config,
+	skillsDir: string,
+): { failures: string[]; actions: Action[] } {
 	const skills = selectSkills(skillsDir, skillNames);
 	const targets = opts.target?.length ? opts.target : config.defaultTargets;
 	const scope = opts.scope ?? "user";
@@ -108,9 +118,12 @@ function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: Inst
 
 	if (opts.dryRun) log.warn("dry run — no files will be changed");
 
-	log.info(pc.dim(`${mode} ${skills.length} skill(s) → [${targets.join(", ")}] (${scope} scope)`));
+	const count = `${skills.length} skill${skills.length === 1 ? "" : "s"}`;
+
+	log.muted(`${mode} ${sym.dot} ${count} ${sym.dot} ${targets.join(", ")} ${sym.dot} ${scope} scope`);
 
 	const failures: string[] = [];
+	const allActions: Action[] = [];
 
 	for (const name of targets) {
 		const tc = config.targets[name];
@@ -131,13 +144,15 @@ function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: Inst
 
 		const ctx = { skills, dest, mode: usedMode, force: !!opts.force, dryRun: !!opts.dryRun };
 
-		log.heading(`${target.name} → ${prettyPath(dest)}${target.supportsSymlink ? pc.dim(` (${usedMode})`) : ""}`);
+		targetHeader(target.name, dest, target.supportsSymlink ? usedMode : "generated");
 
 		try {
 			const actions = mode === "install" ? target.install(ctx) : target.uninstall(ctx);
 
-			if (actions.length === 0) log.dim("  (nothing to do)");
-			else actions.forEach(printAction);
+			if (actions.length === 0) log.muted("  nothing to do");
+			else printActions(actions);
+
+			allActions.push(...actions);
 		} catch (err) {
 			// One target failing (e.g. malformed AGENTS.md) shouldn't abort the others.
 			failures.push(name);
@@ -145,7 +160,7 @@ function runOnce(mode: "install" | "uninstall", skillNames: string[], opts: Inst
 		}
 	}
 
-	return failures;
+	return { failures, actions: allActions };
 }
 
 /**

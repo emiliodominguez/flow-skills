@@ -5,7 +5,14 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+
+- **Polished CLI output** — one shared logging vocabulary (glyphs + color) across every
+  command. Install/uninstall/sync now print a target section header, aligned per-skill lines
+  showing the skill name with a `+` / `−` / `·` outcome glyph and a dim outcome word, and a
+  one-line summary footer (e.g. `install complete · 22 linked`). `doctor` gained a bulleted
+  state summary; `validate` aligns its findings. Backticked command hints are highlighted, and
+  output degrades to plain text under `NO_COLOR` / non-TTY.
 
 ## [0.3.0] — 2026-07-11
 

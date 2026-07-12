@@ -3,7 +3,7 @@ import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
 import { validateReferences, validateSkill, type Issue, type Skill } from "../core/skill.js";
-import { log } from "../core/logger.js";
+import { log, sym } from "../core/logger.js";
 
 /**
  * Run all validations over an already-loaded skill set.
@@ -44,17 +44,19 @@ export function validateCommand(opts: { strict?: boolean }): void {
 
 	const errors = issues.filter((i) => i.level === "error");
 	const warns = issues.filter((i) => i.level === "warn");
+	const width = Math.max(0, ...issues.map((i) => i.skill.length));
 
 	for (const issue of issues) {
-		const tag = issue.level === "error" ? pc.red("error") : pc.yellow("warn ");
+		const isError = issue.level === "error";
+		const tag = (isError ? pc.red : pc.yellow)(`${isError ? sym.err : sym.warn} ${(isError ? "error" : "warn").padEnd(5)}`);
 
-		console.log(`  ${tag} ${pc.bold(issue.skill)} ${pc.dim(issue.rule)} — ${issue.message}`);
+		console.log(`  ${tag}  ${pc.bold(issue.skill.padEnd(width))}  ${pc.dim(issue.rule)} ${pc.dim(sym.dot)} ${issue.message}`);
 	}
 
-	log.heading(`Checked ${skills.length} skills`);
+	log.heading(`Checked ${skills.length} skill${skills.length === 1 ? "" : "s"}`);
 
 	if (errors.length === 0 && warns.length === 0) log.ok("all clean");
-	else log.info(`${errors.length} error(s), ${warns.length} warning(s)`);
+	else log.info(`${errors.length} error${errors.length === 1 ? "" : "s"} ${sym.dot} ${warns.length} warning${warns.length === 1 ? "" : "s"}`);
 
 	if (errors.length > 0 || (opts.strict && warns.length > 0)) process.exitCode = 1;
 }

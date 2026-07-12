@@ -2,8 +2,9 @@ import path from "node:path";
 import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
-import { resolveTargetPath, prettyPath } from "../core/paths.js";
-import { log, printAction } from "../core/logger.js";
+import { resolveTargetPath } from "../core/paths.js";
+import { log, printActions, targetHeader, summarize, sym } from "../core/logger.js";
+import type { Action } from "../core/install-fs.js";
 import { getTarget } from "../targets/index.js";
 import type { SkillState } from "../targets/types.js";
 
@@ -28,7 +29,7 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 	if (opts.dryRun) log.warn("dry run — no files will be changed");
 
 	const failures: string[] = [];
-	let synced = 0;
+	const allActions: Action[] = [];
 
 	for (const name of targets) {
 		const tc = config.targets[name];
@@ -42,21 +43,21 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 			const target = getTarget(name);
 			const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
 
-			log.heading(`${target.name} → ${prettyPath(dest)}`);
+			targetHeader(target.name, dest, target.supportsSymlink ? config.installMode : "generated");
 
 			const statuses = target.status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
 			const installedNames = new Set(statuses.filter((s) => INSTALLED.has(s.state)).map((s) => s.skill));
 			const toSync = skills.filter((s) => installedNames.has(s.name));
 
 			if (toSync.length === 0) {
-				log.dim("  (nothing installed here)");
+				log.muted("  nothing installed here");
 				continue;
 			}
 
 			const actions = target.install({ skills: toSync, dest, mode: config.installMode, force: false, dryRun: !!opts.dryRun });
 
-			actions.forEach(printAction);
-			synced += toSync.length;
+			printActions(actions);
+			allActions.push(...actions);
 		} catch (err) {
 			// One target failing (e.g. malformed AGENTS.md) shouldn't abort the others.
 			failures.push(name);
@@ -68,8 +69,9 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 		log.error(`sync failed for: ${failures.join(", ")}`);
 		process.exitCode = 1;
 	} else {
-		log.info(pc.dim(`\nsynced ${synced} installed skill(s)`));
+		const phrase = summarize(allActions) || "nothing installed anywhere";
 
-		if (!opts.dryRun) log.ok("sync complete");
+		if (opts.dryRun) log.muted(`\ndry run ${sym.dot} ${phrase}`);
+		else log.ok(`sync complete ${pc.dim(`${sym.dot} ${phrase}`)}`);
 	}
 }

@@ -49,5 +49,5 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	fs.mkdirSync(dir, { recursive: true });
 	fs.writeFileSync(path.join(dir, "SKILL.md"), content, "utf8");
 	log.ok(`Created ${path.relative(root, path.join(dir, "SKILL.md"))}`);
-	log.dim("Edit it, then run `agent-skills validate` and `agent-skills install`.");
+	log.muted("Edit it, then run `agent-skills validate` and `agent-skills install`.");
 }

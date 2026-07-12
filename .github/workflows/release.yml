@@ -29,11 +29,15 @@ jobs:
           pnpm run validate
           pnpm run test
       - run: pnpm run build
-      - name: Publish to npm
-        run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # GitHub release first, so a tag always cuts one even before npm is set up.
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
+      # npm publish only when the token exists — a tag without NPM_TOKEN skips
+      # this step (stays green) instead of failing the whole run.
+      - name: Publish to npm
+        if: ${{ secrets.NPM_TOKEN != '' }}
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

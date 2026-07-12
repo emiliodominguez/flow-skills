@@ -5,6 +5,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.3.0] — 2026-07-11
+
+A capabilities release: three new commands' worth of reach (sync, watch, profiles),
+five more targets, six more skills, per-skill versioning, and stricter lint.
+
 ### Added
 
 - **`sync` command** — re-installs whatever is already installed across all targets (via
@@ -38,6 +45,9 @@ All notable changes to this project are documented here. Format follows
   spacing (blank lines around returns, declarations, functions, and control blocks), and
   `eslint-plugin-jsdoc` requires complete JSDoc (`@param` descriptions + `@returns`) on every
   `src/` function.
+- **Release workflow cuts the GitHub release first**, then publishes to npm only when the
+  `NPM_TOKEN` secret is present — so a `v*` tag without the secret still produces a GitHub
+  release (the publish step skips) instead of failing the whole run.
 
 ### Fixed
 

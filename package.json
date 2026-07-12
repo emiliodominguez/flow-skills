@@ -1,6 +1,6 @@
 {
 	"name": "@emiliodominguez/agent-skills",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Author agent skills once, install them into Claude Code, Cursor, Codex/AGENTS.md, Windsurf, Copilot, Zed, aider, Cline and Continue — with validation, scaffolding and a tested installer.",
 	"type": "module",
 	"publishConfig": {

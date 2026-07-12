@@ -17,7 +17,6 @@ Start with the [project README](../README.md) for install and usage. These docs 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — how the CLI and target adapters work, and the
   safety model (what the installer will and won't delete).
 - **[../CONTRIBUTING.md](../CONTRIBUTING.md)** — workflow, validation rules, adding a target.
-- **[ROADMAP.md](ROADMAP.md)** — what's planned next.
 
 ## Reference
 

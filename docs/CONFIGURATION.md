@@ -82,6 +82,14 @@ Verify without touching anything first:
 pnpm skills install -t cursor --dry-run
 ```
 
+**Two caveats worth knowing (verified July 2026):**
+
+- **windsurf** — `.windsurf/rules/` still works, but after the Cognition rebrand newer builds
+  also read `.devin/rules/`. If Windsurf ignores the rules, point the path at `.devin/rules`.
+- **aider** — the `CONVENTIONS.md` we write is the right file, but aider does **not** auto-load
+  it. Tell aider to read it, either per session (`aider --read CONVENTIONS.md`) or persistently
+  via `.aider.conf.yml` (`read: CONVENTIONS.md`).
+
 ## Local overrides
 
 Keep machine-specific paths out of the committed config by putting them in

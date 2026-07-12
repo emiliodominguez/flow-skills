@@ -31,6 +31,9 @@ All notable changes to this project are documented here. Format follows
   `vitest` 4 (+ explicit `vite` 8, which vitest 4 requires for its module runner),
   `js-yaml` 5, `lint-staged` 17, `@types/node` 26, and the CI GitHub Actions.
 - Dropped `@types/js-yaml` (js-yaml 5 ships its own types); tsup target bumped to node22.
+- **Removed `docs/ROADMAP.md`** — every item is implemented. Target paths were verified
+  against each tool's current docs (July 2026); the two live caveats (windsurf also reads
+  `.devin/rules`, aider must be told to `--read CONVENTIONS.md`) moved to `docs/CONFIGURATION.md`.
 - **Stricter ESLint** — `@stylistic/padding-line-between-statements` enforces vertical
   spacing (blank lines around returns, declarations, functions, and control blocks), and
   `eslint-plugin-jsdoc` requires complete JSDoc (`@param` descriptions + `@returns`) on every

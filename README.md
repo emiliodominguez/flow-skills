@@ -189,7 +189,6 @@ reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference — targets, scopes, paths                 |
 | [docs/AUTHORING.md](docs/AUTHORING.md)                            | How to write a good skill                                 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                      | How the CLI works + the safety model                      |
-| [docs/ROADMAP.md](docs/ROADMAP.md)                                | What's planned next                                       |
 | [CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md) | Contributing & release history                            |
 
 ---

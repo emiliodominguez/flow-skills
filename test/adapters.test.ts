@@ -165,6 +165,21 @@ describe("file-per-skill targets (windsurf / cline / continue)", () => {
 			expect(fs.existsSync(file)).toBe(false);
 		});
 	}
+
+	it("cline: a legacy single FILE at dest is skipped (no mkdir EEXIST), backed up under --force", () => {
+		const dest = path.join(tmp, ".clinerules"); // a FILE where the adapter wants a directory
+		fs.writeFileSync(dest, "the user's legacy clinerules");
+
+		const skipped = clineTarget.install(ctx({ dest, skills: [skills[0]!] }));
+		expect(skipped[0]!.verb).toBe("skip");
+		expect(fs.readFileSync(dest, "utf8")).toBe("the user's legacy clinerules"); // preserved, no throw
+
+		const forced = clineTarget.install(ctx({ dest, skills: [skills[0]!], force: true }));
+		expect(forced.map((a) => a.verb)).toContain("backup");
+		expect(fs.statSync(dest).isDirectory()).toBe(true); // now the directory we wanted
+		expect(fs.existsSync(path.join(dest, `${skills[0]!.name}.md`))).toBe(true);
+		expect(fs.readdirSync(tmp).some((e) => e.startsWith(".clinerules.bak-"))).toBe(true); // legacy file preserved aside
+	});
 });
 
 describe("new bundle targets (copilot / zed / aider)", () => {

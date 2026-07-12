@@ -24,9 +24,9 @@ All notable changes to this project are documented here. Format follows
 
 ### Changed
 
-- **Package is now published to npm** as the scoped `@emiliodominguez/agent-skills` (no longer
-  `private`); the release workflow runs `pnpm publish` on a `v*` tag (needs the `NPM_TOKEN`
-  secret).
+- **Package prepared for npm publishing** as the scoped `@emiliodominguez/agent-skills` (no
+  longer `private`); the release workflow will `pnpm publish` on the next `v*` tag once the
+  `NPM_TOKEN` secret is set. Not yet on npm.
 - Dependencies brought to their latest majors: `commander` 15, `eslint`/`@eslint/js` 10,
   `vitest` 4 (+ explicit `vite` 8, which vitest 4 requires for its module runner),
   `js-yaml` 5, `lint-staged` 17, `@types/node` 26, and the CI GitHub Actions.

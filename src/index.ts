@@ -24,7 +24,7 @@ const program = new Command();
 
 program
 	.name("agent-skills")
-	.description("Author agent skills once; install them into Claude Code, Cursor, Codex/AGENTS.md and Windsurf.")
+	.description("Author agent skills once; install them into Claude Code, Cursor, Codex, Windsurf, Copilot, Zed, aider, Cline and Continue.")
 	.version(version());
 
 program

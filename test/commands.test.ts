@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { listCommand } from "../src/commands/list";
 import { syncCommand } from "../src/commands/sync";
+import { resolveSelection } from "../src/commands/install";
+import type { Config } from "../src/core/config";
 import { cursorTarget } from "../src/targets/cursor";
 import { discoverSkills } from "../src/core/registry";
 import { findRepoRoot } from "../src/core/config";
@@ -57,5 +59,23 @@ describe("sync", () => {
 	it("dry-run reports 'nothing installed' when a target is empty", () => {
 		expect(() => syncCommand({ target: ["cursor"], scope: "project", dryRun: true })).not.toThrow();
 		expect(fs.existsSync(path.join(tmp, ".cursor"))).toBe(false);
+	});
+});
+
+describe("resolveSelection (profiles)", () => {
+	const config = { profiles: { wip: [], frontend: ["ed-styles", "ed-work"] } } as unknown as Config;
+
+	it("an EMPTY profile throws — it must not fall through to 'all skills' (uninstall would remove everything)", () => {
+		expect(() => resolveSelection([], ["wip"], config)).toThrow(/lists no skills/);
+	});
+	it("an unknown profile throws", () => {
+		expect(() => resolveSelection([], ["nope"], config)).toThrow(/Unknown profile/);
+	});
+	it("a real profile resolves to its union; explicit skill args win over --profile", () => {
+		expect(resolveSelection([], ["frontend"], config)).toEqual(["ed-styles", "ed-work"]);
+		expect(resolveSelection(["ed-plan"], ["frontend"], config)).toEqual(["ed-plan"]);
+	});
+	it("no profile and no skills → [] (means all)", () => {
+		expect(resolveSelection([], undefined, config)).toEqual([]);
 	});
 });

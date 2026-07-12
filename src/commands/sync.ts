@@ -35,11 +35,11 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 			log.warn(`target "${name}" is disabled or unknown — skipping`);
 			continue;
 		}
-		const target = getTarget(name);
-		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
-		log.heading(`${target.name} → ${prettyPath(dest)}`);
-
 		try {
+			const target = getTarget(name);
+			const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
+			log.heading(`${target.name} → ${prettyPath(dest)}`);
+
 			const statuses = target.status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
 			const installedNames = new Set(statuses.filter((s) => INSTALLED.has(s.state)).map((s) => s.skill));
 			const toSync = skills.filter((s) => installedNames.has(s.name));

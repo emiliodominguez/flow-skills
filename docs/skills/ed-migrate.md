@@ -39,7 +39,7 @@ You can't migrate what you haven't found.
 Do the migration in a **dedicated git worktree / branch**, never in a dirty tree.
 
 - A big sweep mixed with other work is unreviewable and un-revertable. Keep it alone.
-- If you're fanning out parallel agents to transform disjoint site groups, give each its **own worktree** so concurrent edits can't corrupt each other, then merge.
+- **Optional parallel sweep** (only worth it for a big migration): fan out `general-purpose` agents — they must _edit_, so not `Explore` (which can't) — sharded by **disjoint files/directories**, never by loose "site groups": two sites in the same file across two shards collide on merge. Give each its **own worktree**, and have it run Phase 4's per-site verify on its shard **before** you merge — an unverified shard hides a bad rewrite in the pile. If the sites don't split cleanly by file, stay single-writer.
 
 ---
 

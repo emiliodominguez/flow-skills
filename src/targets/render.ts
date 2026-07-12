@@ -54,6 +54,15 @@ function escapeYaml(value: string): string {
  * @returns The recorded actions.
  */
 export function installFilePerSkill(ctx: InstallContext, ext: string, build: (skill: InstallContext["skills"][number]) => string): Action[] {
+	// A user's legacy single FILE at ctx.dest (e.g. the classic `.clinerules` file, where we
+	// want a `.clinerules/` directory) would make mkdir(ctx.dest) throw EEXIST. Treat it like
+	// any other unmanaged entry: skip, or back it up (move aside) under --force.
+	if (fs.existsSync(ctx.dest) && fs.statSync(ctx.dest).isFile()) {
+		if (!ctx.force)
+			return [{ verb: "skip", path: ctx.dest, note: "exists as a file, not a directory — not managed; use --force to move it aside" }];
+		const backedUp = backup(ctx.dest, Date.now(), ctx.dryRun);
+		return [backedUp, ...ctx.skills.map((skill) => writeFile(path.join(ctx.dest, `${skill.name}.${ext}`), build(skill), ctx.dryRun))];
+	}
 	return ctx.skills.flatMap((skill) => {
 		const file = path.join(ctx.dest, `${skill.name}.${ext}`);
 		if (fs.existsSync(file) && !fileIsManaged(file)) {

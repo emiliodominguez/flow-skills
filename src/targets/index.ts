@@ -25,7 +25,7 @@ export const TARGETS: Record<string, Target> = {
 /**
  * Resolve a target adapter by id.
  *
- * @param name - Target id (`claude`, `cursor`, `codex`, `windsurf`).
+ * @param name - Target id (`claude`, `cursor`, `codex`, `windsurf`, `copilot`, `zed`, `aider`, `cline`, `continue`).
  * @returns The adapter.
  * @throws If the id is unknown.
  */

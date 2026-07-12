@@ -8,6 +8,8 @@ version: 0.1.0
 
 A test earns its place by **failing when behaviour breaks and only then**. A test coupled to implementation fails on every refactor and catches no bugs — it's a liability wearing a green check. The discipline below keeps tests behavioural, at the right level, and deterministic.
 
+The inline write-a-failing-test-then-make-it-pass loop *while implementing* a feature is `/ed-work` (tests-first). Reach for `/ed-test` when testing is the job itself: **strategy** — what to test at which level, pinning legacy code with characterisation tests, or killing flakiness.
+
 ---
 
 ## Phase 1: Choose the level

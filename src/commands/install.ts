@@ -42,6 +42,11 @@ export function resolveSelection(skillNames: string[], profiles: string[] | unde
 		}
 		for (const skill of list) names.add(skill);
 	}
+	// An empty union would fall through to "all skills" downstream — catastrophic for
+	// `uninstall --profile <empty>` (removes everything). Refuse it explicitly.
+	if (names.size === 0) {
+		throw new Error(`Profile ${profiles.map((p) => `"${p}"`).join(", ")} lists no skills; add skills to it, or omit --profile to act on all.`);
+	}
 	return [...names];
 }
 
@@ -56,6 +61,7 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const skillsDir = path.join(root, config.skillsDir);
+	if (skillNames.length > 0 && opts.profile?.length) log.warn("--profile ignored: explicit skill names take precedence");
 	const selected = resolveSelection(skillNames, opts.profile, config);
 
 	const failures = runOnce(mode, selected, opts, config, skillsDir);
@@ -128,7 +134,12 @@ function watch(skillNames: string[], opts: InstallOptions, config: Config, skill
 		clearTimeout(timer);
 		timer = setTimeout(() => {
 			log.step("change detected — re-installing");
-			runOnce("install", skillNames, opts, config, skillsDir);
+			try {
+				runOnce("install", skillNames, opts, config, skillsDir);
+			} catch (err) {
+				// A source edit (e.g. renaming a watched skill) can throw; keep the watcher alive.
+				log.error(`re-install failed: ${err instanceof Error ? err.message : String(err)} — still watching`);
+			}
 		}, 150);
 	});
 }

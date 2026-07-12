@@ -36,6 +36,9 @@
 		"validate": "tsx src/index.ts validate",
 		"docs:gen": "tsx scripts/gen-skill-docs.ts",
 		"eval:llm": "tsx scripts/eval-llm.ts",
+		"changeset": "changeset",
+		"version:packages": "changeset version",
+		"release": "changeset publish",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
@@ -61,6 +64,7 @@
 		"picocolors": "^1.1.1"
 	},
 	"devDependencies": {
+		"@changesets/cli": "^2.31.0",
 		"@eslint/js": "^10.0.1",
 		"@stylistic/eslint-plugin": "^2.12.1",
 		"@types/node": "^26.1.1",

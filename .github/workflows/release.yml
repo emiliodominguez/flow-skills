@@ -1,16 +1,19 @@
 name: release
 
+# Changesets-driven. On every push to main: if changeset files are pending, open/update
+# a "version packages" PR (bump version + CHANGELOG). When that PR merges (no pending
+# changesets), publish to npm — but only when NPM_TOKEN is configured.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
 
 permissions:
   contents: write
+  pull-requests: write
 
 env:
   HUSKY: "0"
-  # Hoisted to workflow scope so a step `if:` can gate on it — the `secrets`
-  # context itself is not allowed in `if:` conditions.
+  # Hoisted to workflow scope so the `with:` expression below can gate on it.
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
@@ -18,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -25,22 +30,15 @@ jobs:
           cache: pnpm
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install --frozen-lockfile
-      - name: Verify
-        run: |
-          pnpm run typecheck
-          pnpm run lint
-          pnpm run validate
-          pnpm run test
       - run: pnpm run build
-      # GitHub release first, so a tag always cuts one even before npm is set up.
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v3
+      - name: Create version PR or publish
+        uses: changesets/action@v1
         with:
-          generate_release_notes: true
-      # npm publish only when the token exists — a tag without NPM_TOKEN skips
-      # this step (stays green) instead of failing the whole run.
-      - name: Publish to npm
-        if: ${{ env.NPM_TOKEN != '' }}
-        run: pnpm publish --no-git-checks
+          version: pnpm run version:packages
+          # Empty publish command until NPM_TOKEN exists → version-PR only, never a failed publish.
+          publish: ${{ env.NPM_TOKEN != '' && 'pnpm run release' || '' }}
+          commit: "chore(release): version packages"
+          title: "chore(release): version packages"
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}

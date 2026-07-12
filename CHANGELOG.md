@@ -3,10 +3,6 @@
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); this project uses [SemVer](https://semver.org/).
 
-## [Unreleased]
-
-_Nothing yet._
-
 ## [0.4.0] — 2026-07-11
 
 A quality-and-DX release: behavioral evals for the skills, a richer CLI (interactive picker,

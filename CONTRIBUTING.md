@@ -46,6 +46,24 @@ managed-file marker in `src/targets/render.ts` so `uninstall` stays safe.
 Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`). No
 `Co-Authored-By` trailers.
 
+## Releasing (changesets)
+
+Releases are automated with [changesets](https://github.com/changesets/changesets). When your
+change is user-facing, add a changeset in the same PR:
+
+```sh
+pnpm changeset          # pick patch/minor/major and write a one-line summary
+```
+
+On merge to `main`, the release workflow opens (or updates) a **"version packages" PR** that
+bumps the version and prepends the summaries to `CHANGELOG.md`. Merging _that_ PR publishes to
+npm — but only once the `NPM_TOKEN` secret is set (until then it version-bumps without
+publishing). The GitHub setting _Allow GitHub Actions to create and approve pull requests_ must
+be enabled for the version PR to open.
+
+Releases `0.1.0`–`0.4.0` predate changesets and were cut by hand; `0.5.0` onward go through
+this flow.
+
 ## Code style
 
 Function declarations over arrow functions, tabs (width 4), print width 150 (Prettier

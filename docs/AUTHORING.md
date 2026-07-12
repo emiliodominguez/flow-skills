@@ -67,7 +67,12 @@ reading it cold", "the maintainer in two years" — not six copies of "review th
 
 ## Before you commit
 
-- `pnpm skills validate` is clean.
+- `pnpm skills validate` is clean (naming, refs, and the quality lints: the description names
+  its own `/<skill>` trigger and is a real sentence, the body has no filler words).
+- You added an **`evals/beats.json` entry** — 3–5 lowercase substrings naming the skill's
+  distinctive mechanics that appear in its body. `pnpm test` fails until they do (see
+  [`../evals/README.md`](../evals/README.md)).
+- `pnpm docs:gen` was run and the regenerated `docs/` is committed.
 - You invoked the skill in a real session and it did the right thing (evidence, not "looks
   right").
 - Every `/other-skill` handoff points at a skill that exists.

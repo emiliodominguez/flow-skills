@@ -56,13 +56,13 @@ pnpm changeset          # pick patch/minor/major and write a one-line summary
 ```
 
 On merge to `main`, the release workflow opens (or updates) a **"version packages" PR** that
-bumps the version and prepends the summaries to `CHANGELOG.md`. Merging _that_ PR publishes to
-npm — but only once the `NPM_TOKEN` secret is set (until then it version-bumps without
-publishing). The GitHub setting _Allow GitHub Actions to create and approve pull requests_ must
-be enabled for the version PR to open.
+bumps the version and prepends the summaries to `CHANGELOG.md`. Merging _that_ PR lands the
+release. This repo is **private and not published**, so `NPM_TOKEN` is intentionally unset and
+the flow is **versioning-only** — no npm publish. (Set `NPM_TOKEN` to turn publishing on.) The
+repo setting _Allow GitHub Actions to create and approve pull requests_ is enabled so the
+version PR can open.
 
-Releases `0.1.0`–`0.4.0` predate changesets and were cut by hand; `0.5.0` onward go through
-this flow.
+Releases `0.1.0`–`0.4.0` were cut by hand; `0.4.1` onward go through this flow.
 
 ## Code style
 

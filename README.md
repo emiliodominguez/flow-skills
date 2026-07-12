@@ -33,16 +33,16 @@ tool's native format on install. One source, many destinations.
 A connected workflow that moves work from idea to shipped. See the full map in
 [`docs/OVERVIEW.md`](docs/OVERVIEW.md).
 
-| Phase          | Skills                                                                                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Think**      | `ed-brainstorm` · `ed-prototype`                                                                                   |
-| **Understand** | `ed-onboard` — map an unfamiliar codebase fast                                                                     |
-| **Plan**       | `ed-plan` — parallel research, writes `.plans/<file>`                                                              |
-| **Build**      | `ed-work` · `ed-test` (test strategy) · `ed-migrate` (cross-file sweeps)                                           |
-| **Check**      | `ed-review` (persona panel + verification) · `ed-adversarial-review` (red-team)                                    |
-| **Polish**     | `ed-simplify` · `ed-refactor`                                                                                      |
-| **Ship**       | `ed-ship` · `ed-docs` · `ed-pr-fix` · `ed-git-fix`                                                                 |
-| **Support**    | `ed-diagnose` · `ed-triage` · `ed-benchmark` · `ed-handoff` · `ed-styles` · `ed-animate` · `ed-prune-claude-setup` |
+| Phase          | Skills                                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Think**      | `ed-brainstorm` · `ed-prototype`                                                                                               |
+| **Understand** | `ed-onboard` — map an unfamiliar codebase fast                                                                                 |
+| **Plan**       | `ed-plan` — parallel research, writes `.plans/<file>`                                                                          |
+| **Build**      | `ed-work` · `ed-test` (test strategy) · `ed-migrate` (cross-file sweeps)                                                       |
+| **Check**      | `ed-review` (persona panel + verification) · `ed-adversarial-review` (red-team)                                                |
+| **Polish**     | `ed-simplify` · `ed-refactor`                                                                                                  |
+| **Ship**       | `ed-ship` · `ed-commit` · `ed-docs` · `ed-pr-fix` · `ed-git-fix`                                                               |
+| **Support**    | `ed-diagnose` · `ed-triage` · `ed-benchmark` · `ed-deps` · `ed-handoff` · `ed-styles` · `ed-animate` · `ed-prune-claude-setup` |
 
 `ed-plan` writes a plan file, then you execute it in a **fresh session** with `/ed-work` —
 planning and building don't share a crowded context window.
@@ -52,6 +52,10 @@ planning and building don't share a crowded context window.
 ## Install
 
 **Requirements:** Node ≥ 22. pnpm is auto-enabled via corepack if missing.
+
+> This is a **private, personal** repo — it's not published to npm, and the `git clone` /
+> `npx github:` paths assume your git is authenticated to it (they work on your own machines,
+> not for the public).
 
 ### Option A — bootstrap script (no setup)
 
@@ -71,7 +75,7 @@ pnpm skills install                # default target(s) from config
 pnpm skills install -t windsurf -s project   # into ./.windsurf/rules of the current project
 ```
 
-### Option C — one-off via npx (from git)
+### Option C — one-off via npx (from git, if you have access)
 
 ```sh
 npx github:emiliodominguez/agent-skills install -t claude
@@ -230,8 +234,11 @@ pnpm run build          # bundle to dist/ (tsup)
 
 A husky pre-commit hook runs prettier + eslint on staged files. CI runs three jobs on every
 push and PR: **lint** (eslint, format, docs-freshness, prod-dependency audit), **test**
-(typecheck, validate, coverage on a Node 22/24 matrix), and **pack** (the packaging smoke
-test). Pushing a `v*` tag runs the release workflow.
+(typecheck, validate, coverage on a Node 22/24 + Windows matrix), and **pack** (the packaging
+smoke test). A push to `main` runs the **changesets** release workflow — it opens a "version
+packages" PR when changesets are pending, so version + `CHANGELOG` bumps are automated (see
+[CONTRIBUTING.md](CONTRIBUTING.md#releasing-changesets)). Publishing to npm is intentionally
+off (private repo); the flow is versioning-only.
 
 ---
 

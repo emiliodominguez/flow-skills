@@ -3,6 +3,8 @@
 	"ed-animate": ["storyboard", "dials", "critique", "stagger", "magic numbers"],
 	"ed-benchmark": ["baseline", "variance", "workload", "p99", "noise"],
 	"ed-brainstorm": ["one question at a time", "skeptic panel", "stress-test", "design sketch", "adversarial"],
+	"ed-commit": ["conventional", "imperative", "the why", "git add -p", "one logical change"],
+	"ed-deps": ["outdated", "changelog", "one at a time", "held back", "lockfile"],
 	"ed-diagnose": ["reproduce", "hypothesis", "instrument", "regression test", "falsifiable"],
 	"ed-docs": ["reader", "anchor", "colocate", "source of truth", "prune"],
 	"ed-git-fix": ["conflict markers", "restack", "abort", "force-with-lease", "worktree"],

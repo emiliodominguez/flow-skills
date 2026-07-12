@@ -12,6 +12,8 @@ flowchart LR
   ed_animate["ed-animate"]
   ed_benchmark["ed-benchmark"]
   ed_brainstorm["ed-brainstorm"]
+  ed_commit["ed-commit"]
+  ed_deps["ed-deps"]
   ed_diagnose["ed-diagnose"]
   ed_docs["ed-docs"]
   ed_git_fix["ed-git-fix"]
@@ -36,6 +38,10 @@ flowchart LR
   ed_benchmark --> ed_diagnose
   ed_benchmark --> ed_work
   ed_brainstorm --> ed_plan
+  ed_commit --> ed_ship
+  ed_commit --> ed_pr_fix
+  ed_deps --> ed_review
+  ed_deps --> ed_ship
   ed_docs --> ed_ship
   ed_git_fix --> ed_ship
   ed_migrate --> ed_review
@@ -70,6 +76,8 @@ flowchart LR
 - **ed-animate** → `ed-work`, `ed-review`
 - **ed-benchmark** → `ed-diagnose`, `ed-work`
 - **ed-brainstorm** → `ed-plan`
+- **ed-commit** → `ed-ship`, `ed-pr-fix`
+- **ed-deps** → `ed-review`, `ed-ship`
 - **ed-diagnose** → _(terminal)_
 - **ed-docs** → `ed-ship`
 - **ed-git-fix** → `ed-ship`

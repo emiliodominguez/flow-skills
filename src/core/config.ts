@@ -2,6 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+/** Install scopes: `user` (global) or `project` (the current repo). Single source
+ *  of truth shared by the CLI options, the interactive picker, and completion. */
+export const SCOPES = ["user", "project"] as const;
+
+/** A resolved install scope. */
+export type Scope = (typeof SCOPES)[number];
+
 /** Where a target installs by default, per scope. Paths may use `~`. */
 export interface TargetConfig {
 	enabled: boolean;

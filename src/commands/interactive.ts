@@ -8,6 +8,24 @@ import { doctorCommand } from "./doctor.js";
 import { listCommand } from "./list.js";
 
 /**
+ * If a prompt was cancelled (Ctrl-C), print a notice and report it so the caller
+ * can return. Written as a type predicate so `if (bail(x)) return` narrows `x` to
+ * its real value afterward.
+ *
+ * @param value - A prompt result that may be the cancel symbol.
+ * @returns True (narrowing `value` to `symbol`) when the prompt was cancelled.
+ */
+function bail<T>(value: T | symbol): value is symbol {
+	if (p.isCancel(value)) {
+		p.cancel("Cancelled.");
+
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * Interactive picker shown when the CLI is run with no subcommand on a TTY.
  * Walks the user through an action and (for install/uninstall) the targets,
  * skills, and scope, then dispatches to the matching command.
@@ -31,11 +49,7 @@ export async function interactiveCommand(): Promise<void> {
 		],
 	});
 
-	if (p.isCancel(action)) {
-		p.cancel("Cancelled.");
-
-		return;
-	}
+	if (bail(action)) return;
 
 	if (action === "list") {
 		listCommand({ targets: true, profiles: true });
@@ -56,11 +70,7 @@ export async function interactiveCommand(): Promise<void> {
 		required: true,
 	});
 
-	if (p.isCancel(targets)) {
-		p.cancel("Cancelled.");
-
-		return;
-	}
+	if (bail(targets)) return;
 
 	const chosen = await p.multiselect({
 		message: "Which skills? (space to toggle · select none = all)",
@@ -68,11 +78,7 @@ export async function interactiveCommand(): Promise<void> {
 		required: false,
 	});
 
-	if (p.isCancel(chosen)) {
-		p.cancel("Cancelled.");
-
-		return;
-	}
+	if (bail(chosen)) return;
 
 	const scope = await p.select({
 		message: "Scope",
@@ -83,11 +89,7 @@ export async function interactiveCommand(): Promise<void> {
 		initialValue: "user" as const,
 	});
 
-	if (p.isCancel(scope)) {
-		p.cancel("Cancelled.");
-
-		return;
-	}
+	if (bail(scope)) return;
 
 	p.outro(`${action} → ${targets.join(", ")}`);
 	installCommand(action, chosen, { target: targets, scope });

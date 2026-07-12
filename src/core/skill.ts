@@ -166,6 +166,18 @@ export function validateSkill(skill: Skill): Issue[] {
 }
 
 /**
+ * Extract `/skill-ref` tokens (without the leading slash) from prose — the one
+ * grammar for "what looks like a skill reference", shared by the dangling-reference
+ * lint here and the docs handoff-map generator so they never disagree.
+ *
+ * @param text - Prose that may mention `/skill` references.
+ * @returns The referenced tokens, in order (with duplicates).
+ */
+export function extractSkillRefs(text: string): string[] {
+	return [...text.matchAll(/\/([a-z][a-z0-9-]{2,})/g)].map((m) => m[1]!);
+}
+
+/**
  * Cross-skill reference check: flags `/name` mentions that look like a skill in
  * the same family (share a `prefix-`) but don't exist in the set. Catches a
  * handoff that points at a removed or misspelled skill.
@@ -177,16 +189,13 @@ export function validateReferences(skills: Skill[]): Issue[] {
 	const issues: Issue[] = [];
 	const names = new Set(skills.map((s) => s.name));
 	const families = new Set(skills.map((s) => s.name.split("-")[0] + "-"));
-	const refPattern = /\/([a-z][a-z0-9-]{2,})/g;
 
 	for (const skill of skills) {
 		const seen = new Set<string>();
 		// Scan the description too — the handoff clause lives there and is load-bearing.
 		const haystack = `${skill.body}\n${skill.frontmatter.description}`;
 
-		for (const match of haystack.matchAll(refPattern)) {
-			const token = match[1]!;
-
+		for (const token of extractSkillRefs(haystack)) {
 			if (seen.has(token) || names.has(token)) continue;
 
 			seen.add(token);

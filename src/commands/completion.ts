@@ -1,11 +1,15 @@
+import { SCOPES } from "../core/config.js";
 import { log } from "../core/logger.js";
 import { TARGETS } from "../targets/index.js";
 
-/** Subcommands offered for completion (kept in step with the ones wired in index.ts). */
-const COMMANDS = "list validate install uninstall sync doctor new completion";
+/** Subcommands offered for completion. A test asserts this matches the registered commands. */
+export const COMMANDS = "list validate install uninstall sync doctor new completion";
 
 /** The flags worth completing after a subcommand. */
 const FLAGS = "--target --scope --copy --force --dry-run --watch --profile --json --strict --targets --profiles --help";
+
+/** Scope values, from the single source of truth in config. */
+const SCOPE_VALUES = SCOPES.join(" ");
 
 /**
  * The bash completion script.
@@ -21,7 +25,7 @@ _agent_skills() {
   prev="\${COMP_WORDS[COMP_CWORD-1]}"
   case "$prev" in
     -t|--target) COMPREPLY=( $(compgen -W "${targets}" -- "$cur") ); return;;
-    -s|--scope) COMPREPLY=( $(compgen -W "user project" -- "$cur") ); return;;
+    -s|--scope) COMPREPLY=( $(compgen -W "${SCOPE_VALUES}" -- "$cur") ); return;;
   esac
   if [ "$COMP_CWORD" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "${COMMANDS}" -- "$cur") ); return
@@ -44,7 +48,7 @@ _agent_skills() {
   if (( CURRENT == 2 )); then compadd -- ${COMMANDS}; return; fi
   case "\${words[CURRENT-1]}" in
     -t|--target) compadd -- ${targets}; return;;
-    -s|--scope) compadd -- user project; return;;
+    -s|--scope) compadd -- ${SCOPE_VALUES}; return;;
   esac
   compadd -- ${FLAGS}
 }
@@ -62,7 +66,7 @@ function fish(targets: string): string {
 complete -c agent-skills -f
 complete -c agent-skills -n __fish_use_subcommand -a "${COMMANDS}"
 complete -c agent-skills -s t -l target -x -a "${targets}"
-complete -c agent-skills -s s -l scope -x -a "user project"`;
+complete -c agent-skills -s s -l scope -x -a "${SCOPE_VALUES}"`;
 }
 
 /**
@@ -72,12 +76,8 @@ complete -c agent-skills -s s -l scope -x -a "user project"`;
  */
 export function completionCommand(shell: string): void {
 	const targets = Object.keys(TARGETS).join(" ");
-	const scripts: Record<string, () => string> = {
-		bash: () => bash(targets),
-		zsh: () => zsh(targets),
-		fish: () => fish(targets),
-	};
-	const build = scripts[shell];
+	const builders: Record<string, (t: string) => string> = { bash, zsh, fish };
+	const build = builders[shell];
 
 	if (!build) {
 		log.error(`unknown shell "${shell}" — use one of: bash, zsh, fish`);
@@ -86,5 +86,5 @@ export function completionCommand(shell: string): void {
 		return;
 	}
 
-	console.log(build());
+	console.log(build(targets));
 }

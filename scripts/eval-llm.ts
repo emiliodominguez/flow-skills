@@ -15,7 +15,7 @@ const API = "https://api.anthropic.com/v1/messages";
 const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5";
 
 interface AnthropicResponse {
-	content?: { type: string; text?: string }[];
+	content?: { text?: string }[];
 	error?: { message: string };
 }
 
@@ -56,16 +56,24 @@ async function grade(body: string, beats: string[], apiKey: string): Promise<Ver
 		body: JSON.stringify({ model: MODEL, max_tokens: 1024, messages: [{ role: "user", content: prompt }] }),
 	});
 
-	const data = (await res.json()) as AnthropicResponse;
+	// Guard the parse so a non-JSON error body (5xx/gateway) throws our message, not a SyntaxError.
+	const data = (await res.json().catch(() => ({}) as AnthropicResponse)) as AnthropicResponse;
 
 	if (!res.ok || data.error) throw new Error(data.error?.message ?? `HTTP ${res.status}`);
 
-	const text = data.content?.map((block) => block.text ?? "").join("") ?? "";
-	const json = /\[[\s\S]*\]/.exec(text);
+	const text = (data.content?.map((block) => block.text ?? "").join("") ?? "").replace(/```(?:json)?/gi, "").trim();
 
-	if (!json) throw new Error(`judge did not return JSON: ${text.slice(0, 120)}`);
+	// The prompt asks for only a JSON array; parse the whole reply, else fall back to the
+	// first array (non-greedy, so trailing prose with a stray "]" can't corrupt it).
+	try {
+		return JSON.parse(text) as Verdict[];
+	} catch {
+		const match = /\[[\s\S]*?\]/.exec(text);
 
-	return JSON.parse(json[0]) as Verdict[];
+		if (!match) throw new Error(`judge did not return a JSON array: ${text.slice(0, 120)}`);
+
+		return JSON.parse(match[0]) as Verdict[];
+	}
 }
 
 const apiKey = process.env.ANTHROPIC_API_KEY;

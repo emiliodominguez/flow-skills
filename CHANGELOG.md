@@ -5,6 +5,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.4.0] — 2026-07-11
+
+A quality-and-DX release: behavioral evals for the skills, a richer CLI (interactive picker,
+completions, `--json`), a generated skill map, deeper lint, and Windows CI.
+
 ### Added
 
 - **Skill evals** — each skill now has a behavioral contract in `evals/beats.json` (3–5

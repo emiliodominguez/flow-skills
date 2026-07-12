@@ -9,6 +9,8 @@ import { installCommand } from "./commands/install.js";
 import { syncCommand } from "./commands/sync.js";
 import { doctorCommand } from "./commands/doctor.js";
 import { newCommand } from "./commands/new.js";
+import { completionCommand } from "./commands/completion.js";
+import { interactiveCommand } from "./commands/interactive.js";
 
 /**
  * Read the CLI's own version from its package.json, falling back to "0.0.0".
@@ -38,6 +40,7 @@ program
 	.description("List all skills (and, with --targets, the install targets)")
 	.option("--targets", "also list available target adapters")
 	.option("--profiles", "also list configured install profiles")
+	.option("--json", "output machine-readable JSON")
 	.action((opts) => listCommand(opts));
 
 program
@@ -89,6 +92,7 @@ program
 	.description("Report install state per target and flag drift or conflicts")
 	.addOption(targetOption)
 	.addOption(scopeOption)
+	.option("--json", "output machine-readable JSON")
 	.action((opts) => doctorCommand(opts));
 
 program
@@ -97,6 +101,18 @@ program
 	.argument("<name>", "kebab-case skill id")
 	.option("-d, --description <text>", "frontmatter description")
 	.action((name, opts) => newCommand(name, opts));
+
+program
+	.command("completion")
+	.description("Print a shell completion script (bash, zsh, or fish) to eval/source")
+	.argument("[shell]", "shell: bash, zsh, or fish", "bash")
+	.action((shell) => completionCommand(shell));
+
+// No subcommand on a TTY → interactive picker; otherwise show help.
+program.action(async () => {
+	if (process.stdin.isTTY && process.stdout.isTTY) await interactiveCommand();
+	else program.help();
+});
 
 program.parseAsync(process.argv).catch((err: unknown) => {
 	log.error(err instanceof Error ? err.message : String(err));

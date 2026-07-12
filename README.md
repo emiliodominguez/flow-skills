@@ -82,14 +82,20 @@ npx github:emiliodominguez/agent-skills install -t claude
 ## Usage
 
 ```
-agent-skills list [--targets] [--profiles]   List skills (and, optionally, adapters / profiles)
+agent-skills                          (no args, in a terminal) interactive picker
+agent-skills list [--targets] [--profiles] [--json]   List skills (and, optionally, adapters / profiles)
 agent-skills validate [--strict]      Validate frontmatter, naming, cross-references
 agent-skills install [skills...]      Install skills into target(s)
 agent-skills uninstall [skills...]    Remove installed skills
 agent-skills sync                     Re-install whatever is already installed (propagate edits)
-agent-skills doctor                   Report install state per target; flag drift/conflicts
+agent-skills doctor [--json]          Report install state per target; flag drift/conflicts
 agent-skills new <name> [-d "desc"]   Scaffold a new skill from the template
+agent-skills completion [shell]       Print a bash/zsh/fish completion script to eval/source
 ```
+
+Run **`agent-skills`** with no arguments in a terminal for an interactive picker.
+`list` and `doctor` take **`--json`** for machine-readable output. Enable tab-completion
+with e.g. `eval "$(agent-skills completion zsh)"` in your shell rc.
 
 **Common flags** (`install` / `uninstall`):
 

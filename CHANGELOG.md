@@ -7,6 +7,10 @@ All notable changes to this project are documented here. Format follows
 
 ### Added
 
+- **Interactive picker, completions, and `--json`** — running `agent-skills` with no
+  arguments in a terminal opens an interactive picker (via `@clack/prompts`); a new
+  `completion [bash|zsh|fish]` command prints a shell-completion script; and `list` and
+  `doctor` accept `--json` for machine-readable output.
 - **Skill handoff map** — `pnpm docs:gen` now emits `docs/SKILL-MAP.md`, a Mermaid graph (plus
   a text list) of how each skill hands off to the next, parsed from the descriptions and
   enforced fresh by CI. Linked from the README and OVERVIEW.

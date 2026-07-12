@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { newCommand } from "../src/commands/new";
 import { validateCommand } from "../src/commands/validate";
+import { completionCommand } from "../src/commands/completion";
+import { listCommand } from "../src/commands/list";
 
 const spies: { mockRestore: () => void }[] = [];
 let logSpy: ReturnType<typeof vi.spyOn>;
@@ -96,5 +98,46 @@ describe("validateCommand", () => {
 		validateCommand({ strict: true });
 
 		expect(process.exitCode).toBeFalsy();
+	});
+});
+
+describe("listCommand --json", () => {
+	beforeEach(silence);
+	afterEach(restore);
+
+	it("emits parseable JSON with skills, targets, and profiles", () => {
+		listCommand({ json: true });
+
+		const data = JSON.parse(logSpy.mock.calls.flat().join("\n"));
+
+		expect(data.skills.length).toBeGreaterThanOrEqual(16);
+		expect(data.targets.length).toBeGreaterThanOrEqual(9);
+		expect(data.skills[0]).toHaveProperty("description");
+	});
+});
+
+describe("completionCommand", () => {
+	beforeEach(silence);
+	afterEach(restore);
+
+	it("emits a bash completion script naming the targets", () => {
+		completionCommand("bash");
+
+		const out = logSpy.mock.calls.flat().join("\n");
+
+		expect(out).toContain("complete -F _agent_skills agent-skills");
+		expect(out).toContain("claude");
+	});
+
+	it("emits a zsh script", () => {
+		completionCommand("zsh");
+
+		expect(logSpy.mock.calls.flat().join("\n")).toContain("#compdef agent-skills");
+	});
+
+	it("errors and exits non-zero on an unknown shell", () => {
+		completionCommand("powershell");
+
+		expect(process.exitCode).toBe(1);
 	});
 });

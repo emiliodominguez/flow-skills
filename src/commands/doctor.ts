@@ -19,61 +19,83 @@ const STATE_COLOR: Record<SkillState, (s: string) => string> = {
 /** States that don't need attention (missing just means "not installed here"). */
 const HEALTHY = new Set<SkillState>(["linked", "copied", "generated", "missing"]);
 
+/** One target's computed install report. */
+interface TargetReport {
+	target: string;
+	dest: string;
+	error?: string;
+	counts: Partial<Record<SkillState, number>>;
+	attention: { skill: string; state: SkillState }[];
+}
+
 /**
  * `doctor` — report each target's install state and flag drift or conflicts.
  * Exits non-zero when something needs attention, so it's scriptable.
  *
- * @param opts - Targets (default: all enabled) and scope.
+ * @param opts - Targets (default: all enabled), scope, and `json` for machine output.
  */
-export function doctorCommand(opts: { target?: string[]; scope?: "user" | "project" }): void {
+export function doctorCommand(opts: { target?: string[]; scope?: "user" | "project"; json?: boolean }): void {
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const skills = discoverSkills(path.join(root, config.skillsDir));
 	const scope = opts.scope ?? "user";
 	const targets = opts.target?.length ? opts.target : Object.keys(config.targets).filter((name) => config.targets[name]?.enabled);
 
+	const reports: TargetReport[] = [];
 	let problems = 0;
 
 	for (const name of targets) {
 		const tc = config.targets[name];
 
 		if (!tc || !tc.enabled) {
-			log.warn(`target "${name}" is disabled or unknown — skipping`);
+			if (!opts.json) log.warn(`target "${name}" is disabled or unknown — skipping`);
+
 			continue;
 		}
 
 		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
 
-		targetHeader(name, dest);
-
-		let statuses;
-
 		try {
-			statuses = getTarget(name).status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
+			const statuses = getTarget(name).status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
+			const counts: Partial<Record<SkillState, number>> = {};
+
+			for (const status of statuses) counts[status.state] = (counts[status.state] ?? 0) + 1;
+
+			const attention = statuses.filter((s) => !HEALTHY.has(s.state)).map((s) => ({ skill: s.skill, state: s.state }));
+
+			problems += attention.length;
+			reports.push({ target: name, dest, counts, attention });
 		} catch (err) {
-			log.error(`  ${err instanceof Error ? err.message : String(err)}`);
 			problems++;
+			reports.push({ target: name, dest, error: err instanceof Error ? err.message : String(err), counts: {}, attention: [] });
+		}
+	}
+
+	if (problems > 0) process.exitCode = 1;
+
+	if (opts.json) {
+		console.log(JSON.stringify({ scope, healthy: problems === 0, problems, targets: reports }, null, 2));
+
+		return;
+	}
+
+	for (const report of reports) {
+		targetHeader(report.target, report.dest);
+
+		if (report.error) {
+			log.error(`  ${report.error}`);
 			continue;
 		}
 
-		const counts = new Map<SkillState, number>();
+		const counts = Object.entries(report.counts) as [SkillState, number][];
 
-		for (const status of statuses) counts.set(status.state, (counts.get(status.state) ?? 0) + 1);
+		log.info("  " + counts.map(([state, n]) => STATE_COLOR[state](`${n} ${state}`)).join(`   ${sym.dot} `));
 
-		log.info("  " + [...counts.entries()].map(([state, n]) => STATE_COLOR[state](`${n} ${state}`)).join(`   ${sym.dot} `));
-
-		for (const status of statuses) {
-			if (HEALTHY.has(status.state)) continue;
-
-			problems++;
-			log.info(`    ${STATE_COLOR[status.state](status.state.padEnd(9))} ${pc.bold(status.skill)}`);
+		for (const item of report.attention) {
+			log.info(`    ${STATE_COLOR[item.state](item.state.padEnd(9))} ${pc.bold(item.skill)}`);
 		}
 	}
 
-	if (problems > 0) {
-		log.warn(`${problems} item(s) need attention. Re-run \`install\` to fix drift; inspect conflicts by hand (or \`--force\`).`);
-		process.exitCode = 1;
-	} else {
-		log.ok("all installed skills are healthy");
-	}
+	if (problems > 0) log.warn(`${problems} item(s) need attention. Re-run \`install\` to fix drift; inspect conflicts by hand (or \`--force\`).`);
+	else log.ok("all installed skills are healthy");
 }

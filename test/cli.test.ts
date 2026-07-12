@@ -9,13 +9,15 @@ import { doctorCommand } from "../src/commands/doctor";
 // project-scope installs land in the temp dir instead of the real config dirs.
 let tmp: string;
 let cwd: string;
+let logSpy: ReturnType<typeof vi.spyOn>;
 const spies: { mockRestore: () => void }[] = [];
 
 beforeEach(() => {
 	tmp = fs.mkdtempSync(path.join(os.tmpdir(), "agent-skills-cli-"));
 	cwd = process.cwd();
 	process.chdir(tmp);
-	spies.push(vi.spyOn(console, "log").mockImplementation(() => {}));
+	logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+	spies.push(logSpy);
 	spies.push(vi.spyOn(console, "error").mockImplementation(() => {}));
 });
 afterEach(() => {
@@ -70,5 +72,17 @@ describe("installCommand (project scope)", () => {
 		fs.appendFileSync(path.join(tmp, ".cursor", "rules", "ed-plan.mdc"), "\nDRIFT\n");
 		doctorCommand({ target: ["cursor"], scope: "project" });
 		expect(process.exitCode).toBe(1); // drift flagged
+	});
+
+	it("doctor --json emits a machine-readable report", () => {
+		installCommand("install", ["ed-plan"], { target: ["cursor"], scope: "project" });
+		process.exitCode = 0;
+		logSpy.mockClear(); // drop the install output so we capture only the JSON
+
+		doctorCommand({ target: ["cursor"], scope: "project", json: true });
+		const data = JSON.parse(logSpy.mock.calls.flat().join("\n"));
+
+		expect(data.healthy).toBe(true);
+		expect(data.targets[0].counts.generated).toBe(1);
 	});
 });

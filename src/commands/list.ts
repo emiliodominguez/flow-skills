@@ -9,12 +9,28 @@ import { TARGETS } from "../targets/index.js";
  * `list` — show every skill in the repo and the available targets.
  *
  * @param opts - `targets` to also print the target adapters; `profiles` to print
- *   the configured install sets.
+ *   the configured install sets; `json` for a machine-readable dump.
  */
-export function listCommand(opts: { targets?: boolean; profiles?: boolean }): void {
+export function listCommand(opts: { targets?: boolean; profiles?: boolean; json?: boolean }): void {
 	const root = findRepoRoot();
 	const config = loadConfig(root);
 	const skills = discoverSkills(path.join(root, config.skillsDir));
+
+	if (opts.json) {
+		const payload = {
+			skills: skills.map((s) => ({
+				name: s.name,
+				version: typeof s.frontmatter.version === "string" ? s.frontmatter.version : null,
+				description: s.frontmatter.description,
+			})),
+			targets: Object.values(TARGETS).map((t) => ({ name: t.name, describe: t.describe })),
+			profiles: config.profiles,
+		};
+
+		console.log(JSON.stringify(payload, null, 2));
+
+		return;
+	}
 
 	log.heading(`Skills (${skills.length})`);
 	const width = Math.max(...skills.map((s) => sanitize(s.name).length), 0);

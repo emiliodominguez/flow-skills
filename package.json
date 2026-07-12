@@ -55,6 +55,7 @@
 		"*.{json,md,yml,yaml}": "prettier --write"
 	},
 	"dependencies": {
+		"@clack/prompts": "^1.7.0",
 		"commander": "^15.0.0",
 		"picocolors": "^1.1.1"
 	},

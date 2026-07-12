@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { log, sym, targetHeader, printActions, summarize } from "../src/core/logger";
+import { log, sym, targetHeader, printActions, summarize, isBlockedSkip, sanitize } from "../src/core/logger";
 import type { Action } from "../src/core/install-fs";
 
 // The logger writes to console; capture output so we can assert on the rendered lines.
@@ -115,11 +115,50 @@ describe("log", () => {
 		log.warn("careful");
 		log.step("working");
 		log.muted("quiet");
-		log.dim("dim");
 		log.heading("Section");
 		log.error("boom");
 
 		expect(out()).toContain("done");
 		expect(errSpy.mock.calls.flat().join("\n")).toContain("boom");
+	});
+});
+
+describe("isBlockedSkip / blocked-skip summary", () => {
+	it("classifies only unmanaged-collision skips as blocked", () => {
+		expect(isBlockedSkip({ verb: "skip", path: "/x", note: "exists, not managed by agent-skills" })).toBe(true);
+		expect(isBlockedSkip({ verb: "skip", path: "/x", note: "already linked" })).toBe(false);
+		expect(isBlockedSkip({ verb: "skip", path: "/x", note: "absent" })).toBe(false);
+		expect(isBlockedSkip({ verb: "symlink", path: "/x" })).toBe(false);
+	});
+
+	it("summarize splits blocked skips from benign ones", () => {
+		const actions: Action[] = [
+			{ verb: "symlink", path: "/x/a" },
+			{ verb: "skip", path: "/x/b", note: "already linked" },
+			{ verb: "skip", path: "/x/c", note: "exists, not managed by agent-skills — use --force to overwrite" },
+		];
+
+		expect(summarize(actions)).toBe(`1 linked ${sym.dot} 1 skipped ${sym.dot} 1 unchanged`);
+	});
+
+	it("words a bundle-uninstall rewrite as 'updated', not 'written'", () => {
+		const rewrite: Action = { verb: "write", path: "/dest/AGENTS.md", note: "updated" };
+
+		expect(summarize([rewrite])).toBe("1 updated");
+		printActions([rewrite]);
+		expect(out()).toContain("updated");
+	});
+});
+
+describe("sanitize", () => {
+	it("removes the control bytes so an escape sequence can't be acted on", () => {
+		// The ESC (\x1b) and BEL (\x07) are stripped; the now-inert printable
+		// payload ("[2J") remains as plain text — the terminal can't clear itself.
+		expect(sanitize("a\x1b[2Jb\x07c")).toBe("a[2Jbc");
+		expect(sanitize("plain")).toBe("plain");
+	});
+
+	it("keeps tab and newline", () => {
+		expect(sanitize("keep\tthis\nplease")).toBe("keep\tthis\nplease");
 	});
 });

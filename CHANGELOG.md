@@ -10,9 +10,19 @@ All notable changes to this project are documented here. Format follows
 - **Polished CLI output** — one shared logging vocabulary (glyphs + color) across every
   command. Install/uninstall/sync now print a target section header, aligned per-skill lines
   showing the skill name with a `+` / `−` / `·` outcome glyph and a dim outcome word, and a
-  one-line summary footer (e.g. `install complete · 22 linked`). `doctor` gained a bulleted
-  state summary; `validate` aligns its findings. Backticked command hints are highlighted, and
-  output degrades to plain text under `NO_COLOR` / non-TTY.
+  one-line summary footer (e.g. `install complete · 22 linked`). `doctor` and `validate` align
+  their output on the same vocabulary. Backticked command hints are highlighted, and output
+  degrades to plain text under `NO_COLOR` / non-TTY.
+
+### Fixed
+
+- From a multi-persona `/ed-review` of the logging change: a **blocked install no longer reads
+  as success** — skips split into "skipped" (blocked by an unmanaged file) vs. "unchanged", and
+  the footer warns when skills were left untouched (previously a fully-blocked run printed a
+  green `· 22 unchanged`). A bundle **uninstall** that rewrites the shared file now reads
+  "updated" instead of "written". The logger **sanitizes** repo-derived names/paths/messages
+  (strips C0/C1 control bytes) so a crafted skills repo can't smuggle terminal escape sequences
+  into the output. Removed a dead `log.dim` helper and de-duplicated the install/sync footer.
 
 ## [0.3.0] — 2026-07-11
 

@@ -225,7 +225,9 @@ export function removeManagedBlock(dest: string, dryRun: boolean): Action | null
 		else fs.writeFileSync(dest, next + "\n", "utf8");
 	}
 
-	return { verb: next.length === 0 ? "remove" : "write", path: dest, note: "managed block" };
+	// Emptied → the file we created is gone ("remove"); otherwise our block was
+	// rewritten without one skill — an "updated", which the logger words as such.
+	return next.length === 0 ? { verb: "remove", path: dest, note: "managed block" } : { verb: "write", path: dest, note: "updated" };
 }
 
 /**

@@ -60,7 +60,7 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 
 		for (const status of statuses) counts.set(status.state, (counts.get(status.state) ?? 0) + 1);
 
-		log.info("  " + [...counts.entries()].map(([state, n]) => STATE_COLOR[state](`${sym.bullet} ${n} ${state}`)).join("   "));
+		log.info("  " + [...counts.entries()].map(([state, n]) => STATE_COLOR[state](`${n} ${state}`)).join(`   ${sym.dot} `));
 
 		for (const status of statuses) {
 			if (HEALTHY.has(status.state)) continue;

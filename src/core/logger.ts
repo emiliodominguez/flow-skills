@@ -8,14 +8,30 @@ export const sym = {
 	ok: "✓",
 	err: "✗",
 	warn: "⚠",
-	info: "›",
+	step: "›",
 	arrow: "→",
 	dot: "·",
-	bullet: "•",
 	added: "+",
+	// U+2212 MINUS SIGN (not ASCII "-"), so the removal glyph optically matches the
+	// weight and width of the "+" added glyph in aligned columns.
 	removed: "−",
 	changed: "~",
 };
+
+/**
+ * Strip C0/C1 control bytes (except tab/newline) from text that originates in a
+ * skills repo — a directory basename or frontmatter value the user may not have
+ * authored — so a crafted repo can't smuggle raw terminal escape sequences into
+ * the output. Our own color codes are applied *after* this, so they're unaffected.
+ *
+ * @param text - Untrusted, repo-derived text.
+ * @returns The text with control characters removed.
+ */
+export function sanitize(text: string): string {
+	// C0 controls (keeping \t = \x09 and \n = \x0A), DEL, and C1 controls.
+	// eslint-disable-next-line no-control-regex
+	return text.replace(/[\x00-\x08\x0B-\x1F\x7F-\x9F]/g, "");
+}
 
 /**
  * Colorize backticked `code` spans so command hints stand out in any message.
@@ -31,11 +47,10 @@ function emphasizeCode(msg: string): string {
 export const log = {
 	info: (msg: string) => console.log(emphasizeCode(msg)),
 	muted: (msg: string) => console.log(pc.dim(emphasizeCode(msg))),
-	step: (msg: string) => console.log(`${pc.cyan(sym.info)} ${emphasizeCode(msg)}`),
+	step: (msg: string) => console.log(`${pc.cyan(sym.step)} ${emphasizeCode(msg)}`),
 	ok: (msg: string) => console.log(`${pc.green(sym.ok)} ${emphasizeCode(msg)}`),
 	warn: (msg: string) => console.log(`${pc.yellow(sym.warn)} ${emphasizeCode(msg)}`),
 	error: (msg: string) => console.error(`${pc.red(sym.err)} ${emphasizeCode(msg)}`),
-	dim: (msg: string) => console.log(pc.dim(msg)),
 	heading: (msg: string) => console.log(`\n${pc.bold(msg)}`),
 };
 
@@ -49,7 +64,7 @@ export const log = {
  * @param note - Optional trailing note (e.g. "symlink", "generated").
  */
 export function targetHeader(name: string, dest: string, note?: string): void {
-	const where = pc.dim(`${sym.arrow} ${prettyPath(dest)}`);
+	const where = pc.dim(`${sym.arrow} ${sanitize(prettyPath(dest))}`);
 	const tail = note ? pc.dim(` ${sym.dot} ${note}`) : "";
 
 	console.log(`\n${pc.bold(name)} ${where}${tail}`);
@@ -72,6 +87,35 @@ const VERB: Record<Action["verb"], VerbStyle> = {
 };
 
 /**
+ * A skip that flags an unmanaged collision — the adapters phrase these
+ * "… not managed …" and the user must resolve them with `--force`. Distinct
+ * from a benign "already linked" / "absent" skip that needs no attention.
+ *
+ * @param action - The action to classify.
+ * @returns True when the action is a skip blocked by an unmanaged entry.
+ */
+export function isBlockedSkip(action: Action): boolean {
+	return action.verb === "skip" && !!action.note?.includes("not managed");
+}
+
+/**
+ * The single summary word for an action. Folds the two context distinctions the
+ * raw verb can't express: a bundle uninstall that rewrites the file (tagged
+ * `note: "updated"`) reads "updated" not "written", and skips split into blocked
+ * "skipped" vs. benign "unchanged".
+ *
+ * @param action - The action to classify.
+ * @returns The past-tense summary word.
+ */
+function wordFor(action: Action): string {
+	if (action.verb === "skip") return isBlockedSkip(action) ? "skipped" : "unchanged";
+
+	if (action.verb === "write" && action.note === "updated") return "updated";
+
+	return VERB[action.verb].word;
+}
+
+/**
  * The dim detail shown after a skill's name for one action. The verbose
  * `→ <src>` note on a symlink is dropped (the header already says where).
  *
@@ -85,6 +129,8 @@ function detailFor(action: Action): string {
 
 	if (action.verb === "backup") return action.note ? `${word} ${action.note}` : word;
 
+	if (action.verb === "write" && action.note === "updated") return "updated";
+
 	if (action.verb === "write" || action.verb === "remove") return action.note ? `${word} (${action.note})` : word;
 
 	return word;
@@ -92,20 +138,19 @@ function detailFor(action: Action): string {
 
 /**
  * Print a block of actions as aligned, colorized lines under a target header.
- * Shows each entry's basename (the directory is in the header) plus a dim
- * outcome word.
+ * Shows each entry's (sanitized) basename plus a dim outcome word.
  *
  * @param actions - The recorded actions for one target.
  */
 export function printActions(actions: Action[]): void {
-	const width = Math.max(0, ...actions.map((a) => path.basename(a.path).length));
+	const names = actions.map((action) => sanitize(path.basename(action.path)));
+	const width = Math.max(0, ...names.map((name) => name.length));
 
-	for (const action of actions) {
+	actions.forEach((action, i) => {
 		const { glyph, color } = VERB[action.verb];
-		const name = path.basename(action.path).padEnd(width);
 
-		console.log(`  ${color(glyph)} ${name}  ${pc.dim(detailFor(action))}`);
-	}
+		console.log(`  ${color(glyph)} ${names[i]!.padEnd(width)}  ${pc.dim(detailFor(action))}`);
+	});
 }
 
 /**
@@ -117,13 +162,42 @@ export function printActions(actions: Action[]): void {
 export function summarize(actions: Action[]): string {
 	if (actions.length === 0) return "";
 
-	const order: Action["verb"][] = ["symlink", "copy", "write", "remove", "backup", "skip"];
-	const counts = new Map<Action["verb"], number>();
+	// Display order for the phrase — a superset of VERB.word (writes can read
+	// "updated"; skips split into "skipped"/"unchanged"), so it's kept explicit.
+	const order = ["linked", "copied", "written", "updated", "removed", "backed up", "skipped", "unchanged"];
+	const counts = new Map<string, number>();
 
-	for (const action of actions) counts.set(action.verb, (counts.get(action.verb) ?? 0) + 1);
+	for (const action of actions) {
+		const word = wordFor(action);
+
+		counts.set(word, (counts.get(word) ?? 0) + 1);
+	}
 
 	return order
-		.filter((verb) => counts.get(verb))
-		.map((verb) => `${counts.get(verb)} ${VERB[verb].word}`)
+		.filter((word) => counts.get(word))
+		.map((word) => `${counts.get(word)} ${word}`)
 		.join(` ${sym.dot} `);
+}
+
+/**
+ * Print the completion footer for an install/uninstall/sync run: a one-line
+ * summary, plus a warning when skills were left untouched by an unmanaged
+ * collision — so a blocked run is never reported as an unqualified success.
+ *
+ * @param label - The completed action, e.g. "install complete".
+ * @param actions - Every action the run performed.
+ * @param opts - `dryRun` to phrase it as a preview; `whenEmpty` for the no-action text.
+ */
+export function reportSummary(label: string, actions: Action[], opts: { dryRun?: boolean; whenEmpty: string }): void {
+	const phrase = summarize(actions) || opts.whenEmpty;
+
+	if (opts.dryRun) log.muted(`\ndry run ${sym.dot} ${phrase}`);
+	else log.ok(`${label} ${pc.dim(`${sym.dot} ${phrase}`)}`);
+
+	const blocked = actions.filter(isBlockedSkip).length;
+
+	if (blocked > 0)
+		log.warn(
+			`${blocked} skill${blocked === 1 ? "" : "s"} left untouched (exists, not managed) — re-run with \`--force\`, or inspect with \`doctor\`.`,
+		);
 }

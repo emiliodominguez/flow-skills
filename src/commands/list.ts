@@ -2,7 +2,7 @@ import path from "node:path";
 import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
-import { log } from "../core/logger.js";
+import { log, sanitize } from "../core/logger.js";
 import { TARGETS } from "../targets/index.js";
 
 /**
@@ -17,16 +17,16 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean }): vo
 	const skills = discoverSkills(path.join(root, config.skillsDir));
 
 	log.heading(`Skills (${skills.length})`);
-	const width = Math.max(...skills.map((s) => s.name.length), 0);
+	const width = Math.max(...skills.map((s) => sanitize(s.name).length), 0);
 	// Reserve a version column only if at least one skill declares a version.
-	const versionOf = (s: (typeof skills)[number]) => (typeof s.frontmatter.version === "string" ? s.frontmatter.version : "");
+	const versionOf = (s: (typeof skills)[number]) => (typeof s.frontmatter.version === "string" ? sanitize(s.frontmatter.version) : "");
 	const verWidth = Math.max(...skills.map((s) => versionOf(s).length), 0);
 
 	for (const skill of skills) {
-		const summary = skill.frontmatter.description.split(/[.—]/)[0]!.trim().slice(0, 90);
+		const summary = sanitize(skill.frontmatter.description.split(/[.—]/)[0]!.trim().slice(0, 90));
 		const ver = verWidth > 0 ? pc.dim(("v" + (versionOf(skill) || "—")).padEnd(verWidth + 2)) + " " : "";
 
-		console.log(`  ${pc.bold(skill.name.padEnd(width))}  ${ver}${pc.dim(summary)}`);
+		console.log(`  ${pc.bold(sanitize(skill.name).padEnd(width))}  ${ver}${pc.dim(summary)}`);
 	}
 
 	if (opts.targets) {

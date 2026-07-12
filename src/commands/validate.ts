@@ -3,7 +3,7 @@ import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
 import { validateReferences, validateSkill, type Issue, type Skill } from "../core/skill.js";
-import { log, sym } from "../core/logger.js";
+import { log, sym, sanitize } from "../core/logger.js";
 
 /**
  * Run all validations over an already-loaded skill set.
@@ -44,13 +44,14 @@ export function validateCommand(opts: { strict?: boolean }): void {
 
 	const errors = issues.filter((i) => i.level === "error");
 	const warns = issues.filter((i) => i.level === "warn");
-	const width = Math.max(0, ...issues.map((i) => i.skill.length));
+	// Skill names and messages embed repo-derived frontmatter; sanitize before printing.
+	const width = Math.max(0, ...issues.map((i) => sanitize(i.skill).length));
 
 	for (const issue of issues) {
 		const isError = issue.level === "error";
 		const tag = (isError ? pc.red : pc.yellow)(`${isError ? sym.err : sym.warn} ${(isError ? "error" : "warn").padEnd(5)}`);
 
-		console.log(`  ${tag}  ${pc.bold(issue.skill.padEnd(width))}  ${pc.dim(issue.rule)} ${pc.dim(sym.dot)} ${issue.message}`);
+		console.log(`  ${tag}  ${pc.bold(sanitize(issue.skill).padEnd(width))}  ${pc.dim(issue.rule)} ${pc.dim(sym.dot)} ${sanitize(issue.message)}`);
 	}
 
 	log.heading(`Checked ${skills.length} skill${skills.length === 1 ? "" : "s"}`);

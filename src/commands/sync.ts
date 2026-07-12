@@ -1,9 +1,8 @@
 import path from "node:path";
-import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
 import { resolveTargetPath } from "../core/paths.js";
-import { log, printActions, targetHeader, summarize, sym } from "../core/logger.js";
+import { log, printActions, targetHeader, reportSummary } from "../core/logger.js";
 import type { Action } from "../core/install-fs.js";
 import { getTarget } from "../targets/index.js";
 import type { SkillState } from "../targets/types.js";
@@ -69,9 +68,6 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 		log.error(`sync failed for: ${failures.join(", ")}`);
 		process.exitCode = 1;
 	} else {
-		const phrase = summarize(allActions) || "nothing installed anywhere";
-
-		if (opts.dryRun) log.muted(`\ndry run ${sym.dot} ${phrase}`);
-		else log.ok(`sync complete ${pc.dim(`${sym.dot} ${phrase}`)}`);
+		reportSummary("sync complete", allActions, { dryRun: opts.dryRun, whenEmpty: "nothing installed anywhere" });
 	}
 }

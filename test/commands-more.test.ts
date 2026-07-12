@@ -6,9 +6,11 @@ import { newCommand } from "../src/commands/new";
 import { validateCommand } from "../src/commands/validate";
 
 const spies: { mockRestore: () => void }[] = [];
+let logSpy: ReturnType<typeof vi.spyOn>;
 
 function silence() {
-	spies.push(vi.spyOn(console, "log").mockImplementation(() => {}));
+	logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+	spies.push(logSpy);
 	spies.push(vi.spyOn(console, "error").mockImplementation(() => {}));
 }
 
@@ -80,9 +82,13 @@ describe("validateCommand", () => {
 	beforeEach(silence);
 	afterEach(restore);
 
-	it("passes on the clean corpus and does not set an error exit code", () => {
+	it("passes on the clean corpus and reports a non-zero skill count", () => {
 		validateCommand({});
 
+		const output = logSpy.mock.calls.flat().join("\n");
+
+		// Guard against a vacuous pass: it must have actually checked skills.
+		expect(output).toMatch(/Checked [1-9]\d* skills/);
 		expect(process.exitCode).toBeFalsy();
 	});
 

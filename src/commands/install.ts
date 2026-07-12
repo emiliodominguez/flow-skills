@@ -4,7 +4,7 @@ import pc from "picocolors";
 import { findRepoRoot, loadConfig, type Config } from "../core/config.js";
 import { selectSkills } from "../core/registry.js";
 import { resolveTargetPath, prettyPath } from "../core/paths.js";
-import { log, printActions, targetHeader, summarize, sym } from "../core/logger.js";
+import { log, printActions, targetHeader, reportSummary, sym } from "../core/logger.js";
 import type { Action } from "../core/install-fs.js";
 import { getTarget } from "../targets/index.js";
 
@@ -81,10 +81,7 @@ export function installCommand(mode: "install" | "uninstall", skillNames: string
 		log.error(`${mode} failed for: ${failures.join(", ")}`);
 		process.exitCode = 1;
 	} else {
-		const phrase = summarize(actions) || "no changes";
-
-		if (opts.dryRun) log.muted(`\ndry run ${sym.dot} ${phrase}`);
-		else log.ok(`${mode} complete ${pc.dim(`${sym.dot} ${phrase}`)}`);
+		reportSummary(`${mode} complete`, actions, { dryRun: opts.dryRun, whenEmpty: "no changes" });
 	}
 
 	if (mode === "install" && opts.watch && !opts.dryRun) watch(selected, opts, config, skillsDir);

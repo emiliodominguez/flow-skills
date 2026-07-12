@@ -1,6 +1,7 @@
 # The ed-* skill suite
 
-A connected workflow. Each skill does one job and hands off to the next.
+A connected workflow. Each skill does one job and hands off to the next. For a
+rendered graph of every handoff, see the auto-generated [SKILL-MAP.md](SKILL-MAP.md).
 
 ```
 ed-onboard    ──map an unfamiliar codebase──┐

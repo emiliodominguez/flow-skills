@@ -5,6 +5,7 @@ Start with the [project README](../README.md) for install and usage. These docs 
 ## For users
 
 - **[SKILLS.md](SKILLS.md)** — catalog of every skill and what it's for (auto-generated).
+- **[SKILL-MAP.md](SKILL-MAP.md)** — a rendered graph of how the skills hand off (auto-generated).
 - **[OVERVIEW.md](OVERVIEW.md)** — the skill workflow, how the skills connect, and the
   practices behind them.
 - **[CONFIGURATION.md](CONFIGURATION.md)** — config file reference: targets, scopes, install

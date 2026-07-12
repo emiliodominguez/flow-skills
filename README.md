@@ -182,14 +182,15 @@ reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ## Documentation
 
-| Doc                                                               | What's in it                                              |
-| ----------------------------------------------------------------- | --------------------------------------------------------- |
-| [docs/SKILLS.md](docs/SKILLS.md)                                  | Catalog of every skill and what it's for (auto-generated) |
-| [docs/OVERVIEW.md](docs/OVERVIEW.md)                              | The skill workflow and the practices behind it            |
-| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference — targets, scopes, paths                 |
-| [docs/AUTHORING.md](docs/AUTHORING.md)                            | How to write a good skill                                 |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                      | How the CLI works + the safety model                      |
-| [CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md) | Contributing & release history                            |
+| Doc                                                               | What's in it                                               |
+| ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| [docs/SKILLS.md](docs/SKILLS.md)                                  | Catalog of every skill and what it's for (auto-generated)  |
+| [docs/SKILL-MAP.md](docs/SKILL-MAP.md)                            | Rendered graph of how the skills hand off (auto-generated) |
+| [docs/OVERVIEW.md](docs/OVERVIEW.md)                              | The skill workflow and the practices behind it             |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference — targets, scopes, paths                  |
+| [docs/AUTHORING.md](docs/AUTHORING.md)                            | How to write a good skill                                  |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                      | How the CLI works + the safety model                       |
+| [CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md) | Contributing & release history                             |
 
 ---
 

@@ -76,7 +76,7 @@ Get reviewed changes to production safely — atomic commits with conventional-c
 
 ## [ed-simplify](skills/ed-simplify.md) `v0.1.0`
 
-Aggressively reduce code — strip AI slop, kill single-use abstractions, delete defensive checks for impossible cases, collapse indirection, and shrink files to essence WITHOUT changing behavior. Use when the user says "simplify", "deslop", "reduce", "trim", "make shorter", "too much code", "clean up", "bloated", "overengineered", or complains about AI artifacts (excessive comments, single-use helpers, defensive checks). Default scope is changed files on the current branch vs main; triggers automatically as a post-step in /ed-review when slop is detected. Hands off to /ed-review then /ed-ship.
+Aggressively reduce code — strip AI slop, kill single-use abstractions, delete defensive checks for impossible cases, collapse indirection, and shrink files to essence WITHOUT changing behavior. Use when the user says "simplify", "deslop", "reduce", "trim", "make shorter", "too much code", "clean up", "bloated", "overengineered", or complains about AI artifacts (excessive comments, single-use helpers, defensive checks) — also /ed-simplify. Default scope is changed files on the current branch vs main; triggers automatically as a post-step in /ed-review when slop is detected. Hands off to /ed-review then /ed-ship.
 
 ## [ed-styles](skills/ed-styles.md) `v0.1.0`
 

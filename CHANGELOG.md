@@ -7,6 +7,9 @@ All notable changes to this project are documented here. Format follows
 
 ### Added
 
+- **Skill handoff map** — `pnpm docs:gen` now emits `docs/SKILL-MAP.md`, a Mermaid graph (plus
+  a text list) of how each skill hands off to the next, parsed from the descriptions and
+  enforced fresh by CI. Linked from the README and OVERVIEW.
 - **Deeper skill lint** — `validate` now warns on filler/weasel words in the body, a
   too-thin description (`< 80` chars), and a description that doesn't name its own
   `/<skill>` trigger, on top of the existing structural checks.

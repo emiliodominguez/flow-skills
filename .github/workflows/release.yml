@@ -39,7 +39,7 @@ jobs:
       # Pinned to a full commit SHA (supply-chain): this is the only step that sees the
       # npm token, and the token is scoped to this step's env — not the whole workflow.
       - name: Create version PR or publish
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1
+        uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v1
         with:
           version: pnpm run version:packages
           # Empty publish command until NPM_TOKEN exists → version-PR only, never a failed publish.

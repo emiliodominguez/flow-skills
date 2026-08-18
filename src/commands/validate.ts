@@ -33,7 +33,7 @@ export function validateAll(skillsDir: string): { skills: Skill[]; issues: Issue
 }
 
 /**
- * `validate` — structural checks on every skill; exits non-zero on any error.
+ * `validate` - structural checks on every skill; exits non-zero on any error.
  *
  * @param opts - `strict` to also fail on warnings.
  */

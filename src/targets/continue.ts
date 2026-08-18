@@ -18,13 +18,13 @@ function build(skill: Skill): string {
 }
 
 /**
- * Continue — one Markdown rule per skill under `.continue/rules/`. Continue reads
+ * Continue - one Markdown rule per skill under `.continue/rules/`. Continue reads
  * each `.md` in that directory as a rule; each skill becomes its own file and
  * uninstall only touches files carrying our marker.
  */
 export const continueTarget: Target = {
 	name: "continue",
-	describe: "Continue — .continue/rules/<name>.md (one rule file per skill)",
+	describe: "Continue - .continue/rules/<name>.md (one rule file per skill)",
 	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {

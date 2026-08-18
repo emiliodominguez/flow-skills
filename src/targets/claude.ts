@@ -3,7 +3,7 @@ import path from "node:path";
 import type { Action } from "../core/install-fs.js";
 import { backup, copyDir, isSymlinkTo, removePath, symlink, writeFile } from "../core/install-fs.js";
 import type { InstallContext, SkillStatus, Target } from "./types.js";
-import { MANAGED_LINE } from "./render.js";
+import { LEGACY_MANAGED_LINE, MANAGED_LINE } from "./render.js";
 
 /** Dropped into a copied skill dir so uninstall can tell a copy of ours from a user's own dir. */
 const MARKER = ".agent-skills";
@@ -97,7 +97,7 @@ function hasRecordedSymlink(dest: string): boolean {
 }
 
 /**
- * Any entry (dir, file, or symlink — including a broken one) exists at `p`.
+ * Any entry (dir, file, or symlink - including a broken one) exists at `p`.
  *
  * @param p - The path to test.
  * @returns True if any entry exists at `p`.
@@ -133,7 +133,11 @@ function hasManagedCopyMarker(dest: string): boolean {
 	const marker = path.join(dest, MARKER);
 
 	try {
-		return fs.lstatSync(marker).isFile() && fs.readFileSync(marker, "utf8") === MANAGED_LINE + "\n";
+		if (!fs.lstatSync(marker).isFile()) return false;
+
+		const contents = fs.readFileSync(marker, "utf8");
+
+		return contents === MANAGED_LINE + "\n" || contents === LEGACY_MANAGED_LINE + "\n";
 	} catch {
 		return false;
 	}
@@ -176,7 +180,7 @@ function sameSkillTree(source: string, installed: string): boolean {
 }
 
 /**
- * Claude Code — the native format. Each skill is a directory containing SKILL.md
+ * Claude Code - the native format. Each skill is a directory containing SKILL.md
  * under `~/.claude/skills/<name>/`. Symlink mode points the entry at the repo so
  * edits are live; copy mode drops a frozen snapshot (marked so uninstall is safe).
  * A directory we did not create is never touched without `--force`, and even then
@@ -184,7 +188,7 @@ function sameSkillTree(source: string, installed: string): boolean {
  */
 export const claudeTarget: Target = {
 	name: "claude",
-	describe: "Claude Code — ~/.claude/skills/<name>/SKILL.md (native; symlink or copy)",
+	describe: "Claude Code - ~/.claude/skills/<name>/SKILL.md (native; symlink or copy)",
 	supportsSymlink: true,
 
 	install(ctx: InstallContext): Action[] {
@@ -194,7 +198,7 @@ export const claudeTarget: Target = {
 			const actions: Action[] = [];
 
 			if (present(dest) && !isManaged(dest, skill.dir)) {
-				if (!ctx.force) return [{ verb: "skip", path: dest, note: "exists, not managed by agent-skills — use --force to overwrite" }];
+				if (!ctx.force) return [{ verb: "skip", path: dest, note: "exists, not managed by agent-skills - use --force to overwrite" }];
 
 				actions.push(backup(dest, Date.now(), ctx.dryRun));
 			}
@@ -244,7 +248,7 @@ export const claudeTarget: Target = {
 				return [action];
 			}
 
-			return [{ verb: "skip", path: dest, note: "not managed by agent-skills — use --force to remove" }];
+			return [{ verb: "skip", path: dest, note: "not managed by agent-skills - use --force to remove" }];
 		});
 
 		writeManifest(ctx.dest, manifest, ctx.dryRun);

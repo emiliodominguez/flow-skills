@@ -28,7 +28,7 @@ jobs:
           pnpm run docs:gen
           git add -A docs/
           git diff --cached --exit-code docs/ || {
-            echo "::error::Generated docs are stale — run 'pnpm docs:gen' and commit the result."
+            echo "::error::Generated docs are stale - run 'pnpm docs:gen' and commit the result."
             exit 1
           }
       - name: Audit production dependencies
@@ -42,7 +42,7 @@ jobs:
         os: [ubuntu-latest]
         node: [22, 24]
         # Windows has no unprivileged symlinks, so the native target falls back to
-        # copy there — one Windows job exercises that path.
+        # copy there - one Windows job exercises that path.
         include:
           - os: windows-latest
             node: 22

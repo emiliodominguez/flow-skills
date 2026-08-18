@@ -79,7 +79,7 @@ async function grade(body: string, beats: string[], apiKey: string): Promise<Ver
 const apiKey = process.env.ANTHROPIC_API_KEY;
 
 if (!apiKey) {
-	console.log("ANTHROPIC_API_KEY is not set — skipping LLM evals.");
+	console.log("ANTHROPIC_API_KEY is not set - skipping LLM evals.");
 	console.log("The model-free beat check runs in `pnpm test`. Set the key to grade with a judge model.");
 	process.exit(0);
 }
@@ -104,15 +104,15 @@ for (const skill of targets) {
 		const verdicts = await grade(skill.body, list, apiKey);
 		const missing = verdicts.filter((v) => !v.present);
 
-		console.log(`${missing.length === 0 ? "✓" : "✗"} ${skill.name} — ${list.length - missing.length}/${list.length} beats`);
+		console.log(`${missing.length === 0 ? "✓" : "✗"} ${skill.name} - ${list.length - missing.length}/${list.length} beats`);
 
 		for (const miss of missing) {
 			failed++;
-			console.log(`    ✗ ${miss.beat} — ${miss.why ?? ""}`);
+			console.log(`    ✗ ${miss.beat} - ${miss.why ?? ""}`);
 		}
 	} catch (err) {
 		failed++;
-		console.log(`! ${skill.name} — eval error: ${err instanceof Error ? err.message : String(err)}`);
+		console.log(`! ${skill.name} - eval error: ${err instanceof Error ? err.message : String(err)}`);
 	}
 }
 

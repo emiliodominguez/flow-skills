@@ -4,7 +4,7 @@ Author agent skills **once**, install them **anywhere**.
 
 A source-of-truth repo for a suite of workflow skills (the `ed-*` family) plus a small,
 tested CLI that installs them into **Claude Code**, **Codex**, **Cursor**,
-**Windsurf**, **GitHub Copilot**, **Zed**, **aider**, **Cline**, and **Continue** — with
+**Windsurf**, **GitHub Copilot**, **Zed**, **aider**, **Cline**, and **Continue** - with
 validation, scaffolding, and a symlink-or-copy installer.
 
 ```sh
@@ -36,15 +36,15 @@ A connected workflow that moves work from idea to shipped. See the full map in
 | Phase          | Skills                                                                                                                         |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Think**      | `ed-brainstorm` · `ed-prototype`                                                                                               |
-| **Understand** | `ed-onboard` — map an unfamiliar codebase fast                                                                                 |
-| **Plan**       | `ed-plan` — parallel research, writes `.plans/<file>`                                                                          |
+| **Understand** | `ed-onboard` - map an unfamiliar codebase fast                                                                                 |
+| **Plan**       | `ed-plan` - parallel research, writes `.plans/<file>`                                                                          |
 | **Build**      | `ed-work` · `ed-test` (test strategy) · `ed-migrate` (cross-file sweeps)                                                       |
 | **Check**      | `ed-review` (persona panel + verification) · `ed-adversarial-review` (red-team)                                                |
 | **Polish**     | `ed-simplify` · `ed-refactor`                                                                                                  |
 | **Ship**       | `ed-ship` · `ed-commit` · `ed-docs` · `ed-pr-fix` · `ed-git-fix`                                                               |
 | **Support**    | `ed-diagnose` · `ed-triage` · `ed-benchmark` · `ed-deps` · `ed-handoff` · `ed-styles` · `ed-animate` · `ed-prune-claude-setup` |
 
-`ed-plan` writes a plan file, then you execute it in a **fresh session** with `/ed-work` —
+`ed-plan` writes a plan file, then you execute it in a **fresh session** with `/ed-work` -
 planning and building don't share a crowded context window.
 
 ---
@@ -53,11 +53,11 @@ planning and building don't share a crowded context window.
 
 **Requirements:** Node ≥ 22. pnpm is auto-enabled via corepack if missing.
 
-> This is a **private, personal** repo — it's not published to npm, and the `git clone` /
+> This is a **private, personal** repo - it's not published to npm, and the `git clone` /
 > `npx github:` paths assume your git is authenticated to it (they work on your own machines,
 > not for the public).
 
-### Option A — bootstrap script (no setup)
+### Option A - bootstrap script (no setup)
 
 ```sh
 git clone https://github.com/emiliodominguez/agent-skills.git
@@ -67,7 +67,7 @@ cd agent-skills
 ./install.sh -- --copy             # → copy a frozen snapshot instead of symlinking
 ```
 
-### Option B — pnpm
+### Option B - pnpm
 
 ```sh
 pnpm install
@@ -75,7 +75,7 @@ pnpm skills install                # default target(s) from config
 pnpm skills install -t windsurf -s project   # into ./.windsurf/rules of the current project
 ```
 
-### Option C — one-off via npx (from git, if you have access)
+### Option C - one-off via npx (from git, if you have access)
 
 ```sh
 npx github:emiliodominguez/agent-skills install -t claude
@@ -138,11 +138,11 @@ a curated subset with a profile: `agent-skills install --profile frontend`.
 | **continue** | `.md` rule                        | one file per skill in `.continue/rules/`            |
 
 The `claude` and `codex` targets support symlinking because their native format is identical
-to the source. The others are transformed, so they're always generated fresh — re-run
+to the source. The others are transformed, so they're always generated fresh - re-run
 `install` (or `sync`) to update. The bundle targets (copilot, zed, aider) merge every skill into one delimited
 managed block, preserving any surrounding content you wrote in the same file.
 
-### Safety — what it will and won't touch
+### Safety model
 
 The installer writes into your real config directories, so it never destroys anything it did
 not create:
@@ -154,11 +154,11 @@ not create:
   marked files.
 - On upgrade, **codex** removes only the old installer-managed block from `AGENTS.md` and
   migrates provably managed legacy `~/.codex/skills` entries; user-authored content is preserved.
-- `--force` never deletes outright — it **backs the entry up** to a `.bak-<n>` sibling first.
+- `--force` never deletes outright - it **backs the entry up** to a `.bak-<n>` sibling first.
 - On Windows (no symlink privilege), the native target automatically falls back to `--copy`.
 - `--dry-run` previews every action; `doctor` reports drift without changing anything.
 
-Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety-model--what-the-tool-will-and-wont-touch).
+Full detail: [Safety model](docs/ARCHITECTURE.md#safety-model).
 
 ---
 
@@ -184,7 +184,7 @@ Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety
 ```
 
 Paths for the non-native targets follow each tool's documented convention; adjust them here
-if your version differs (the newer tools' rules directories move — re-check yours). A
+if your version differs (the newer tools' rules directories move - re-check yours). A
 `profiles` map lets you curate subsets for `install --profile <name>`. Keep machine-specific
 overrides in a git-ignored `.agent-skills.local.json` (same shape, deep-merged on top). Full
 reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
@@ -198,7 +198,7 @@ reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 | [docs/SKILLS.md](docs/SKILLS.md)                                  | Catalog of every skill and what it's for (auto-generated)  |
 | [docs/SKILL-MAP.md](docs/SKILL-MAP.md)                            | Rendered graph of how the skills hand off (auto-generated) |
 | [docs/OVERVIEW.md](docs/OVERVIEW.md)                              | The skill workflow and the practices behind it             |
-| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference — targets, scopes, paths                  |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference - targets, scopes, paths                  |
 | [docs/AUTHORING.md](docs/AUTHORING.md)                            | How to write a good skill                                  |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                      | How the CLI works + the safety model                       |
 | [CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md) | Contributing & release history                             |
@@ -208,7 +208,7 @@ reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 ## Author a new skill
 
 ```sh
-pnpm skills new my-skill -d "One line: what it does — when to use — handoff."
+pnpm skills new my-skill -d "One line: what it does - when to use - handoff."
 # edit skills/my-skill/SKILL.md
 pnpm skills validate
 pnpm skills install -t claude codex
@@ -223,7 +223,7 @@ See [`docs/AUTHORING.md`](docs/AUTHORING.md) and [`CONTRIBUTING.md`](CONTRIBUTIN
 
 ```sh
 pnpm skills <cmd>       # run the CLI from source (tsx)
-pnpm test               # vitest — corpus validation, adapters, core units, CLI
+pnpm test               # vitest - corpus validation, adapters, core units, CLI
 pnpm run test:coverage  # vitest with v8 coverage (70% threshold)
 pnpm run typecheck      # tsc over src + test + scripts
 pnpm run lint           # eslint (typescript-eslint)
@@ -233,13 +233,11 @@ pnpm smoke              # pack + install the tarball in a clean project, run the
 pnpm run build          # bundle to dist/ (tsup)
 ```
 
-A husky pre-commit hook runs prettier + eslint on staged files. CI runs three jobs on every
-push and PR: **lint** (eslint, format, docs-freshness, prod-dependency audit), **test**
-(typecheck, validate, coverage on a Node 22/24 + Windows matrix), and **pack** (the packaging
-smoke test). A push to `main` runs the **changesets** release workflow — it opens a "version
-packages" PR when changesets are pending, so version + `CHANGELOG` bumps are automated (see
-[CONTRIBUTING.md](CONTRIBUTING.md#releasing-changesets)). Publishing to npm is intentionally
-off (private repo); the flow is versioning-only.
+A husky pre-commit hook runs prettier + eslint on staged files. The repository keeps CI and
+Changesets workflow definitions for linting, tests, packaging, and release versioning, but
+GitHub Actions is currently disabled. Run the gate above locally before merging. Follow the
+manual release steps in [CONTRIBUTING.md](CONTRIBUTING.md#releasing-changesets) when a version
+is ready. Publishing to npm requires explicit npm authentication.
 
 ---
 
@@ -258,7 +256,7 @@ destination that this tool didn't create. Inspect it; if it's safe to replace, r
 uses the pre-native bundle path. Change it to `~/.agents/skills` (user) or `.agents/skills`
 (project), then re-run; the installer removes only its legacy managed block.
 
-**`pnpm install` warns about ignored build scripts (esbuild).** Allow it once — this repo
+**`pnpm install` warns about ignored build scripts (esbuild).** Allow it once - this repo
 already lists esbuild in `pnpm-workspace.yaml`; run `pnpm install` again after cloning.
 
 **Broken symlinks after moving the repo.** Symlinked native (`claude`/`codex`) installs point at the repo's
@@ -268,4 +266,4 @@ path. If you move the repo, re-run `pnpm skills install` to repoint them, or use
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).

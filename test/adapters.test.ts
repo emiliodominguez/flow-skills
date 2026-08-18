@@ -13,7 +13,7 @@ import { continueTarget } from "../src/targets/continue";
 import { copilotTarget } from "../src/targets/copilot";
 import { zedTarget } from "../src/targets/zed";
 import { aiderTarget } from "../src/targets/aider";
-import { MANAGED_LINE } from "../src/targets/render";
+import { LEGACY_MANAGED_LINE, MANAGED_LINE } from "../src/targets/render";
 import { BLOCK_START, writeManagedBlock } from "../src/core/install-fs";
 import type { InstallContext } from "../src/targets/types";
 
@@ -57,6 +57,19 @@ describe("claude target", () => {
 		expect(fs.existsSync(path.join(copied, ".agent-skills"))).toBe(true);
 		// A marked copy is recognised as ours and removed on uninstall.
 		const actions = claudeTarget.uninstall(ctx({ dest, mode: "copy" }));
+
+		expect(actions[0]!.verb).toBe("remove");
+		expect(fs.existsSync(copied)).toBe(false);
+	});
+
+	it("recognizes copies created with the legacy marker", () => {
+		const dest = path.join(tmp, "skills");
+		const copied = path.join(dest, skills[0]!.name);
+
+		fs.cpSync(skills[0]!.dir, copied, { recursive: true });
+		fs.writeFileSync(path.join(copied, ".agent-skills"), LEGACY_MANAGED_LINE + "\n");
+
+		const actions = claudeTarget.uninstall(ctx({ dest, skills: [skills[0]!] }));
 
 		expect(actions[0]!.verb).toBe("remove");
 		expect(fs.existsSync(copied)).toBe(false);
@@ -217,6 +230,40 @@ describe("cursor / windsurf (file-per-skill)", () => {
 		cursorTarget.uninstall(ctx({ dest }));
 		expect(fs.existsSync(file)).toBe(false);
 		expect(fs.existsSync(userFile)).toBe(true);
+	});
+
+	it("recognizes generated files created with the legacy marker", () => {
+		const dest = path.join(tmp, "rules");
+		const file = path.join(dest, `${skills[0]!.name}.mdc`);
+
+		fs.mkdirSync(dest, { recursive: true });
+		fs.writeFileSync(file, `---\ndescription: legacy\n---\n${LEGACY_MANAGED_LINE}\n\nlegacy generated content\n`);
+
+		const actions = cursorTarget.uninstall(ctx({ dest, skills: [skills[0]!] }));
+
+		expect(actions[0]!.verb).toBe("remove");
+		expect(fs.existsSync(file)).toBe(false);
+	});
+
+	it("does not trust marker mentions outside the generated header", () => {
+		const dest = path.join(tmp, "rules");
+		const file = path.join(dest, `${skills[0]!.name}.mdc`);
+
+		fs.mkdirSync(dest, { recursive: true });
+
+		for (const marker of [MANAGED_LINE, LEGACY_MANAGED_LINE]) {
+			const content = `---\ndescription: user-authored rule\n---\n\n\`\`\`html\n${marker}\n\`\`\`\n`;
+
+			fs.writeFileSync(file, content);
+
+			const installActions = cursorTarget.install(ctx({ dest, skills: [skills[0]!] }));
+			const uninstallActions = cursorTarget.uninstall(ctx({ dest, skills: [skills[0]!] }));
+
+			expect(installActions[0]!.verb).toBe("skip");
+			expect(uninstallActions[0]!.verb).toBe("skip");
+			expect(cursorTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("conflict");
+			expect(fs.readFileSync(file, "utf8")).toBe(content);
+		}
 	});
 
 	it("does not follow same-name symlinks that point outside the target directory", () => {

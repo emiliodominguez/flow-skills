@@ -12,10 +12,10 @@ anything, and never let a destructive command run on a state you don't understan
 
 Two common shapes:
 
-1. **Conflicts** during rebase, merge, or restack — needs resolution
-2. **Cruft** — stale worktrees, branches for merged PRs, orphan refs
+1. **Conflicts** during rebase, merge, or restack - needs resolution
+2. **Cruft** - stale worktrees, branches for merged PRs, orphan refs
 
-Different sections below for each. Single agent throughout — this is surgical, not
+Different sections below for each. Single agent throughout - this is surgical, not
 parallelizable.
 
 ---
@@ -32,13 +32,13 @@ Read the whole thing before you run anything else. Note:
 
 - Are you mid-rebase? `git status` will say so. Look for "interactive rebase in progress" or "you are currently rebasing".
 - Which files are conflicted? The status lines starting with `both modified:` / `both added:` / etc.
-- What's the operation? Rebase, merge, cherry-pick, restack — each has different `--continue` and abort commands. Don't guess which one you're in.
+- What's the operation? Rebase, merge, cherry-pick, restack - each has different `--continue` and abort commands. Don't guess which one you're in.
 
 ### Step 2: For each conflicted file
 
 Open it. Find the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`).
 
-**Marker-less conflicts first** — binary files, or `deleted by us` / `deleted by them` /
+**Marker-less conflicts first** - binary files, or `deleted by us` / `deleted by them` /
 `both added` states, have no markers to edit. Never choose `--ours` or `--theirs` from the
 label alone; the sides depend on the operation:
 
@@ -59,11 +59,11 @@ intended deletion. Then `git add <file>`. For ordinary text conflicts, for each 
 	- Both changes apply (combine them)
 	- Stage 2 wins
 	- Stage 3 wins
-	- Neither — neither side captures the intent (rare, but possible — rewrite)
+	- Neither - neither side captures the intent (rare, but possible - rewrite)
 4. **Delete the conflict markers.** All three of them per conflict.
 5. **Run any local checks** the change implies (type-check, the relevant test).
 
-**Never** just pick one side blindly. Conflicts usually mean both sides changed the same thing for different reasons — figure out both.
+**Never** just pick one side blindly. Conflicts usually mean both sides changed the same thing for different reasons - figure out both.
 
 ### Step 3: Mark resolved and continue
 
@@ -86,7 +86,7 @@ If more conflicts come, repeat Step 2 until clean.
 
 ### Step 4: When restacking, keep going through the stack
 
-A stack has multiple branches dependent on each other. After resolving the first, the tool restacks the next — which may also conflict. Don't stop until the whole chain is clean.
+A stack has multiple branches dependent on each other. After resolving the first, the tool restacks the next - which may also conflict. Don't stop until the whole chain is clean.
 
 ```bash
 gt sr           # restack everything (Graphite)
@@ -94,9 +94,9 @@ gs stack restack
 git town sync   # Git Town
 ```
 
-### Step 5: If you're lost — abort cleanly
+### Step 5: If you're lost - abort cleanly
 
-If the conflict resolution has gone sideways and you can't recover, **abort — don't keep hacking at a broken state.**
+If the conflict resolution has gone sideways and you can't recover, **abort - don't keep hacking at a broken state.**
 
 ```bash
 git rebase --abort
@@ -107,13 +107,13 @@ gs rebase abort     # git-spice (alias: gs rba)
 git town undo       # Git Town (reverts the last town command)
 ```
 
-You'll be back where you started, no harm done. Try again with a clearer head, or with a different strategy (e.g. merge instead of rebase). This escape hatch is always available — reach for it before you make things worse.
+You'll be back where you started, no harm done. Try again with a clearer head, or with a different strategy (e.g. merge instead of rebase). This escape hatch is always available - reach for it before you make things worse.
 
 ---
 
 ## Cruft (cleanup)
 
-**Investigate before deleting.** An unfamiliar branch, worktree, or untracked file might be the user's in-progress work. When unsure, ask — deletion here is not always recoverable.
+**Investigate before deleting.** An unfamiliar branch, worktree, or untracked file might be the user's in-progress work. When unsure, ask - deletion here is not always recoverable.
 
 ### Stale branches
 
@@ -138,7 +138,7 @@ git worktree remove <path>      # removes a specific worktree
 
 ### Untracked junk
 
-Don't `git clean -fd` blindly — it deletes anything not tracked, including your in-progress prototype.
+Don't `git clean -fd` blindly - it deletes anything not tracked, including your in-progress prototype.
 
 Always dry-run first:
 
@@ -156,8 +156,8 @@ Read the dry-run output line by line before running the real thing. If anything 
 - **Read the error before re-running.** If a `--continue`, restack, or clean failed, understand *why* before you run it again. Blindly re-running a destructive op on a confused state makes it worse.
 - **Never run a destructive op twice after the first failed.** Re-read the message; the state may not be what you assume.
 - **Never force-push to main / master.** Warn the user even if they ask.
-- **When a restacked feature branch must be pushed** (plain-git restack rewrites already-pushed history), use `git push --force-with-lease`, never a raw `--force` — the lease refuses if someone else pushed in the meantime.
-- **Never use `--no-verify`** to bypass hooks unless the user explicitly asks. Hooks fail for reasons — fix the cause, don't skip the check.
+- **When a restacked feature branch must be pushed** (plain-git restack rewrites already-pushed history), use `git push --force-with-lease`, never a raw `--force` - the lease refuses if someone else pushed in the meantime.
+- **Never use `--no-verify`** to bypass hooks unless the user explicitly asks. Hooks fail for reasons - fix the cause, don't skip the check.
 - **Investigate before deleting.** Unfamiliar branches, worktrees, or files might be the user's in-progress work.
 - **Abort beats improvise.** A clean abort and a fresh attempt is better than digging a deeper hole.
 

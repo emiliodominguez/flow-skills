@@ -18,7 +18,7 @@ function titleize(name: string): string {
 }
 
 /**
- * `new` — scaffold a new skill directory from the template.
+ * `new` - scaffold a new skill directory from the template.
  *
  * @param name - Kebab-case skill id (also the directory name).
  * @param opts - `description` for the frontmatter.
@@ -43,7 +43,7 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	}
 
 	const template = fs.readFileSync(path.join(root, "templates", "SKILL.md.tmpl"), "utf8");
-	const baseDescription = opts.description ?? `<one line: what it does — when to use / trigger phrases — handoff>.`;
+	const baseDescription = opts.description ?? `<one line: what it does - when to use / trigger phrases - handoff>.`;
 	const description = `${baseDescription} Invoke as /${name} in Claude Code or $${name} in Codex.`;
 	const content = template
 		.replaceAll("{{name}}", name)

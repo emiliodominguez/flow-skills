@@ -1,4 +1,4 @@
-# AGENTS.md — agent-skills
+# AGENTS.md - agent-skills
 
 Project guidance for Codex sessions working in this repository. Global user instructions still apply.
 
@@ -19,7 +19,7 @@ pnpm run format
 pnpm run lint
 pnpm run typecheck
 pnpm run validate
-pnpm test
+pnpm run test:coverage
 pnpm run build
 ```
 
@@ -30,7 +30,7 @@ Whenever a skill body or description changes, run `pnpm docs:gen` and commit the
 - Scaffold with `pnpm skills new <name>`.
 - Keep frontmatter valid YAML and include only `name` and `description`.
 - Name both explicit invocation forms in descriptions: `/<skill>` for Claude Code and `$<skill>` for Codex.
-- Add 3–5 required body substrings to `evals/beats.json` for every skill.
+- Add 3-5 required body substrings to `evals/beats.json` for every skill.
 - Test native installs with `pnpm skills install -t claude codex`.
 
 ## Repository conventions
@@ -39,4 +39,5 @@ Whenever a skill body or description changes, run `pnpm docs:gen` and commit the
 - Prefer function declarations over arrow functions.
 - Use tabs with width 4 and a print width of 150.
 - Add JSDoc to every function in `src/`, including `@param` and non-void `@returns`.
-- Use changesets for user-facing changes; this private repository versions releases without publishing to npm.
+- Do not use em or en dashes in prose, comments, metadata, or user-facing text. Rewrite the sentence or use an ASCII hyphen.
+- Use changesets for user-facing changes. While GitHub Actions is disabled, version packages manually and publish only when explicitly requested and npm-authenticated.

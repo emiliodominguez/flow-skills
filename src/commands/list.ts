@@ -6,7 +6,22 @@ import { log, sanitize } from "../core/logger.js";
 import { TARGETS } from "../targets/index.js";
 
 /**
- * `list` — show every skill in the repo and the available targets.
+ * Build a compact list summary while accepting current and legacy separators.
+ *
+ * @param description - Full skill description.
+ * @returns Sanitized summary text.
+ */
+export function summarizeSkillDescription(description: string): string {
+	return sanitize(
+		description
+			.split(/\.| - |\u2013|\u2014/)[0]!
+			.trim()
+			.slice(0, 90),
+	);
+}
+
+/**
+ * `list` - show every skill in the repo and the available targets.
  *
  * @param opts - `targets` to also print the target adapters; `profiles` to print
  *   the configured install sets; `json` for a machine-readable dump.
@@ -35,7 +50,7 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean; json?
 	const width = Math.max(...skills.map((s) => sanitize(s.name).length), 0);
 
 	for (const skill of skills) {
-		const summary = sanitize(skill.frontmatter.description.split(/[.—]/)[0]!.trim().slice(0, 90));
+		const summary = summarizeSkillDescription(skill.frontmatter.description);
 
 		console.log(`  ${pc.bold(sanitize(skill.name).padEnd(width))}  ${pc.dim(summary)}`);
 	}
@@ -56,7 +71,7 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean; json?
 		log.heading(`Profiles (${names.length})`);
 
 		if (names.length === 0) {
-			console.log(pc.dim("  (none configured — add a `profiles` map to agent-skills.config.json)"));
+			console.log(pc.dim("  (none configured - add a `profiles` map to agent-skills.config.json)"));
 		} else {
 			const profileWidth = Math.max(...names.map((n) => n.length), 0);
 

@@ -16,13 +16,13 @@ function build(skill: Skill): string {
 }
 
 /**
- * Cursor — one `.mdc` rule file per skill under `.cursor/rules/`. `alwaysApply:
+ * Cursor - one `.mdc` rule file per skill under `.cursor/rules/`. `alwaysApply:
  * false` + a description makes it an "agent-requested" rule Cursor pulls in when
  * relevant, mirroring how a skill is invoked on demand.
  */
 export const cursorTarget: Target = {
 	name: "cursor",
-	describe: "Cursor — .cursor/rules/<name>.mdc (agent-requested rule per skill)",
+	describe: "Cursor - .cursor/rules/<name>.mdc (agent-requested rule per skill)",
 	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {

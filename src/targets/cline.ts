@@ -16,13 +16,13 @@ function build(skill: Skill): string {
 }
 
 /**
- * Cline — one Markdown rule per skill under `.clinerules/`. Cline loads every
+ * Cline - one Markdown rule per skill under `.clinerules/`. Cline loads every
  * file in that directory as an always-on instruction, so each skill becomes its
  * own file and uninstall only touches files carrying our marker.
  */
 export const clineTarget: Target = {
 	name: "cline",
-	describe: "Cline — .clinerules/<name>.md (one rule file per skill)",
+	describe: "Cline - .clinerules/<name>.md (one rule file per skill)",
 	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {

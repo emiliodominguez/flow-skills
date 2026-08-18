@@ -11,7 +11,7 @@ export interface SkillFrontmatter {
 
 /** A single skill loaded from disk. */
 export interface Skill {
-	/** Directory name — the canonical id, must equal `frontmatter.name`. */
+	/** Directory name - the canonical id, must equal `frontmatter.name`. */
 	name: string;
 	/** Absolute path to the skill directory. */
 	dir: string;
@@ -35,7 +35,7 @@ export interface Issue {
 	message: string;
 }
 
-/** Max description length before we warn — long descriptions bloat the model's skill index. */
+/** Max description length before we warn - long descriptions bloat the model's skill index. */
 export const DESCRIPTION_WARN_LIMIT = 1024;
 
 /** Below this, a description gives the model too little to match the skill on. */
@@ -44,7 +44,7 @@ export const DESCRIPTION_MIN_LENGTH = 80;
 /** Low-value filler that weakens instructions; flagged so skills stay crisp. */
 export const WEASEL_WORDS = ["simply", "basically", "effortlessly", "trivially", "needless to say", "as you can see", "it goes without saying"];
 
-/** Canonical kebab-case check for skill ids — shared with the `new` command. */
+/** Canonical kebab-case check for skill ids - shared with the `new` command. */
 export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
@@ -154,7 +154,7 @@ export function validateSkill(skill: Skill): Issue[] {
 		}
 	}
 
-	if (skill.body.length < 40) add("warn", "body.thin", "body is very short — is this skill complete?");
+	if (skill.body.length < 40) add("warn", "body.thin", "body is very short - is this skill complete?");
 
 	const weasel = WEASEL_WORDS.filter((w) => new RegExp(`\\b${w}\\b`, "i").test(skill.body));
 
@@ -169,7 +169,7 @@ export function validateSkill(skill: Skill): Issue[] {
 }
 
 /**
- * Extract `/skill-ref` and `$skill-ref` tokens (without the sigil) from prose — the one
+ * Extract `/skill-ref` and `$skill-ref` tokens (without the sigil) from prose - the one
  * grammar for "what looks like a skill reference", shared by the dangling-reference
  * lint here and the docs handoff-map generator so they never disagree.
  *
@@ -195,7 +195,7 @@ export function validateReferences(skills: Skill[]): Issue[] {
 
 	for (const skill of skills) {
 		const seen = new Set<string>();
-		// Scan the description too — the handoff clause lives there and is load-bearing.
+		// Scan the description too - the handoff clause lives there and is load-bearing.
 		const haystack = `${skill.body}\n${skill.frontmatter.description}`;
 
 		for (const token of extractSkillRefs(haystack)) {

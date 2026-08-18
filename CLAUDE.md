@@ -1,4 +1,4 @@
-# CLAUDE.md — agent-skills
+# CLAUDE.md - agent-skills
 
 Project guidance for Claude Code sessions working in this repo. The user's global
 `~/.claude/CLAUDE.md` still applies; this file adds the repo-specific rules that bite.
@@ -19,20 +19,20 @@ managed block). `src/commands/` holds the CLI verbs; `src/cli.ts` builds the com
 helpers, and the logger. The installer only ever touches entries it created (markers / managed
 blocks); `--force` backs up, never deletes.
 
-## The gate — run before every commit
+## The gate - run before every commit
 
 ```sh
 pnpm run format      # prettier
 pnpm run lint        # eslint (padding + jsdoc rules are enforced, not optional)
 pnpm run typecheck   # tsc over src + test + scripts
 pnpm run validate    # skill frontmatter / naming / refs / quality lints
-pnpm test            # vitest (or test:coverage — CI enforces a 70% branch threshold)
+pnpm run test:coverage  # vitest with the required 70% branch threshold
 pnpm run build       # tsup bundle
 ```
 
 **Whenever a skill changes (body, description, or a new/removed skill), run `pnpm docs:gen`** and
-commit the result — CI's docs-freshness check fails on stale `docs/`. This is the single most
-common trip-up.
+inspect and commit the generated result. GitHub Actions is disabled, so no remote check will catch
+stale generated docs.
 
 ## Authoring a skill
 
@@ -40,27 +40,26 @@ common trip-up.
   `description`) → phased body → `## Anti-patterns` → `## Done when` → a final handoff
   line naming the next skill.
 - The **description** must name its own `/<skill>` (Claude Code) and `$<skill>` (Codex) triggers, stay under 1024 chars, and end with a
-  handoff clause (`hands off to /ed-x`, `routes to`, or `feeds`) — the skill map is parsed from it.
-- Every skill needs an entry in **`evals/beats.json`** (3–5 lowercase substrings that appear in the
+  handoff clause (`hands off to /ed-x`, `routes to`, or `feeds`) - the skill map is parsed from it.
+- Every skill needs an entry in **`evals/beats.json`** (3-5 lowercase substrings that appear in the
   body); `pnpm test` fails until the body delivers them. See `evals/README.md`.
 - `pnpm skills install -t claude codex` re-links; since native installs are symlinks, source edits are already
-  live — `pnpm skills sync` re-generates the non-symlink targets.
+  live - `pnpm skills sync` re-generates the non-symlink targets.
 
 ## Releasing (changesets)
 
-Versioning/changelog is automated with changesets; npm publish is gated on `NPM_TOKEN` (unset — this
-repo is private, so the flow is **versioning only**, no publish).
+GitHub Actions is currently disabled, so versioning and publishing are manual.
 
-- User-facing change → `pnpm changeset` in the same commit (new skills = `minor`, fixes = `patch`).
-- Push to `main` → the release workflow opens a **"version packages" PR** (bumps `package.json` +
-  prepends to `CHANGELOG.md`). Merging it lands the release. `0.1.0`–`0.4.0` were hand-cut; `0.4.1`
-  onward go through changesets.
+- Add a changeset for each user-facing change (new skills = `minor`, fixes = `patch`).
+- When a version is ready, run `pnpm run version:packages`, review the version and changelog changes, and commit them.
+- Run `pnpm run release` only when publishing is explicitly requested and npm authentication is configured.
 
 ## Conventions
 
 - **Conventional commits** (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `build:`,
   `ci:`). **No `Co-Authored-By` trailers.**
 - **Function declarations over arrow functions.** Tabs (width 4), print width 150. **JSDoc on every
-  `src/` function** (`@param`, `@returns` where non-void) — eslint enforces it.
+  `src/` function** (`@param`, `@returns` where non-void) - eslint enforces it.
+- Do not use em or en dashes in prose, comments, metadata, or user-facing text. Rewrite the sentence or use an ASCII hyphen.
 - Prefer the dedicated skills over ad-hoc work: `/ed-plan` → `/ed-work` → `/ed-review` → `/ed-ship`;
   `/ed-deps` for dependency bumps; `/ed-commit` for commit authoring.

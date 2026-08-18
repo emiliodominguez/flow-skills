@@ -1,6 +1,6 @@
 ---
 name: ed-commit
-description: "Author atomic, conventional commits — split unrelated work into separate commits, pick the right type and scope, and write a subject and body that explain the why, not the diff. Use when committing a batch of changes, untangling a messy working tree, or rewording a weak message (also /ed-commit, \"commit this\", \"write a commit message\", \"split these changes\"). Hands off to /ed-ship to push, or /ed-pr-fix when addressing review. Invoke as /ed-commit in Claude Code or $ed-commit in Codex."
+description: "Author atomic, conventional commits - split unrelated work into separate commits, pick the right type and scope, and write a subject and body that explain the why, not the diff. Use when committing a batch of changes, untangling a messy working tree, or rewording a weak message (also /ed-commit, \"commit this\", \"write a commit message\", \"split these changes\"). Hands off to /ed-ship to push, or /ed-pr-fix when addressing review. Invoke as /ed-commit in Claude Code or $ed-commit in Codex."
 ---
 
 > Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
@@ -23,7 +23,7 @@ One logical change per commit. A commit that does two things can't be reverted o
 
 ## Phase 2: Pick the type and scope
 
-Lead with a **conventional** type — it's a promise about the nature of the change:
+Lead with a **conventional** type - it's a promise about the nature of the change:
 
 `feat` · `fix` · `refactor` · `perf` · `test` · `docs` · `build` · `ci` · `chore`
 
@@ -34,13 +34,13 @@ Lead with a **conventional** type — it's a promise about the nature of the cha
 
 ## Phase 3: Write the subject
 
-- **Imperative** mood — "add", not "added" or "adds"; it completes "this commit will…".
+- **Imperative** mood - "add", not "added" or "adds"; it completes "this commit will…".
 - Keep it under ~72 characters, lowercase after the colon, no trailing period.
 - Name the effect, not the file: `fix: reject a negative amount`, not `fix: update validation.ts`.
 
 ---
 
-## Phase 4: Write the body — the why
+## Phase 4: Write the body - the why
 
 The diff already shows *what* changed. The body exists for **the why** the diff can't carry: the constraint that forced it, the alternative you rejected, the subtlety a future reader will trip on.
 
@@ -54,13 +54,13 @@ The diff already shows *what* changed. The body exists for **the why** the diff 
 
 - Mark a breaking change with a `!` after the type (`feat!:`) or a `BREAKING CHANGE:` footer explaining the migration.
 - No `Co-Authored-By` trailers.
-- Never commit a red gate — if lint/typecheck/tests fail, fix them first; a commit is a claim that this state is coherent.
+- Never commit a red gate - if lint/typecheck/tests fail, fix them first; a commit is a claim that this state is coherent.
 
 ---
 
 ## Anti-patterns
 
-- ❌ "wip", "fixes", "update", "misc" — a subject that tells the future nothing
+- ❌ "wip", "fixes", "update", "misc" - a subject that tells the future nothing
 - ❌ Bundling unrelated changes so the commit can't be reverted or cherry-picked
 - ❌ Restating what the diff already shows instead of the why behind it
 - ❌ Committing code that fails the gate, so the history has broken points

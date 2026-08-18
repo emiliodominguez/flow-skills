@@ -16,13 +16,13 @@ function build(skill: Skill): string {
 }
 
 /**
- * Windsurf — one Markdown rule per skill under `.windsurf/rules/`. The frontmatter
+ * Windsurf - one Markdown rule per skill under `.windsurf/rules/`. The frontmatter
  * goes through the shared `frontmatter()` renderer so a description containing a
  * colon (e.g. "Out of scope: …") is quoted rather than emitted as invalid YAML.
  */
 export const windsurfTarget: Target = {
 	name: "windsurf",
-	describe: "Windsurf — .windsurf/rules/<name>.md (one rule file per skill)",
+	describe: "Windsurf - .windsurf/rules/<name>.md (one rule file per skill)",
 	supportsSymlink: false,
 
 	install(ctx: InstallContext): Action[] {

@@ -5,7 +5,7 @@ import type { Action } from "../core/install-fs.js";
 export interface InstallContext {
 	/** Skills selected for this operation. */
 	skills: Skill[];
-	/** Resolved destination — a directory (dir/file-per-skill) or a file (bundle). */
+	/** Resolved destination - a directory (dir/file-per-skill) or a file (bundle). */
 	dest: string;
 	/** symlink (native only) or copy/generate. */
 	mode: "symlink" | "copy";

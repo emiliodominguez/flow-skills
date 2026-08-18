@@ -44,7 +44,7 @@ export async function interactiveCommand(): Promise<void> {
 		options: [
 			{ value: "install", label: "Install skills" },
 			{ value: "uninstall", label: "Uninstall skills" },
-			{ value: "doctor", label: "Doctor — check install state" },
+			{ value: "doctor", label: "Doctor - check install state" },
 			{ value: "list", label: "List skills" },
 		],
 	});
@@ -83,8 +83,8 @@ export async function interactiveCommand(): Promise<void> {
 	const scope = await p.select({
 		message: "Scope",
 		options: [
-			{ value: "user" as const, label: "user — global (~)" },
-			{ value: "project" as const, label: "project — this repo" },
+			{ value: "user" as const, label: "user - global (~)" },
+			{ value: "project" as const, label: "project - this repo" },
 		],
 		initialValue: "user" as const,
 	});

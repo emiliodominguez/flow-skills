@@ -1,6 +1,6 @@
 ---
 name: ed-onboard
-description: "Understand an unfamiliar codebase fast — find how it builds and runs, trace one real request end to end, fan out parallel read-only explorers over the subsystems, and distil it to the handful of files that actually matter. Use when you're new to a repo, picking up someone else's project, or need a mental map before planning (also /ed-onboard, \"help me understand this codebase\", \"where do I start\", \"how does this work\"). Hands off to /ed-plan to design a change, or /ed-diagnose when onboarding to chase a specific bug. Invoke as /ed-onboard in Claude Code or $ed-onboard in Codex."
+description: "Understand an unfamiliar codebase fast - find how it builds and runs, trace one real request end to end, fan out parallel read-only explorers over the subsystems, and distil it to the handful of files that actually matter. Use when you're new to a repo, picking up someone else's project, or need a mental map before planning (also /ed-onboard, \"help me understand this codebase\", \"where do I start\", \"how does this work\"). Hands off to /ed-plan to design a change, or /ed-diagnose when onboarding to chase a specific bug. Invoke as /ed-onboard in Claude Code or $ed-onboard in Codex."
 ---
 
 > Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
@@ -23,7 +23,7 @@ Start where the machine starts.
 
 ## Phase 2: Trace one real flow end to end
 
-Pick a single representative operation — a login, one API request, one CLI command — and follow it **all the way through**: entry → routing → business logic → data layer → response.
+Pick a single representative operation - a login, one API request, one CLI command - and follow it **all the way through**: entry → routing → business logic → data layer → response.
 
 Write down each hop and the file it lives in. One traced flow teaches the architecture (layers, boundaries, conventions) better than reading ten files in isolation.
 
@@ -34,16 +34,16 @@ Write down each hop and the file it lives in. One traced flow teaches the archit
 For anything past a small repo, read the subsystems **in parallel, read-only**.
 
 1. **One agent per subsystem.** Launch parallel read-only subagents with the host's delegation mechanism; they never edit. Stay within available concurrency, running waves or inspecting sequentially when needed. Give each a scope: "the data layer", "auth", "the build pipeline", "the request lifecycle".
-2. **Each returns the same shape:** its purpose in two sentences, the 3–5 files that matter, the key types/functions, how it connects to the rest, and anything surprising or load-bearing.
+2. **Each returns the same shape:** its purpose in two sentences, the 3-5 files that matter, the key types/functions, how it connects to the rest, and anything surprising or load-bearing.
 3. **You stitch the reports into one map.** The explorers cover breadth cheaply; you keep the synthesis.
 
-Match effort to size — a small project doesn't need a fan-out, just read it.
+Match effort to size - a small project doesn't need a fan-out, just read it.
 
 ---
 
 ## Phase 4: Distil to what matters
 
-- Name the **5–10 files** a newcomer must know, each with a one-line "this is where X happens".
+- Name the **5-10 files** a newcomer must know, each with a one-line "this is where X happens".
 - Note the **conventions** the code follows (error handling, naming, layering) so your change looks native, not bolted on.
 - Note the **landmines**: the global everything depends on, the module that's secretly stateful, the "do not touch" comment and why.
 - Capture it as a short written map (in the PR, a scratch note, or `/ed-handoff` format) so the understanding outlives this session.
@@ -53,10 +53,10 @@ Match effort to size — a small project doesn't need a fan-out, just read it.
 ## Anti-patterns
 
 - ❌ Reading files alphabetically instead of following a real execution path
-- ❌ Trying to understand everything before you understand anything — breadth-first, then depth where you'll work
-- ❌ Letting explorer subagents edit or "improve" code — they read and report, nothing else
+- ❌ Trying to understand everything before you understand anything - breadth-first, then depth where you'll work
+- ❌ Letting explorer subagents edit or "improve" code - they read and report, nothing else
 - ❌ A map that lists every file instead of the handful that actually matter
-- ❌ Onboarding forever — stop when you can place a change confidently, not when you've read it all
+- ❌ Onboarding forever - stop when you can place a change confidently, not when you've read it all
 
 ---
 

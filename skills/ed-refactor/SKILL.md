@@ -1,6 +1,6 @@
 ---
 name: ed-refactor
-description: "Behavior-preserving improvement of existing code — find structural friction, deepen shallow modules, consolidate duplication, manage deprecations and migrations. Use when the user says \"refactor this\", \"clean this up\", \"this is getting messy\", \"let's restructure\", or when invoked as /ed-refactor. NOT for changing behavior (that's /ed-work) and NOT for line-level slop reduction (that's /ed-simplify). Hands off to /ed-work for the actual changes or /ed-review when done. Invoke as /ed-refactor in Claude Code or $ed-refactor in Codex."
+description: "Behavior-preserving improvement of existing code - find structural friction, deepen shallow modules, consolidate duplication, manage deprecations and migrations. Use when the user says \"refactor this\", \"clean this up\", \"this is getting messy\", \"let's restructure\", or when invoked as /ed-refactor. NOT for changing behavior (that's /ed-work) and NOT for line-level slop reduction (that's /ed-simplify). Hands off to /ed-work for the actual changes or /ed-review when done. Invoke as /ed-refactor in Claude Code or $ed-refactor in Codex."
 ---
 
 > Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
@@ -9,9 +9,9 @@ description: "Behavior-preserving improvement of existing code — find structur
 
 Improve the structure of existing code **without changing what it does**. The behaviour observable from outside the changed code must be identical before and after.
 
-This is a **single-writer** edit. Its safety net is characterization tests you run after every step — not a review panel. The panel comes later, and separately: `/ed-review` runs *after* the refactor lands, on the diff. Don't fan out subagents to "refactor in parallel" — one writer, one green test suite.
+This is a **single-writer** edit. Its safety net is characterization tests you run after every step - not a review panel. The panel comes later, and separately: `/ed-review` runs *after* the refactor lands, on the diff. Don't fan out subagents to "refactor in parallel" - one writer, one green test suite.
 
-If you find yourself wanting to "also fix this small bug while I'm in here" — **don't**. That's a separate commit, and probably a separate skill (`/ed-diagnose` then `/ed-work`).
+If you find yourself wanting to "also fix this small bug while I'm in here" - **don't**. That's a separate commit, and probably a separate skill (`/ed-diagnose` then `/ed-work`).
 
 ---
 
@@ -31,11 +31,11 @@ Write the scope down in one sentence. Refer back to it whenever you're tempted t
 
 Behavior preservation is only meaningful if you know what behavior to preserve.
 
-- **Run the existing tests** — they should pass before you start.
-- If the area is undertested, **write characterisation tests first**: tests that capture what the code does today (warts and all). Don't fix anything yet. If a characterisation test surfaces a pre-existing bug, **preserve** the buggy behaviour for now, note it, and hand it to `/ed-diagnose` after the refactor — don't quietly fix it inline.
+- **Run the existing tests** - they should pass before you start.
+- If the area is undertested, **write characterisation tests first**: tests that capture what the code does today (warts and all). Don't fix anything yet. If a characterisation test surfaces a pre-existing bug, **preserve** the buggy behaviour for now, note it, and hand it to `/ed-diagnose` after the refactor - don't quietly fix it inline.
 - For UI: capture screenshots of the current state, or note user-visible behaviour to compare.
 
-You cannot refactor safely without a test net. These tests *are* the safety net — they're what makes a single-writer edit trustworthy without a reviewer watching every keystroke. **If the code resists testing** (unmockable I/O, nondeterminism), your FIRST refactor is "Extract a pure core" (below) so the logic becomes testable; if even that's impossible, stop and escalate rather than refactor blind.
+You cannot refactor safely without a test net. These tests *are* the safety net - they're what makes a single-writer edit trustworthy without a reviewer watching every keystroke. **If the code resists testing** (unmockable I/O, nondeterminism), your FIRST refactor is "Extract a pure core" (below) so the logic becomes testable; if even that's impossible, stop and escalate rather than refactor blind.
 
 ---
 
@@ -61,7 +61,7 @@ Side effects (I/O, time, randomness) at the edges; pure logic in the middle. Mak
 ### Migration / deprecation
 Old code lives alongside new for a transitional period. Steps:
 1. Add the new implementation
-2. Mark the old code deprecated with a note pointing at the replacement — **before** migrating, so in-flight and newly-written callers are steered to the replacement during the transition
+2. Mark the old code deprecated with a note pointing at the replacement - **before** migrating, so in-flight and newly-written callers are steered to the replacement during the transition
 3. Migrate callers one by one (each is its own commit)
 4. After all callers migrate, delete the old code
 
@@ -71,7 +71,7 @@ Old code lives alongside new for a transitional period. Steps:
 
 - One refactor pattern per commit.
 - Run the tests after each step. They should still pass.
-- If a test starts failing, you changed behaviour by accident. Revert and try smaller. First rule out a **flaky baseline** — a suite that fails intermittently can't tell "I broke it" from "flake"; if Step 2's baseline was flaky, stabilise or quarantine those tests before trusting any red.
+- If a test starts failing, you changed behaviour by accident. Revert and try smaller. First rule out a **flaky baseline** - a suite that fails intermittently can't tell "I broke it" from "flake"; if Step 2's baseline was flaky, stabilise or quarantine those tests before trusting any red.
 
 ---
 
@@ -80,7 +80,7 @@ Old code lives alongside new for a transitional period. Steps:
 - Full test suite green
 - Type-check passes
 - For UI: visual check, no regressions
-- For perf-sensitive code: a quick before/after benchmark — refactoring sometimes silently changes hot paths
+- For perf-sensitive code: a quick before/after benchmark - refactoring sometimes silently changes hot paths
 
 ---
 
@@ -90,10 +90,10 @@ Old code lives alongside new for a transitional period. Steps:
 - ❌ Renaming variables along with structural changes (rename in a separate commit so the structural diff is readable)
 - ❌ Deleting comments you don't understand (read git blame first)
 - ❌ Extracting an abstraction from two examples
-- ❌ Rewriting a module instead of refactoring it — at that point, you're doing `/ed-work` with a "replace X" task, not a refactor
+- ❌ Rewriting a module instead of refactoring it - at that point, you're doing `/ed-work` with a "replace X" task, not a refactor
 - ❌ Refactoring untested code without writing characterisation tests first
 - ❌ Mixing a refactor commit with a behaviour-change commit
-- ❌ Fanning out parallel writers to "refactor faster" — one writer, one green suite
+- ❌ Fanning out parallel writers to "refactor faster" - one writer, one green suite
 
 ---
 
@@ -104,4 +104,4 @@ Old code lives alongside new for a transitional period. Steps:
 - The diff is smaller or more readable than what was there
 - A future reader will be glad you made the change
 
-Then: if the refactor is large enough to need its own plan, hand it to `/ed-plan` (which decomposes it and routes execution to `/ed-work`). Otherwise say **"Refactor complete. Ready for `/ed-review`?"** — then `/ed-ship`.
+Then: if the refactor is large enough to need its own plan, hand it to `/ed-plan` (which decomposes it and routes execution to `/ed-work`). Otherwise say **"Refactor complete. Ready for `/ed-review`?"** - then `/ed-ship`.

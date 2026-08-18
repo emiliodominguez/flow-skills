@@ -70,7 +70,7 @@ complete -c agent-skills -s s -l scope -x -a "${SCOPE_VALUES}"`;
 }
 
 /**
- * `completion` — print a shell completion script to stdout for eval/sourcing.
+ * `completion` - print a shell completion script to stdout for eval/sourcing.
  *
  * @param shell - One of `bash`, `zsh`, `fish` (default `bash`).
  */
@@ -80,7 +80,7 @@ export function completionCommand(shell: string): void {
 	const build = builders[shell];
 
 	if (!build) {
-		log.error(`unknown shell "${shell}" — use one of: bash, zsh, fish`);
+		log.error(`unknown shell "${shell}" - use one of: bash, zsh, fish`);
 		process.exitCode = 1;
 
 		return;

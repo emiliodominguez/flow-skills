@@ -21,7 +21,7 @@ NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
 [ "$NODE_MAJOR" -ge 22 ] || die "Node.js >= 22 required (found $(node -v))."
 
 if ! command -v pnpm >/dev/null 2>&1; then
-	say "pnpm not found — enabling it via corepack"
+	say "pnpm not found - enabling it via corepack"
 	corepack enable >/dev/null 2>&1 || npm install -g pnpm >/dev/null 2>&1 || die "Could not install pnpm. Install it manually: https://pnpm.io/installation"
 fi
 

@@ -6,7 +6,7 @@ import { isSymlinkTo, removePath } from "../core/install-fs.js";
 import type { InstallContext, SkillStatus, Target } from "./types.js";
 import { makeBundleTarget } from "./bundle.js";
 import { claudeTarget } from "./claude.js";
-import { MANAGED_LINE } from "./render.js";
+import { LEGACY_MANAGED_LINE, MANAGED_LINE } from "./render.js";
 
 const COPY_MARKER = ".agent-skills";
 const legacyBundleTarget = makeBundleTarget({ name: "codex-legacy", describe: "Legacy Codex AGENTS.md bundle", heading: "# Agent skills" });
@@ -55,7 +55,11 @@ function isManagedCopy(dir: string): boolean {
 	const marker = path.join(dir, COPY_MARKER);
 
 	try {
-		return fs.lstatSync(marker).isFile() && fs.readFileSync(marker, "utf8") === MANAGED_LINE + "\n";
+		if (!fs.lstatSync(marker).isFile()) return false;
+
+		const contents = fs.readFileSync(marker, "utf8");
+
+		return contents === MANAGED_LINE + "\n" || contents === LEGACY_MANAGED_LINE + "\n";
 	} catch {
 		return false;
 	}
@@ -131,7 +135,7 @@ function installCodex(ctx: Parameters<Target["install"]>[0]): Action[] {
 				actions.push({
 					verb: "skip",
 					path: path.join(ctx.dest, skill.name),
-					note: `same-name legacy skill at ${oldDest} is not managed — resolve duplicate first`,
+					note: `same-name legacy skill at ${oldDest} is not managed - resolve duplicate first`,
 				});
 			}
 		}
@@ -222,13 +226,13 @@ function statusCodex(ctx: InstallContext): SkillStatus[] {
 }
 
 /**
- * Codex — the native agent-skills format. Codex supports the same SKILL.md
+ * Codex - the native agent-skills format. Codex supports the same SKILL.md
  * directory shape as Claude Code and follows symlinked skill directories.
  */
 export const codexTarget: Target = {
 	...claudeTarget,
 	name: "codex",
-	describe: "Codex — ~/.agents/skills/<name>/SKILL.md (native; symlink or copy)",
+	describe: "Codex - ~/.agents/skills/<name>/SKILL.md (native; symlink or copy)",
 	install: installCodex,
 	uninstall: uninstallCodex,
 	status: statusCodex,

@@ -135,7 +135,7 @@ describe("isBlockedSkip / blocked-skip summary", () => {
 		const actions: Action[] = [
 			{ verb: "symlink", path: "/x/a" },
 			{ verb: "skip", path: "/x/b", note: "already linked" },
-			{ verb: "skip", path: "/x/c", note: "exists, not managed by agent-skills — use --force to overwrite" },
+			{ verb: "skip", path: "/x/c", note: "exists, not managed by agent-skills - use --force to overwrite" },
 		];
 
 		expect(summarize(actions)).toBe(`1 linked ${sym.dot} 1 skipped ${sym.dot} 1 unchanged`);
@@ -153,7 +153,7 @@ describe("isBlockedSkip / blocked-skip summary", () => {
 describe("sanitize", () => {
 	it("removes the control bytes so an escape sequence can't be acted on", () => {
 		// The ESC (\x1b) and BEL (\x07) are stripped; the now-inert printable
-		// payload ("[2J") remains as plain text — the terminal can't clear itself.
+		// payload ("[2J") remains as plain text - the terminal can't clear itself.
 		expect(sanitize("a\x1b[2Jb\x07c")).toBe("a[2Jbc");
 		expect(sanitize("plain")).toBe("plain");
 	});

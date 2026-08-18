@@ -1,13 +1,13 @@
 ---
 name: ed-diagnose
-description: "Root-cause a bug or performance regression through a disciplined loop — reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says \"debug this\", \"why isn't this working\", \"it's broken\", \"investigate\"). Makes the minimal root-cause fix and locks it in with a regression test, escalating to /ed-work when the fix spans multiple slices. Invoke as /ed-diagnose in Claude Code or $ed-diagnose in Codex."
+description: "Root-cause a bug or performance regression through a disciplined loop - reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says \"debug this\", \"why isn't this working\", \"it's broken\", \"investigate\"). Makes the minimal root-cause fix and locks it in with a regression test, escalating to /ed-work when the fix spans multiple slices. Invoke as /ed-diagnose in Claude Code or $ed-diagnose in Codex."
 ---
 
 > Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Diagnose
 
-For bugs that don't yield to a quick fix. The discipline below stops you from guessing your way deeper into the problem. The one rule underneath all six phases: **a cause is confirmed by evidence that matches a prediction — never by "seems likely".**
+For bugs that don't yield to a quick fix. The discipline below stops you from guessing your way deeper into the problem. The one rule underneath all six phases: **a cause is confirmed by evidence that matches a prediction - never by "seems likely".**
 
 **Do NOT skip phases.** When you feel you "already know" the answer, that's exactly when you skip step 1 and waste an hour fixing the wrong thing.
 
@@ -19,7 +19,7 @@ You don't understand a bug you can't reproduce.
 
 - Get a single command, click sequence, or input that **always** triggers it.
 - Note the environment (OS, browser, node version, env vars, data).
-- If it's intermittent, find the conditions that change failure rate — concurrency, time of day, dataset size, cache state.
+- If it's intermittent, find the conditions that change failure rate - concurrency, time of day, dataset size, cache state.
 - **Write down the steps.** You'll need them again in Phase 6.
 
 If you cannot reproduce, stop and gather more data. Logs from the user, a recording, a packet capture. Do not move on.
@@ -51,15 +51,15 @@ Rank candidate causes by likelihood and ease-of-test. Test the easiest one first
 
 ### When it's murky: fan out competing hypotheses (optional)
 
-**Match effort to difficulty.** For a simple or obvious bug, stay single-threaded — one hypothesis, test it, move on. Fanning out here would be ceremony, not speed.
+**Match effort to difficulty.** For a simple or obvious bug, stay single-threaded - one hypothesis, test it, move on. Fanning out here would be ceremony, not speed.
 
 But when the bug is genuinely murky and you have **several plausible, competing causes** (e.g. "it's a stale cache" vs. "it's a race in the writer" vs. "it's a serialization boundary"), you MAY investigate them in parallel instead of serially:
 
 1. **One agent per competing hypothesis.** Launch them as **parallel read-only subagents in one batch** using the host's delegation mechanism; they never edit and never fix. Stay within the host's available concurrency, running waves or investigating sequentially when needed. Assign each agent exactly one candidate cause.
-2. **Each agent's job is evidence, not verdicts.** Give it the reproduction, the minimal case, and its assigned hypothesis. It reads the relevant code and gathers evidence **FOR and AGAINST** that cause — the guard that would prevent it, the call path that would trigger it, the state that would have to hold — and reports back what it found.
-3. **You pick the survivor.** Collect the reports. Discard the causes the evidence argues against. The hypothesis left standing — the one nothing refuted and something supports — is the one you carry into Phase 4 to **prove**. A parallel sweep narrows the field fast; it does not confirm anything on its own.
+2. **Each agent's job is evidence, not verdicts.** Give it the reproduction, the minimal case, and its assigned hypothesis. It reads the relevant code and gathers evidence **FOR and AGAINST** that cause - the guard that would prevent it, the call path that would trigger it, the state that would have to hold - and reports back what it found.
+3. **You pick the survivor.** Collect the reports. Discard the causes the evidence argues against. The hypothesis left standing - the one nothing refuted and something supports - is the one you carry into Phase 4 to **prove**. A parallel sweep narrows the field fast; it does not confirm anything on its own.
 
-This is optional acceleration, not mandatory ceremony. It replaces serial guessing with a parallel narrowing pass — the actual confirmation still happens in Phase 4, against instrumentation.
+This is optional acceleration, not mandatory ceremony. It replaces serial guessing with a parallel narrowing pass - the actual confirmation still happens in Phase 4, against instrumentation.
 
 ---
 
@@ -70,16 +70,16 @@ Add observation, not fixes. Yet.
 - Log values at every boundary between your hypothesis and the failure.
 - Add asserts on invariants you assume hold.
 - Use a debugger for stepwise inspection if the state is complex.
-- For perf: profile, capture traces, measure — never guess what's slow.
+- For perf: profile, capture traces, measure - never guess what's slow.
 
 Re-run the reproduction. Read what the instrumentation says. Compare it to the prediction your hypothesis made in Phase 3.
 
-**When observation perturbs the bug:** if adding instrumentation makes it vanish or shift (an observer effect on timing-sensitive code), switch to lower-perturbation observation — sampling, a ring buffer, a post-hoc trace, hardware counters — rather than heavier logging. And if the repro is flaky, one clean re-run neither confirms nor refutes: require N runs or a before/after failure-rate delta before you trust the result.
+**When observation perturbs the bug:** if adding instrumentation makes it vanish or shift (an observer effect on timing-sensitive code), switch to lower-perturbation observation - sampling, a ring buffer, a post-hoc trace, hardware counters - rather than heavier logging. And if the repro is flaky, one clean re-run neither confirms nor refutes: require N runs or a before/after failure-rate delta before you trust the result.
 
-**This is the evidence gate.** A hypothesis is confirmed only when the instrumentation output **matches its prediction** — the value you expected to be null is null, the branch you expected to run ran, the query you blamed is the one that's slow. "It seems likely" and "that would explain it" are not confirmation.
+**This is the evidence gate.** A hypothesis is confirmed only when the instrumentation output **matches its prediction** - the value you expected to be null is null, the branch you expected to run ran, the query you blamed is the one that's slow. "It seems likely" and "that would explain it" are not confirmation.
 
 If reality matches the prediction → you've found it.
-If not → the hypothesis is wrong, no matter how plausible it felt. Back to Phase 3 with what you learned. If several hypotheses in a row fail against the evidence, stop trusting the reproduction or the minimal case and redo Phases 1–2 — a wrong repro sends every hypothesis astray — and escalate rather than keep looping if it still won't yield.
+If not → the hypothesis is wrong, no matter how plausible it felt. Back to Phase 3 with what you learned. If several hypotheses in a row fail against the evidence, stop trusting the reproduction or the minimal case and redo Phases 1-2 - a wrong repro sends every hypothesis astray - and escalate rather than keep looping if it still won't yield.
 
 ---
 
@@ -111,11 +111,11 @@ If you can't write a regression test for this class of bug, name what's missing 
 
 - ❌ "Let me try adding a null check" before you know what's null and why
 - ❌ Calling a hypothesis confirmed because it's plausible, without instrumentation that matches its prediction
-- ❌ Fanning out parallel hypothesis agents for a simple bug — that's ceremony, not speed
-- ❌ Letting a hypothesis subagent edit or "fix" code — they gather evidence, read-only
+- ❌ Fanning out parallel hypothesis agents for a simple bug - that's ceremony, not speed
+- ❌ Letting a hypothesis subagent edit or "fix" code - they gather evidence, read-only
 - ❌ Fixing the first thing that makes the symptom go away
 - ❌ Adding logs and then forgetting to read them
-- ❌ "It works on my machine" — that's a data point, not a conclusion
+- ❌ "It works on my machine" - that's a data point, not a conclusion
 - ❌ Shipping the fix without a regression test
 
 ---

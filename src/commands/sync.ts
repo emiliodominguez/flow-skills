@@ -12,7 +12,7 @@ import type { SkillState } from "../targets/types.js";
 const INSTALLED = new Set<SkillState>(["linked", "copied", "generated", "drifted"]);
 
 /**
- * `sync` — re-run install for whatever is *already* installed, across targets, so
+ * `sync` - re-run install for whatever is *already* installed, across targets, so
  * a source edit propagates everywhere with one command. For each target it reads
  * the on-disk state (like `doctor`) and re-installs only the skills that are
  * present (skipping `missing` and never touching a `conflict` it didn't create).
@@ -27,7 +27,7 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 	const targets = opts.target?.length ? opts.target : Object.keys(config.targets).filter((name) => config.targets[name]?.enabled);
 	const projectRoot = findProjectRoot();
 
-	if (opts.dryRun) log.warn("dry run — no files will be changed");
+	if (opts.dryRun) log.warn("dry run - no files will be changed");
 
 	const failures: string[] = [];
 	const allActions: Action[] = [];
@@ -36,7 +36,7 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 		const tc = config.targets[name];
 
 		if (!tc || !tc.enabled) {
-			log.warn(`target "${name}" is disabled or unknown — skipping`);
+			log.warn(`target "${name}" is disabled or unknown - skipping`);
 			continue;
 		}
 

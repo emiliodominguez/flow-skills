@@ -1,19 +1,19 @@
 ---
 name: ed-triage
-description: "Triage an incident or issue fast — confirm it's real and reproducible, assess blast radius and severity, contain an active incident before hunting root cause, then decide fix-now vs. later and route to the right skill. Use for a new bug report, a production alert, or a pile of issues to prioritize (also /ed-triage, \"is this a real problem\", \"how bad is this\", \"what should I do about this bug\", \"prod is down\"). Routes to /ed-diagnose for root cause, /ed-work to fix, or /ed-adversarial-review when it's a security issue. Invoke as /ed-triage in Claude Code or $ed-triage in Codex."
+description: "Triage an incident or issue fast - confirm it's real and reproducible, assess blast radius and severity, contain an active incident before hunting root cause, then decide fix-now vs. later and route to the right skill. Use for a new bug report, a production alert, or a pile of issues to prioritize (also /ed-triage, \"is this a real problem\", \"how bad is this\", \"what should I do about this bug\", \"prod is down\"). Routes to /ed-diagnose for root cause, /ed-work to fix, or /ed-adversarial-review when it's a security issue. Invoke as /ed-triage in Claude Code or $ed-triage in Codex."
 ---
 
 > Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Triage
 
-Triage is a routing decision, not a fix. Its job is to answer **is this real, how bad is it, and what happens next** — quickly and honestly — so effort lands where it matters. Getting root-cause-happy here is a trap: for an active incident, stopping the bleeding comes before understanding the wound.
+Triage is a routing decision, not a fix. Its job is to answer **is this real, how bad is it, and what happens next** - quickly and honestly - so effort lands where it matters. Getting root-cause-happy here is a trap: for an active incident, stopping the bleeding comes before understanding the wound.
 
 ---
 
 ## Phase 1: Confirm it's real
 
-- Reproduce it, or find the evidence that it happened (logs, traces, a screenshot, error rates). An unreproduced, unevidenced report is *unconfirmed* — say so.
+- Reproduce it, or find the evidence that it happened (logs, traces, a screenshot, error rates). An unreproduced, unevidenced report is *unconfirmed* - say so.
 - Pin down the conditions: which users, which version, since when, what changed around then (a deploy? a data migration? traffic?).
 - Rule out the non-bug: misconfiguration, expected behaviour, user error, an already-known issue. Don't spin up an investigation for a dupe.
 
@@ -37,17 +37,17 @@ For an **active incident**, mitigate before you root-cause.
 - Confirm the user has authorized production changes before mutating deployments, flags,
   traffic, or failover state. A request to assess or diagnose is not containment authority.
 - Stop the bleeding: roll back the suspect deploy, feature-flag it off, throttle, fail over. A mitigated incident buys you time to diagnose calmly.
-- Containment is not the fix — it's the tourniquet. Note that the root cause is still open.
+- Containment is not the fix - it's the tourniquet. Note that the root cause is still open.
 - For a non-urgent issue, skip this phase.
 
 ---
 
 ## Phase 4: Decide and route
 
-Decide **fix-now vs. later** from severity × effort, then route — don't fix it here.
+Decide **fix-now vs. later** from severity × effort, then route - don't fix it here.
 
 - **Now**: high severity, or cheap enough that deferring costs more than doing it.
-- **Later**: low impact, or high effort with a workaround — file it with the severity, repro, and evidence so it's actionable later, not re-triaged from scratch.
+- **Later**: low impact, or high effort with a workaround - file it with the severity, repro, and evidence so it's actionable later, not re-triaged from scratch.
 - **Route to the right skill**: `/ed-diagnose` when the cause is unknown and needs hunting; `/ed-work` when the fix is understood and spans slices; `/ed-adversarial-review` when it's security-, auth-, money-, or data-integrity-sensitive.
 
 ---
@@ -59,7 +59,7 @@ Decide **fix-now vs. later** from severity × effort, then route — don't fix i
 - ❌ Treating an unreproduced report as a confirmed bug
 - ❌ Spending high-severity effort on a low-impact issue because it's easy
 - ❌ Filing "later" work with no repro or severity, so it must be triaged again
-- ❌ Fixing it inside triage instead of routing — triage decides, other skills do
+- ❌ Fixing it inside triage instead of routing - triage decides, other skills do
 
 ---
 

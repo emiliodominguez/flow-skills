@@ -70,7 +70,7 @@ export function findRepoRoot(startDir: string = process.cwd()): string {
 }
 
 /**
- * Walk up from this module to the package root — the first ancestor holding a
+ * Walk up from this module to the package root - the first ancestor holding a
  * package.json next to the skills directory. Layout-independent, so it resolves
  * correctly whether running from bundled `dist/index.js` or `tsx src/...`.
  *
@@ -115,7 +115,7 @@ export function loadConfig(root: string): Config {
 function readJsonIfExists(file: string): Partial<Config> | undefined {
 	if (!fs.existsSync(file)) return undefined;
 
-	// mergeInto only reads known keys, so a stray `$schema` is ignored — no cleanup needed.
+	// mergeInto only reads known keys, so a stray `$schema` is ignored - no cleanup needed.
 	return JSON.parse(fs.readFileSync(file, "utf8")) as Partial<Config>;
 }
 

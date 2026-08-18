@@ -36,7 +36,7 @@ export default tseslint.config(
 			"@typescript-eslint/no-floating-promises": "error",
 			"@typescript-eslint/no-misused-promises": "error",
 			"@typescript-eslint/await-thenable": "error",
-			// Vertical spacing — proper separation between statements and declarations.
+			// Vertical spacing - proper separation between statements and declarations.
 			"@stylistic/padding-line-between-statements": padding,
 			"@stylistic/lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
 		},

@@ -1,13 +1,13 @@
 # Configuration
 
 The installer reads `agent-skills.config.json` at the repo root. Everything has a built-in
-default, so the file is optional — it exists to change target paths and defaults.
+default, so the file is optional - it exists to change target paths and defaults.
 
 Precedence (later wins, deep-merged):
 
 1. built-in defaults (`src/core/config.ts`)
 2. `agent-skills.config.json` (committed)
-3. `.agent-skills.local.json` (git-ignored — machine-specific overrides)
+3. `.agent-skills.local.json` (git-ignored - machine-specific overrides)
 
 ## Fields
 
@@ -66,9 +66,9 @@ and a profile overrides "all". `list --profiles` prints the configured sets.
 ## A note on target paths
 
 The `claude` and `codex` native skill paths are exact. Every other target's path follows that tool's **documented
-convention at the time of writing**, but these tools move — a new version may change where it
+convention at the time of writing**, but these tools move - a new version may change where it
 reads rules from. The newer targets (copilot, zed, aider, cline, continue) are
-**project-oriented** — the tools read from the working tree, so `userPath` mirrors `projectPath`
+**project-oriented** - the tools read from the working tree, so `userPath` mirrors `projectPath`
 (except Continue, which also has a global `~/.continue/rules`). If a target installs to the
 wrong place:
 
@@ -84,9 +84,9 @@ pnpm skills install -t cursor --dry-run
 
 **Two caveats worth knowing (verified July 2026):**
 
-- **windsurf** — `.windsurf/rules/` still works, but after the Cognition rebrand newer builds
+- **windsurf** - `.windsurf/rules/` still works, but after the Cognition rebrand newer builds
   also read `.devin/rules/`. If Windsurf ignores the rules, point the path at `.devin/rules`.
-- **aider** — the `CONVENTIONS.md` we write is the right file, but aider does **not** auto-load
+- **aider** - the `CONVENTIONS.md` we write is the right file, but aider does **not** auto-load
   it. Tell aider to read it, either per session (`aider --read CONVENTIONS.md`) or persistently
   via `.aider.conf.yml` (`read: CONVENTIONS.md`).
 

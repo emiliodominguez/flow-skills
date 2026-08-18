@@ -11,13 +11,13 @@ tool's on-disk convention at install time. One source, many destinations.
 
 ```
 src/
-  index.ts              CLI wiring (commander) — parses args, dispatches to commands
+  index.ts              CLI wiring (commander) - parses args, dispatches to commands
   commands/
-    install.ts          install / uninstall — resolves config + targets, runs adapters
-    doctor.ts           doctor — report install state + drift/conflicts per target
-    validate.ts         validate — one scan, shared with the test suite
-    list.ts             list — skills and target adapters
-    new.ts              new — scaffold a skill from templates/SKILL.md.tmpl
+    install.ts          install / uninstall - resolves config + targets, runs adapters
+    doctor.ts           doctor - report install state + drift/conflicts per target
+    validate.ts         validate - one scan, shared with the test suite
+    list.ts             list - skills and target adapters
+    new.ts              new - scaffold a skill from templates/SKILL.md.tmpl
   core/
     skill.ts            parse SKILL.md frontmatter (tolerant), validate, KEBAB
     registry.ts         discover / select skills on disk
@@ -55,16 +55,16 @@ interface Target {
 
 `InstallContext` carries the selected `skills`, the resolved `dest`, the `mode`
 (`symlink | copy`), a `force` flag, and `dryRun`. Adapters return a list of `Action`s
-(`symlink | copy | write | remove | skip`) that the command layer prints — they never log
+(`symlink | copy | write | remove | skip`) that the command layer prints - they never log
 directly, which keeps them testable.
 
 Three adapter shapes:
 
-- **dir-per-skill** (`claude`, `codex`) — each skill is a directory; symlinked to the repo (live) or
+- **dir-per-skill** (`claude`, `codex`) - each skill is a directory; symlinked to the repo (live) or
   copied (frozen).
-- **file-per-skill** (`cursor`, `windsurf`) — each skill is one generated file; they share
+- **file-per-skill** (`cursor`, `windsurf`) - each skill is one generated file; they share
   `installFilePerSkill` / `uninstallFilePerSkill` in `render.ts`.
-- **bundle** (`copilot`, `zed`, `aider`) — all skills live in one target-specific file as
+- **bundle** (`copilot`, `zed`, `aider`) - all skills live in one target-specific file as
   delimited sections inside a managed block.
 
 Adding a target = implement the interface, register it in `targets/index.ts`, add a default
@@ -84,7 +84,7 @@ install [skills...] --target … --scope … [--copy] [--force] [--dry-run]
   → print the actions
 ```
 
-## Safety model — what the tool will and won't touch
+## Safety model
 
 This is the important part. The installer writes into your real config directories, so it is
 deliberately conservative about **destroying anything it did not create**.
@@ -101,12 +101,12 @@ deliberately conservative about **destroying anything it did not create**.
 - **Codex upgrade migration.** The native adapter removes only the old installer-managed
   block from legacy `AGENTS.md` files and migrates only legacy skill entries it can prove
   belong to this repo. Surrounding instructions and unmanaged skills are preserved.
-- **`--force`** is the explicit escape hatch — but it **backs up** (moves to a `.bak-<n>`
+- **`--force`** is the explicit escape hatch - but it **backs up** (moves to a `.bak-<n>`
   sibling), never deletes outright.
 - **Windows** has no symlink privilege by default, so native targets fall back to copy.
 - **`--dry-run`** prints every action without touching the filesystem; **`doctor`** reports
   drift/conflicts read-only.
-- One target throwing is caught and reported — the other
+- One target throwing is caught and reported - the other
   targets still run, and the command exits non-zero.
 
 ## Parsing note

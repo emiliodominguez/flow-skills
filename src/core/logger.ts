@@ -20,8 +20,8 @@ export const sym = {
 
 /**
  * Strip C0/C1 control bytes (except tab/newline) from text that originates in a
- * skills repo — a directory basename or frontmatter value the user may not have
- * authored — so a crafted repo can't smuggle raw terminal escape sequences into
+ * skills repo - a directory basename or frontmatter value the user may not have
+ * authored - so a crafted repo can't smuggle raw terminal escape sequences into
  * the output. Our own color codes are applied *after* this, so they're unaffected.
  *
  * @param text - Untrusted, repo-derived text.
@@ -55,7 +55,7 @@ export const log = {
 };
 
 /**
- * Print a target's section header — bold name, dim destination, optional note
+ * Print a target's section header - bold name, dim destination, optional note
  * (install mode, "generated", etc.). The per-skill lines beneath omit the
  * directory since it lives here.
  *
@@ -87,7 +87,7 @@ const VERB: Record<Action["verb"], VerbStyle> = {
 };
 
 /**
- * A skip that flags an unmanaged collision — the adapters phrase these
+ * A skip that flags an unmanaged collision - the adapters phrase these
  * "… not managed …" and the user must resolve them with `--force`. Distinct
  * from a benign "already linked" / "absent" skip that needs no attention.
  *
@@ -162,7 +162,7 @@ export function printActions(actions: Action[]): void {
 export function summarize(actions: Action[]): string {
 	if (actions.length === 0) return "";
 
-	// Display order for the phrase — a superset of VERB.word (writes can read
+	// Display order for the phrase - a superset of VERB.word (writes can read
 	// "updated"; skips split into "skipped"/"unchanged"), so it's kept explicit.
 	const order = ["linked", "copied", "written", "updated", "removed", "backed up", "skipped", "unchanged"];
 	const counts = new Map<string, number>();
@@ -182,7 +182,7 @@ export function summarize(actions: Action[]): string {
 /**
  * Print the completion footer for an install/uninstall/sync run: a one-line
  * summary, plus a warning when skills were left untouched by an unmanaged
- * collision — so a blocked run is never reported as an unqualified success.
+ * collision - so a blocked run is never reported as an unqualified success.
  *
  * @param label - The completed action, e.g. "install complete".
  * @param actions - Every action the run performed.
@@ -198,6 +198,6 @@ export function reportSummary(label: string, actions: Action[], opts: { dryRun?:
 
 	if (blocked > 0)
 		log.warn(
-			`${blocked} skill${blocked === 1 ? "" : "s"} left untouched (exists, not managed) — re-run with \`--force\`, or inspect with \`doctor\`.`,
+			`${blocked} skill${blocked === 1 ? "" : "s"} left untouched (exists, not managed) - re-run with \`--force\`, or inspect with \`doctor\`.`,
 		);
 }

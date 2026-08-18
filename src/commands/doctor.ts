@@ -29,7 +29,7 @@ interface TargetReport {
 }
 
 /**
- * `doctor` — report each target's install state and flag drift or conflicts.
+ * `doctor` - report each target's install state and flag drift or conflicts.
  * Exits non-zero when something needs attention, so it's scriptable.
  *
  * @param opts - Targets (default: all enabled), scope, and `json` for machine output.
@@ -49,7 +49,7 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 		const tc = config.targets[name];
 
 		if (!tc || !tc.enabled) {
-			if (!opts.json) log.warn(`target "${name}" is disabled or unknown — skipping`);
+			if (!opts.json) log.warn(`target "${name}" is disabled or unknown - skipping`);
 
 			continue;
 		}

@@ -111,7 +111,7 @@ describe("sync", () => {
 describe("resolveSelection (profiles)", () => {
 	const config = { profiles: { wip: [], frontend: ["ed-styles", "ed-work"] } } as unknown as Config;
 
-	it("an EMPTY profile throws — it must not fall through to 'all skills' (uninstall would remove everything)", () => {
+	it("an EMPTY profile throws - it must not fall through to 'all skills' (uninstall would remove everything)", () => {
 		expect(() => resolveSelection([], ["wip"], config)).toThrow(/lists no skills/);
 	});
 	it("an unknown profile throws", () => {

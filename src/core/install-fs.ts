@@ -245,7 +245,7 @@ export function removeManagedBlock(dest: string, dryRun: boolean): Action | null
 	}
 
 	// Emptied → the file we created is gone ("remove"); otherwise our block was
-	// rewritten without one skill — an "updated", which the logger words as such.
+	// rewritten without one skill - an "updated", which the logger words as such.
 	return next.length === 0 ? { verb: "remove", path: dest, note: "managed block" } : { verb: "write", path: dest, note: "updated" };
 }
 

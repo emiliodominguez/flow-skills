@@ -27,8 +27,8 @@ One line about the fixture and the discipline it enforces.
 
 ## Process
 
-1. **Step one** — do the thing.
-2. **Step two** — verify it.
+1. **Step one** - do the thing.
+2. **Step two** - verify it.
 
 ---
 

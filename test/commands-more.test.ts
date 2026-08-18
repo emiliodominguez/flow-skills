@@ -5,7 +5,7 @@ import path from "node:path";
 import { newCommand } from "../src/commands/new";
 import { validateCommand } from "../src/commands/validate";
 import { completionCommand } from "../src/commands/completion";
-import { listCommand } from "../src/commands/list";
+import { listCommand, summarizeSkillDescription } from "../src/commands/list";
 
 const spies: { mockRestore: () => void }[] = [];
 let logSpy: ReturnType<typeof vi.spyOn>;
@@ -121,6 +121,14 @@ describe("listCommand --json", () => {
 		expect(data.skills.length).toBeGreaterThanOrEqual(16);
 		expect(data.targets.length).toBeGreaterThanOrEqual(9);
 		expect(data.skills[0]).toHaveProperty("description");
+	});
+});
+
+describe("summarizeSkillDescription", () => {
+	it("accepts current and legacy dash separators", () => {
+		expect(summarizeSkillDescription("Deploy safely - longer details")).toBe("Deploy safely");
+		expect(summarizeSkillDescription("Deploy safely \u2014 longer details")).toBe("Deploy safely");
+		expect(summarizeSkillDescription("Deploy safely \u2013 longer details")).toBe("Deploy safely");
 	});
 });
 

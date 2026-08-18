@@ -42,7 +42,7 @@ claim · scenario · fix`) so results dedup and rank deterministically.
 5. **Read-only reviewers, one writer.** Review/research agents are run read-only through
    the host's delegation mechanism and batched within available concurrency; only the
    orchestrator writes. No parallel-edit corruption.
-6. **Evidence gates.** "Done" needs observable proof — a test, a reproduced break, a
+6. **Evidence gates.** "Done" needs observable proof - a test, a reproduced break, a
    screenshot. A green typecheck is never, alone, evidence a feature works.
 7. **Severity + confidence, no padding.** Triaged, tagged, and honest. "No blockers" is a
    complete result; nothing is invented to look thorough.
@@ -57,10 +57,10 @@ claim · scenario · fix`) so results dedup and rank deterministically.
    correctness, readability, architecture, security, performance, simplicity.
    ed-adversarial-review attackers: exploit developer, chaos engineer, malicious user,
    boundary breaker, data-integrity auditor, time bomb.
-3. **Merge** — dedup by `file:line`.
-4. **Verify** — an independent agent tries to refute each finding (ed-review) or confirm
+3. **Merge** - dedup by `file:line`.
+4. **Verify** - an independent agent tries to refute each finding (ed-review) or confirm
    each attack is reachable (ed-adversarial-review). Default to refuted when unsure.
-5. **Report** — triaged, deduped, confidence-tagged, with a concrete fix per item.
+5. **Report** - triaged, deduped, confidence-tagged, with a concrete fix per item.
 
 `ed-review` asks _"is it correct and maintainable?"_; `ed-adversarial-review` asks _"how do
 I break it?"_. Run the latter on anything touching auth, money, data, migrations, or

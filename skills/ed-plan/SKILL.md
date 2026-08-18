@@ -8,11 +8,11 @@ description: "Research the codebase with parallel read-only agents, design the a
 # Plan
 
 Between idea and code. Research what exists, decide the shape of the change, chop it into
-shippable tasks — then **write the plan to a file** so the work runs in a fresh, clean
+shippable tasks - then **write the plan to a file** so the work runs in a fresh, clean
 context instead of a window already crowded with research.
 
 **No implementation code in this phase.** Sketches and pseudocode are fine; real edits to
-project files are not — the only writes are the plan file itself and a one-line `.plans/`
+project files are not - the only writes are the plan file itself and a one-line `.plans/`
 entry in `.gitignore` (Phase 4).
 
 **Why a file + fresh session?** Planning is research-heavy and fills the context window
@@ -20,51 +20,51 @@ with exploration you won't need while coding. Executing from a written plan in a
 session is cheaper (warm cache, less to re-read), cleaner (no stale detours), and
 reproducible (anyone can pick up the file).
 
-**Too small to plan?** If the change is 1–2 tasks, skip the file and go straight to
+**Too small to plan?** If the change is 1-2 tasks, skip the file and go straight to
 `/ed-work <description>` (ad-hoc mode). A plan file earns its keep at 3+ tasks or when the
 work spans sessions.
 
 ---
 
-## Phase 1: Research — fan out, read-only (15–30 min max)
+## Phase 1: Research - fan out, read-only (15-30 min max)
 
-Before designing anything, find out what the codebase already gives you. **Always first** —
+Before designing anything, find out what the codebase already gives you. **Always first** -
 it kills bad plans before they cost time. Run these as **parallel read-only subagents in one
 batch** using the host's delegation mechanism; only you, the orchestrator, write files. If
 the angles exceed available concurrency, run them in waves; if the host has no subagent
 support, run them sequentially. Give each a
 narrow angle:
 
-1. **Precedent** — has the team solved something similar nearby? Where? Match that style.
-2. **Constraints** — build system, lint rules, framework gotchas, perf budgets, the
+1. **Precedent** - has the team solved something similar nearby? Where? Match that style.
+2. **Constraints** - build system, lint rules, framework gotchas, perf budgets, the
    testing setup. What will fight this change?
-3. **Blast radius** — who calls / imports / depends on anything this change touches? What
+3. **Blast radius** - who calls / imports / depends on anything this change touches? What
    breaks if the interface moves?
-4. **Prior art in tests** — how is this area tested today? What's the contract as the
+4. **Prior art in tests** - how is this area tested today? What's the contract as the
    tests see it?
 
 Each subagent returns a tight findings list (paths + line refs, not prose essays). You
-synthesize into a **3–6 line "what I found" summary** and **surface anything that
-invalidates the brainstorm** loudly — a wrong premise here is worth more than a whole plan.
-If two agents' findings conflict, re-open the source file yourself before designing on it —
+synthesize into a **3-6 line "what I found" summary** and **surface anything that
+invalidates the brainstorm** loudly - a wrong premise here is worth more than a whole plan.
+If two agents' findings conflict, re-open the source file yourself before designing on it -
 never build on an unreconciled premise.
 
-For a tiny change, skip the fan-out and read the 2–3 relevant files yourself. Match effort
+For a tiny change, skip the fan-out and read the 2-3 relevant files yourself. Match effort
 to risk.
 
 ---
 
 ## Phase 2: Design the change
 
-Now decide HOW. Cover, in prose + sketches (10–30 lines, a whiteboard in markdown):
+Now decide HOW. Cover, in prose + sketches (10-30 lines, a whiteboard in markdown):
 
-- **Entry point** — what file/function does the change start in?
-- **Data flow** — what moves through the system, in what shape?
-- **Module boundaries** — what stays in A vs lives in B? If unclear, keep it where it is.
-- **Public interface** — what new/changed functions, types, endpoints exist after?
-- **Migration story** — if callers in the wild depend on what you're changing, how do they
+- **Entry point** - what file/function does the change start in?
+- **Data flow** - what moves through the system, in what shape?
+- **Module boundaries** - what stays in A vs lives in B? If unclear, keep it where it is.
+- **Public interface** - what new/changed functions, types, endpoints exist after?
+- **Migration story** - if callers in the wild depend on what you're changing, how do they
   transition? (expand → migrate → contract)
-- **Failure modes** — what can go wrong, what's the contract on failure?
+- **Failure modes** - what can go wrong, what's the contract on failure?
 
 **Push back if research surfaced a simpler approach than the brainstorm landed on.** The
 brainstorm sketch is a starting point, not a contract.
@@ -75,14 +75,14 @@ brainstorm sketch is a starting point, not a contract.
 
 Each task is:
 
-- **Independently verifiable** — a concrete "done" check (test passes, output is X, error
+- **Independently verifiable** - a concrete "done" check (test passes, output is X, error
   is gone).
-- **Small enough to ship in one PR** — 15 min to a few hours.
-- **Dependency-ordered** — if B uses what A built, A comes first.
-- **A vertical slice when possible** — all the layers for ONE working capability, not "all
+- **Small enough to ship in one PR** - 15 min to a few hours.
+- **Dependency-ordered** - if B uses what A built, A comes first.
+- **A vertical slice when possible** - all the layers for ONE working capability, not "all
   the DB, then all the API, then all the UI".
 
-3–8 tasks is healthy. At 12+, the design is too big — go back to brainstorm and shrink
+3-8 tasks is healthy. At 12+, the design is too big - go back to brainstorm and shrink
 scope.
 
 ---
@@ -100,35 +100,35 @@ Write the plan to `./.plans/<YYYY-MM-DD>-<slug>.md` (slug derived from the goal,
 Use this exact schema so `/ed-work` can read it cold:
 
 ```markdown
-# Plan — <one-line goal>
+# Plan - <one-line goal>
 
 **Created:** YYYY-MM-DD
 **Status:** ready
 **Design source:** <brainstorm summary / issue link / "ad-hoc">
 
 ## Goal
-<2–3 sentences. What "done" looks like for the whole plan.>
+<2-3 sentences. What "done" looks like for the whole plan.>
 
 ## Research findings
-<3–6 bullets. Precedent, constraints, blast radius, anything that changed the approach.>
+<3-6 bullets. Precedent, constraints, blast radius, anything that changed the approach.>
 
 ## Design
-<10–30 lines: entry point, data flow, module boundaries, public interface,
+<10-30 lines: entry point, data flow, module boundaries, public interface,
 migration story, failure modes. Prose + sketches, no implementation code.>
 
 ## Tasks
-- [ ] **T1 — <verb-led title>**
+- [ ] **T1 - <verb-led title>**
       Acceptance: <observable done-check>
       Touches: <files/areas>
       Depends on: <none | T#>
-- [ ] **T2 — ...**
+- [ ] **T2 - ...**
 
 ## Open questions / risks
 <what's still undecided, what could go wrong>
 ```
 
 `/ed-work` flips `- [ ]` → `- [x]` in this file as each task's acceptance is proven, and sets
-`Status: done` when the whole plan is complete — so the file stays an accurate live
+`Status: done` when the whole plan is complete - so the file stays an accurate live
 checklist across sessions and a bare `/ed-work` can tell in-progress plans from finished ones.
 
 ---
@@ -136,12 +136,12 @@ checklist across sessions and a bare `/ed-work` can tell in-progress plans from 
 ## Anti-patterns
 
 - ❌ Writing the plan without reading the code first
-- ❌ Tasks like "implement the feature" — that's the whole thing, not a task
-- ❌ Horizontal slicing ("Phase 1: database, Phase 2: API") — nothing ships until the end
+- ❌ Tasks like "implement the feature" - that's the whole thing, not a task
+- ❌ Horizontal slicing ("Phase 1: database, Phase 2: API") - nothing ships until the end
 - ❌ Forgetting the migration story when changing a public interface
 - ❌ Designing the perfect end state with no working intermediate state
-- ❌ Leaving the plan only in chat — write the file, or the fresh-context handoff can't work
-- ❌ Committing `.plans/` — it's scratch, keep it git-ignored
+- ❌ Leaving the plan only in chat - write the file, or the fresh-context handoff can't work
+- ❌ Committing `.plans/` - it's scratch, keep it git-ignored
 
 ---
 

@@ -48,7 +48,7 @@ describe("frontmatter escaping (F2 / escapeYaml)", () => {
 	});
 
 	it("round-trips a colon-containing description through parseFrontmatter", () => {
-		const desc = "Audit — Out of scope: caches, history";
+		const desc = "Audit - Out of scope: caches, history";
 		const block = frontmatter({ trigger: "model_decision", description: desc });
 
 		expect(parseFrontmatter(`${block}\nbody`).data.description).toBe(desc);

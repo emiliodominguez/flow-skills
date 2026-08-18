@@ -31,6 +31,20 @@ describe("skills corpus", () => {
 		expect(dangling).toEqual([]);
 	});
 
+	it("validates Claude and Codex reference syntax", () => {
+		const known = {
+			name: "ed-known",
+			dir: "",
+			file: "",
+			frontmatter: { name: "ed-known", description: "Use /ed-known or $ed-known." },
+			body: "Continue with /ed-missing-claude and $ed-missing-codex.\n\n## Done when\n- done\n\n## Rules\n- safe",
+			raw: "",
+		};
+		const rules = validateReferences([known]).map((issue) => issue.message);
+
+		expect(rules).toEqual(expect.arrayContaining([expect.stringContaining("ed-missing-claude"), expect.stringContaining("ed-missing-codex")]));
+	});
+
 	it("flags a skill missing its description", () => {
 		const broken = { name: "x", dir: "", file: "", frontmatter: { name: "x", description: "" }, body: "hello world ".repeat(10), raw: "" };
 		const issues = validateSkill(broken);
@@ -38,7 +52,21 @@ describe("skills corpus", () => {
 		expect(issues.some((i) => i.rule === "frontmatter.description")).toBe(true);
 	});
 
-	it("warns on filler words, a too-thin description, and a missing self-trigger", () => {
+	it("reports non-string frontmatter fields without crashing validation", () => {
+		const broken = {
+			name: "x",
+			dir: "",
+			file: "",
+			frontmatter: { name: 42, description: ["wrong"] },
+			body: "hello world ".repeat(10),
+			raw: "",
+		};
+		const issues = validateSkill(broken as never);
+
+		expect(issues.map((issue) => issue.message)).toEqual(expect.arrayContaining(["`name` must be a string", "`description` must be a string"]));
+	});
+
+	it("warns on filler words, a too-thin description, and missing Claude/Codex self-triggers", () => {
 		const skill = {
 			name: "ed-demo",
 			dir: "",
@@ -51,6 +79,7 @@ describe("skills corpus", () => {
 
 		expect(rules).toContain("prose.weasel");
 		expect(rules).toContain("description.thin");
-		expect(rules).toContain("description.trigger");
+		expect(rules).toContain("description.trigger.claude");
+		expect(rules).toContain("description.trigger.codex");
 	});
 });

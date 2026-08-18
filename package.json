@@ -1,7 +1,7 @@
 {
 	"name": "@emiliodominguez/agent-skills",
 	"version": "0.5.0",
-	"description": "Author agent skills once, install them into Claude Code, Cursor, Codex/AGENTS.md, Windsurf, Copilot, Zed, aider, Cline and Continue — with validation, scaffolding and a tested installer.",
+	"description": "Author agent skills once, install them into Claude Code, Codex, Cursor, Windsurf, Copilot, Zed, aider, Cline and Continue — with validation, scaffolding and a tested installer.",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
@@ -61,6 +61,7 @@
 	"dependencies": {
 		"@clack/prompts": "^1.7.0",
 		"commander": "^15.0.0",
+		"js-yaml": "^5.2.1",
 		"picocolors": "^1.1.1"
 	},
 	"devDependencies": {
@@ -72,7 +73,6 @@
 		"eslint": "^10.7.0",
 		"eslint-plugin-jsdoc": "^50.6.0",
 		"husky": "^9.1.7",
-		"js-yaml": "^5.2.1",
 		"lint-staged": "^17.0.8",
 		"prettier": "^3.4.2",
 		"tsup": "^8.3.5",

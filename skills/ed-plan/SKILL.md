@@ -1,8 +1,9 @@
 ---
 name: ed-plan
-description: Research the codebase with parallel read-only agents, design the approach, then write a task-decomposed plan to ./.plans/<date>-<slug>.md so a FRESH session can execute it. Use when the design from /ed-brainstorm is clear and you need to figure out HOW (or when invoked as /ed-plan, or when the user says "make a plan", "break this down", "what's the approach"). Writes a plan file and hands off to /ed-work in a clean context.
-version: 0.1.0
+description: "Research the codebase with parallel read-only agents, design the approach, then write a task-decomposed plan to ./.plans/DATE-SLUG.md so a FRESH session can execute it. Use when the design from /ed-brainstorm is clear and you need to figure out HOW (or when invoked as /ed-plan, or when the user says \"make a plan\", \"break this down\", \"what's the approach\"). Writes a plan file and hands off to /ed-work in a clean context. Invoke as /ed-plan in Claude Code or $ed-plan in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Plan
 
@@ -28,10 +29,11 @@ work spans sessions.
 ## Phase 1: Research — fan out, read-only (15–30 min max)
 
 Before designing anything, find out what the codebase already gives you. **Always first** —
-it kills bad plans before they cost time. Run these as **parallel subagents in one
-message** (Agent tool — prefer `type: Explore`, which is genuinely read-only; if you use
-`general-purpose`, instruct it to read only, and remember only you, the orchestrator, write
-files). Give each a narrow angle:
+it kills bad plans before they cost time. Run these as **parallel read-only subagents in one
+batch** using the host's delegation mechanism; only you, the orchestrator, write files. If
+the angles exceed available concurrency, run them in waves; if the host has no subagent
+support, run them sequentially. Give each a
+narrow angle:
 
 1. **Precedent** — has the team solved something similar nearby? Where? Match that style.
 2. **Constraints** — build system, lint rules, framework gotchas, perf budgets, the
@@ -152,5 +154,6 @@ checklist across sessions and a bare `/ed-work` can tell in-progress plans from 
 - You can name what could still go wrong and what's not yet decided
 
 Then print the path and say:
-**"Plan written to `.plans/<file>`. Start a fresh session (or `/clear`) and run
-`/ed-work .plans/<file>` to execute it in a clean context."**
+**"Plan written to `.plans/<file>`. Start a fresh chat/session and invoke `/ed-work
+.plans/<file>` in Claude Code or `$ed-work .plans/<file>` in Codex to execute it in a clean
+context."**

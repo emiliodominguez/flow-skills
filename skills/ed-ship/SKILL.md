@@ -1,8 +1,9 @@
 ---
 name: ed-ship
-description: Get reviewed changes to production safely — atomic commits with conventional-commit messages, a draft PR with auto-fix on pre-commit failures, and a pre-launch checklist for anything user-facing. Use after /ed-review passes (and /ed-adversarial-review for security/money/data/auth/migration-sensitive changes), or when invoked as /ed-ship (also "push this", "open a PR", "let's ship it", "ready to deploy"). Hands off to /ed-pr-fix when reviewers comment, /ed-git-fix when the push snags on a rebase/conflict.
-version: 0.1.0
+description: "Get reviewed changes to production safely — atomic commits with conventional-commit messages, a draft PR with auto-fix on pre-commit failures, and a pre-launch checklist for anything user-facing. Use after /ed-review passes (and /ed-adversarial-review for security/money/data/auth/migration-sensitive changes), or when invoked as /ed-ship (also \"push this\", \"open a PR\", \"let's ship it\", \"ready to deploy\"). Hands off to /ed-pr-fix when reviewers comment, /ed-git-fix when the push snags on a rebase/conflict. Invoke as /ed-ship in Claude Code or $ed-ship in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Ship
 
@@ -89,7 +90,7 @@ Skip for internal refactors. Apply to anything that hits production behavior.
 **First confirm CI is green.** The pre-launch checklist covers only *local* checks, but CI runs the moment the PR opens — don't `gh pr ready` on a red pipeline (that's the mistake this skill exists to catch before reviewers see it):
 
 ```bash
-gh pr checks   # wait for green; if red, fix via /ed-work before promoting
+gh pr checks --watch   # wait for green; if red, fix via /ed-work before promoting
 gh pr ready
 ```
 

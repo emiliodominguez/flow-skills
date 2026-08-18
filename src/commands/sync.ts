@@ -1,7 +1,8 @@
 import path from "node:path";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
-import { resolveTargetPath } from "../core/paths.js";
+import { findProjectRoot, resolveTargetPath } from "../core/paths.js";
+import { effectiveInstallMode } from "../core/install-mode.js";
 import { log, printActions, targetHeader, reportSummary } from "../core/logger.js";
 import type { Action } from "../core/install-fs.js";
 import { getTarget } from "../targets/index.js";
@@ -24,6 +25,7 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 	const skills = discoverSkills(path.join(root, config.skillsDir));
 	const scope = opts.scope ?? "user";
 	const targets = opts.target?.length ? opts.target : Object.keys(config.targets).filter((name) => config.targets[name]?.enabled);
+	const projectRoot = findProjectRoot();
 
 	if (opts.dryRun) log.warn("dry run — no files will be changed");
 
@@ -40,9 +42,9 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 
 		try {
 			const target = getTarget(name);
-			const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
+			const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, projectRoot);
 
-			targetHeader(target.name, dest, target.supportsSymlink ? config.installMode : "generated");
+			targetHeader(target.name, dest, target.supportsSymlink ? "preserve installed mode" : "generated");
 
 			const statuses = target.status({ skills, dest, mode: config.installMode, force: false, dryRun: true });
 			const installedNames = new Set(statuses.filter((s) => INSTALLED.has(s.state)).map((s) => s.skill));
@@ -53,7 +55,31 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 				continue;
 			}
 
-			const actions = target.install({ skills: toSync, dest, mode: config.installMode, force: false, dryRun: !!opts.dryRun });
+			const actions: Action[] = [];
+
+			if (target.supportsSymlink) {
+				const byName = new Map(statuses.map((status) => [status.skill, status]));
+				const linked = toSync.filter((skill) => byName.get(skill.name)?.mode === "symlink");
+				const copied = toSync.filter((skill) => byName.get(skill.name)?.mode !== "symlink");
+
+				if (linked.length > 0) {
+					actions.push(
+						...target.install({
+							skills: linked,
+							dest,
+							mode: effectiveInstallMode(target, "symlink"),
+							force: false,
+							dryRun: !!opts.dryRun,
+						}),
+					);
+				}
+
+				if (copied.length > 0) {
+					actions.push(...target.install({ skills: copied, dest, mode: "copy", force: false, dryRun: !!opts.dryRun }));
+				}
+			} else {
+				actions.push(...target.install({ skills: toSync, dest, mode: "copy", force: false, dryRun: !!opts.dryRun }));
+			}
 
 			printActions(actions);
 			allActions.push(...actions);

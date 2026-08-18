@@ -1,7 +1,6 @@
 ---
 name: ed-fixture
-description: "A fixture skill: freeze the exact adapter output. Use when snapshot-testing; hands off to /ed-work."
-version: 0.1.0
+description: "A fixture skill: freeze the exact adapter output. Use when snapshot-testing; invoke /ed-fixture in Claude Code or $ed-fixture in Codex; hand off to /ed-work or $ed-work."
 ---
 
 # Fixture
@@ -27,4 +26,4 @@ One line about the fixture and the discipline it enforces.
 
 - The snapshot matches
 
-Then: hand off to `/ed-work`.
+Then: hand off to `/ed-work` in Claude Code or `$ed-work` in Codex.

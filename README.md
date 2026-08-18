@@ -3,12 +3,12 @@
 Author agent skills **once**, install them **anywhere**.
 
 A source-of-truth repo for a suite of workflow skills (the `ed-*` family) plus a small,
-tested CLI that installs them into **Claude Code**, **Cursor**, **Codex / AGENTS.md**,
+tested CLI that installs them into **Claude Code**, **Codex**, **Cursor**,
 **Windsurf**, **GitHub Copilot**, **Zed**, **aider**, **Cline**, and **Continue** — with
 validation, scaffolding, and a symlink-or-copy installer.
 
 ```sh
-./install.sh                 # all skills → Claude Code (symlinked, edit-live)
+./install.sh                 # all skills → Claude Code + Codex (symlinked, edit-live)
 pnpm skills install -t cursor codex
 pnpm skills new my-skill
 pnpm skills validate
@@ -19,8 +19,8 @@ pnpm skills validate
 ## Why
 
 Every assistant has its own place and format for "always-available instructions": Claude
-Code has `~/.claude/skills/<name>/SKILL.md`, Cursor has `.cursor/rules/*.mdc`, Codex reads
-`AGENTS.md`, Windsurf has `.windsurf/rules`, and Copilot, Zed, aider, Cline and Continue each
+Code has `~/.claude/skills/<name>/SKILL.md`, Codex has `~/.agents/skills/<name>/SKILL.md`,
+Cursor has `.cursor/rules/*.mdc`, Windsurf has `.windsurf/rules`, and Copilot, Zed, aider, Cline and Continue each
 have their own. Writing the same guidance over and over rots fast.
 
 Here each skill is written once as a `SKILL.md`. Target **adapters** transform it into each
@@ -62,7 +62,7 @@ planning and building don't share a crowded context window.
 ```sh
 git clone https://github.com/emiliodominguez/agent-skills.git
 cd agent-skills
-./install.sh                       # → Claude Code, symlinked
+./install.sh                       # → Claude Code + Codex, symlinked
 ./install.sh -- -t cursor codex    # → Cursor + Codex
 ./install.sh -- --copy             # → copy a frozen snapshot instead of symlinking
 ```
@@ -125,21 +125,21 @@ a curated subset with a profile: `agent-skills install --profile frontend`.
 
 ## Targets
 
-| Target       | Emits                             | Install shape                                                      |
-| ------------ | --------------------------------- | ------------------------------------------------------------------ |
-| **claude**   | `SKILL.md` (unchanged)            | one directory per skill; **symlink** (live) or copy                |
-| **cursor**   | `.mdc` rule with frontmatter      | one file per skill in `.cursor/rules/`                             |
-| **codex**    | `AGENTS.md` sections              | all skills in one **managed block** (preserves your other content) |
-| **windsurf** | `.md` rule                        | one file per skill in `.windsurf/rules/`                           |
-| **copilot**  | `.github/copilot-instructions.md` | all skills in one **managed block**                                |
-| **zed**      | `.rules`                          | all skills in one **managed block**                                |
-| **aider**    | `CONVENTIONS.md`                  | all skills in one **managed block**                                |
-| **cline**    | `.md` rule                        | one file per skill in `.clinerules/`                               |
-| **continue** | `.md` rule                        | one file per skill in `.continue/rules/`                           |
+| Target       | Emits                             | Install shape                                       |
+| ------------ | --------------------------------- | --------------------------------------------------- |
+| **claude**   | `SKILL.md` (unchanged)            | one directory per skill; **symlink** (live) or copy |
+| **cursor**   | `.mdc` rule with frontmatter      | one file per skill in `.cursor/rules/`              |
+| **codex**    | `SKILL.md` (unchanged)            | one directory per skill; **symlink** (live) or copy |
+| **windsurf** | `.md` rule                        | one file per skill in `.windsurf/rules/`            |
+| **copilot**  | `.github/copilot-instructions.md` | all skills in one **managed block**                 |
+| **zed**      | `.rules`                          | all skills in one **managed block**                 |
+| **aider**    | `CONVENTIONS.md`                  | all skills in one **managed block**                 |
+| **cline**    | `.md` rule                        | one file per skill in `.clinerules/`                |
+| **continue** | `.md` rule                        | one file per skill in `.continue/rules/`            |
 
-Only the `claude` target supports symlinking (the format is identical to the source). The
-others are transformed, so they're always generated fresh — re-run `install` (or `sync`) to
-update. The bundle targets (codex, copilot, zed, aider) merge every skill into one delimited
+The `claude` and `codex` targets support symlinking because their native format is identical
+to the source. The others are transformed, so they're always generated fresh — re-run
+`install` (or `sync`) to update. The bundle targets (copilot, zed, aider) merge every skill into one delimited
 managed block, preserving any surrounding content you wrote in the same file.
 
 ### Safety — what it will and won't touch
@@ -147,13 +147,13 @@ managed block, preserving any surrounding content you wrote in the same file.
 The installer writes into your real config directories, so it never destroys anything it did
 not create:
 
-- **claude** only overwrites/removes a directory that is _its own_ symlink or a copy it
-  marked. A hand-authored `~/.claude/skills/<name>/` that collides with a skill name is
+- **claude/codex** only overwrite/remove a directory that is _their own_ symlink or a copy
+  they marked. A hand-authored native skill that collides with a skill name is
   **left alone** unless you pass `--force`.
 - **cursor/windsurf** files carry a marker; both `install` and `uninstall` touch only
   marked files.
-- **codex** edits stay inside a delimited block in `AGENTS.md`; your surrounding content is
-  preserved.
+- On upgrade, **codex** removes only the old installer-managed block from `AGENTS.md` and
+  migrates provably managed legacy `~/.codex/skills` entries; user-authored content is preserved.
 - `--force` never deletes outright — it **backs the entry up** to a `.bak-<n>` sibling first.
 - On Windows (no symlink privilege), the native target automatically falls back to `--copy`.
 - `--dry-run` previews every action; `doctor` reports drift without changing anything.
@@ -169,7 +169,7 @@ Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety
 ```jsonc
 {
 	"installMode": "symlink", // or "copy"
-	"defaultTargets": ["claude"],
+	"defaultTargets": ["claude", "codex"],
 	"profiles": {
 		// named install sets: `install --profile frontend`
 		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
@@ -177,7 +177,8 @@ Full detail: [docs/ARCHITECTURE.md → Safety model](docs/ARCHITECTURE.md#safety
 	"targets": {
 		"claude": { "enabled": true, "userPath": "~/.claude/skills", "projectPath": ".claude/skills" },
 		"cursor": { "enabled": true, "userPath": "~/.cursor/rules", "projectPath": ".cursor/rules" },
-		// codex, windsurf, copilot, zed, aider, cline, continue ...
+		"codex": { "enabled": true, "userPath": "~/.agents/skills", "projectPath": ".agents/skills" },
+		// windsurf, copilot, zed, aider, cline, continue ...
 	},
 }
 ```
@@ -210,7 +211,7 @@ reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 pnpm skills new my-skill -d "One line: what it does — when to use — handoff."
 # edit skills/my-skill/SKILL.md
 pnpm skills validate
-pnpm skills install -t claude
+pnpm skills install -t claude codex
 ```
 
 Skills follow a shared anatomy (frontmatter → phased body → `Anti-patterns` → `Done when`).
@@ -253,13 +254,14 @@ if not (see [docs/CONFIGURATION.md](docs/CONFIGURATION.md)).
 destination that this tool didn't create. Inspect it; if it's safe to replace, re-run with
 `--force`.
 
-**`AGENTS.md` errors with "malformed or duplicate markers".** The file has more than one
-`agent-skills` marker pair (e.g. from a bad merge). Remove the stray pair by hand and re-run.
+**Codex reports that its destination is an `AGENTS.md` file.** An older local config still
+uses the pre-native bundle path. Change it to `~/.agents/skills` (user) or `.agents/skills`
+(project), then re-run; the installer removes only its legacy managed block.
 
 **`pnpm install` warns about ignored build scripts (esbuild).** Allow it once — this repo
 already lists esbuild in `pnpm-workspace.yaml`; run `pnpm install` again after cloning.
 
-**Broken symlinks after moving the repo.** Symlinked (`claude`) installs point at the repo's
+**Broken symlinks after moving the repo.** Symlinked native (`claude`/`codex`) installs point at the repo's
 path. If you move the repo, re-run `pnpm skills install` to repoint them, or use `--copy`.
 
 ---

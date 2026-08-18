@@ -1,8 +1,9 @@
 ---
 name: ed-deps
-description: Update dependencies to their latest versions safely — inventory what's outdated, read the changelog for every major before bumping it, upgrade one at a time behind the test gate, and record anything held back with a reason. Use when bumping dependencies, chasing a security advisory, or on a routine currency pass (also /ed-deps, "update dependencies", "bump deps", "are these up to date", "upgrade the packages"). Hands off to /ed-review for the diff, then /ed-ship.
-version: 0.1.0
+description: "Update dependencies to their latest versions safely — inventory what's outdated, read the changelog for every major before bumping it, upgrade one at a time behind the test gate, and record anything held back with a reason. Use when bumping dependencies, chasing a security advisory, or on a routine currency pass (also /ed-deps, \"update dependencies\", \"bump deps\", \"are these up to date\", \"upgrade the packages\"). Hands off to /ed-review for the diff, then /ed-ship. Invoke as /ed-deps in Claude Code or $ed-deps in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Deps
 

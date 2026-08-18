@@ -1,8 +1,9 @@
 ---
 name: ed-benchmark
-description: Measure before optimizing — define the metric and a representative workload, build a repeatable benchmark, capture a baseline, then change one thing at a time and report honest deltas with variance. Use before any performance work, to validate an optimization actually helped, or when someone claims something is "slow" without numbers (also /ed-benchmark, "is this faster", "benchmark this", "measure the performance"). Feeds the perf path of /ed-diagnose; hands off to /ed-work to implement a proven win.
-version: 0.1.0
+description: "Measure before optimizing — define the metric and a representative workload, build a repeatable benchmark, capture a baseline, then change one thing at a time and report honest deltas with variance. Use before any performance work, to validate an optimization actually helped, or when someone claims something is \"slow\" without numbers (also /ed-benchmark, \"is this faster\", \"benchmark this\", \"measure the performance\"). Feeds the perf path of /ed-diagnose; hands off to /ed-work to implement a proven win. Invoke as /ed-benchmark in Claude Code or $ed-benchmark in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Benchmark
 

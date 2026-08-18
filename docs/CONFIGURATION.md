@@ -18,11 +18,11 @@ Precedence (later wins, deep-merged):
 	// Directory (relative to repo root) that holds the skill folders.
 	"skillsDir": "skills",
 
-	// Default strategy for the native (claude) target: symlink (live) or copy (frozen).
+	// Default strategy for native Claude Code and Codex targets: symlink (live) or copy (frozen).
 	"installMode": "symlink",
 
 	// Targets used when --target is not passed.
-	"defaultTargets": ["claude"],
+	"defaultTargets": ["claude", "codex"],
 
 	// Named install sets: `install --profile <name>` installs just these skills.
 	"profiles": {
@@ -35,7 +35,7 @@ Precedence (later wins, deep-merged):
 	"targets": {
 		"claude": { "enabled": true, "userPath": "~/.claude/skills", "projectPath": ".claude/skills" },
 		"cursor": { "enabled": true, "userPath": "~/.cursor/rules", "projectPath": ".cursor/rules" },
-		"codex": { "enabled": true, "userPath": "~/.codex/AGENTS.md", "projectPath": "AGENTS.md" },
+		"codex": { "enabled": true, "userPath": "~/.agents/skills", "projectPath": ".agents/skills" },
 		"windsurf": { "enabled": true, "userPath": "~/.codeium/windsurf/memories", "projectPath": ".windsurf/rules" },
 		"copilot": { "enabled": true, "userPath": ".github/copilot-instructions.md", "projectPath": ".github/copilot-instructions.md" },
 		"zed": { "enabled": true, "userPath": ".rules", "projectPath": ".rules" },
@@ -65,7 +65,7 @@ and a profile overrides "all". `list --profiles` prints the configured sets.
 
 ## A note on target paths
 
-The `claude` paths are exact. Every other target's path follows that tool's **documented
+The `claude` and `codex` native skill paths are exact. Every other target's path follows that tool's **documented
 convention at the time of writing**, but these tools move — a new version may change where it
 reads rules from. The newer targets (copilot, zed, aider, cline, continue) are
 **project-oriented** — the tools read from the working tree, so `userPath` mirrors `projectPath`

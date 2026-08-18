@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { load as loadYaml } from "js-yaml";
 
 /** Parsed YAML frontmatter of a SKILL.md. `name` and `description` are required. */
 export interface SkillFrontmatter {
@@ -22,6 +23,8 @@ export interface Skill {
 	body: string;
 	/** Full raw file contents. */
 	raw: string;
+	/** YAML parse failure captured so validation can report it without aborting the corpus scan. */
+	parseError?: string;
 }
 
 /** A validation finding against a skill. `error` fails CI; `warn` is advisory. */
@@ -45,38 +48,34 @@ export const WEASEL_WORDS = ["simply", "basically", "effortlessly", "trivially",
 export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
- * Parse a SKILL.md's leading `---` frontmatter tolerantly — the way agent skill
- * loaders do — treating each `key: value` line as a single-line string. This is
- * deliberately more lenient than strict YAML so that descriptions containing a
- * `: ` (e.g. "Out of scope: …") parse the same way Claude Code accepts them.
+ * Parse a SKILL.md's leading `---` frontmatter as YAML, matching the shared agent
+ * skills format consumed by Claude Code and Codex.
  *
  * @param raw - Full SKILL.md contents.
  * @returns The parsed key/value data and the body with frontmatter stripped.
  */
-export function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
+export function parseFrontmatter(raw: string): { data: Record<string, unknown>; body: string; error?: string } {
 	const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n([\s\S]*))?$/.exec(raw);
 
 	if (!match) return { data: {}, body: raw.trim() };
 
-	const data: Record<string, string> = {};
+	try {
+		const parsed = loadYaml(match[1]!);
 
-	for (const line of match[1]!.split(/\r?\n/)) {
-		if (!line.trim() || line.trimStart().startsWith("#")) continue;
+		if (parsed === null) return { data: {}, body: (match[2] ?? "").trim() };
 
-		const kv = /^([A-Za-z0-9_-]+):[ \t]*(.*)$/.exec(line);
-
-		if (!kv) continue;
-
-		let value = kv[2] ?? "";
-
-		if (value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
-			value = value.slice(1, -1);
+		if (typeof parsed !== "object" || Array.isArray(parsed)) {
+			return { data: {}, body: (match[2] ?? "").trim(), error: "frontmatter must be a YAML mapping" };
 		}
 
-		data[kv[1]!] = value;
+		return { data: parsed as Record<string, unknown>, body: (match[2] ?? "").trim() };
+	} catch (err) {
+		return {
+			data: {},
+			body: (match[2] ?? "").trim(),
+			error: err instanceof Error ? err.message.split("\n")[0] : String(err),
+		};
 	}
-
-	return { data, body: (match[2] ?? "").trim() };
 }
 
 /**
@@ -91,7 +90,7 @@ export function loadSkill(dir: string): Skill {
 	if (!fs.existsSync(file)) throw new Error(`No SKILL.md in ${dir}`);
 
 	const raw = fs.readFileSync(file, "utf8");
-	const { data, body } = parseFrontmatter(raw);
+	const { data, body, error } = parseFrontmatter(raw);
 
 	return {
 		name: path.basename(dir),
@@ -100,6 +99,7 @@ export function loadSkill(dir: string): Skill {
 		frontmatter: { name: "", description: "", ...data } as SkillFrontmatter,
 		body,
 		raw,
+		parseError: error,
 	};
 }
 
@@ -114,41 +114,44 @@ export function validateSkill(skill: Skill): Issue[] {
 	const issues: Issue[] = [];
 	const add = (level: Issue["level"], rule: string, message: string) => issues.push({ skill: skill.name, level, rule, message });
 	const fm = skill.frontmatter;
+	const name = typeof fm.name === "string" ? fm.name : "";
+	const description = typeof fm.description === "string" ? fm.description : "";
 
-	if (!fm.name) {
-		add("error", "frontmatter.name", "missing `name` in frontmatter");
+	if (skill.parseError) add("error", "frontmatter.yaml", `invalid YAML: ${skill.parseError}`);
+
+	if (!name) {
+		add("error", "frontmatter.name", fm.name === "" ? "missing `name` in frontmatter" : "`name` must be a string");
 	} else {
-		if (fm.name !== skill.name) add("error", "name.match-dir", `frontmatter name "${fm.name}" != directory "${skill.name}"`);
+		if (name !== skill.name) add("error", "name.match-dir", `frontmatter name "${name}" != directory "${skill.name}"`);
 
-		if (!KEBAB.test(fm.name)) add("error", "name.kebab", `name "${fm.name}" is not kebab-case`);
+		if (!KEBAB.test(name)) add("error", "name.kebab", `name "${name}" is not kebab-case`);
 	}
 
-	if (!fm.description) {
-		add("error", "frontmatter.description", "missing `description` in frontmatter");
+	if (!description) {
+		add("error", "frontmatter.description", fm.description === "" ? "missing `description` in frontmatter" : "`description` must be a string");
 	} else {
-		if (fm.description.includes("\n")) add("error", "description.single-line", "description must be a single line");
+		if (description.includes("\n")) add("error", "description.single-line", "description must be a single line");
 
-		if (fm.description.length > DESCRIPTION_WARN_LIMIT) {
-			add("warn", "description.length", `description is ${fm.description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
+		if (description.length > DESCRIPTION_WARN_LIMIT) {
+			add("warn", "description.length", `description is ${description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
 		}
 
-		if (fm.description.length < DESCRIPTION_MIN_LENGTH) {
+		if (description.length < DESCRIPTION_MIN_LENGTH) {
 			add(
 				"warn",
 				"description.thin",
-				`description is only ${fm.description.length} chars (< ${DESCRIPTION_MIN_LENGTH}); say what it does, when to use it, and its handoff`,
+				`description is only ${description.length} chars (< ${DESCRIPTION_MIN_LENGTH}); say what it does, when to use it, and its handoff`,
 			);
 		}
 
-		// The convention is to name the skill's own /trigger in its description so it's discoverable.
-		if (fm.name && !fm.description.toLowerCase().includes(`/${fm.name.toLowerCase()}`)) {
-			add("warn", "description.trigger", `description should name its own /${skill.name} trigger so users can invoke it`);
+		// Name both hosts' explicit invocation syntax so users can discover and invoke the skill.
+		if (name && !description.toLowerCase().includes(`/${name.toLowerCase()}`)) {
+			add("warn", "description.trigger.claude", `description should name /${skill.name} for Claude Code invocation`);
 		}
-	}
 
-	// `version` is optional, but if present it should be a semver-ish string so `list` can surface it.
-	if (typeof fm.version === "string" && fm.version && !/^\d+\.\d+\.\d+/.test(fm.version)) {
-		add("warn", "version.semver", `version "${fm.version}" is not semver-ish (e.g. 1.2.0)`);
+		if (name && !description.toLowerCase().includes(`$${name.toLowerCase()}`)) {
+			add("warn", "description.trigger.codex", `description should name $${skill.name} for Codex invocation`);
+		}
 	}
 
 	if (skill.body.length < 40) add("warn", "body.thin", "body is very short — is this skill complete?");
@@ -166,15 +169,15 @@ export function validateSkill(skill: Skill): Issue[] {
 }
 
 /**
- * Extract `/skill-ref` tokens (without the leading slash) from prose — the one
+ * Extract `/skill-ref` and `$skill-ref` tokens (without the sigil) from prose — the one
  * grammar for "what looks like a skill reference", shared by the dangling-reference
  * lint here and the docs handoff-map generator so they never disagree.
  *
- * @param text - Prose that may mention `/skill` references.
+ * @param text - Prose that may mention Claude Code or Codex skill references.
  * @returns The referenced tokens, in order (with duplicates).
  */
 export function extractSkillRefs(text: string): string[] {
-	return [...text.matchAll(/\/([a-z][a-z0-9-]{2,})/g)].map((m) => m[1]!);
+	return [...text.matchAll(/(?:\/|\$)([a-z][a-z0-9-]{2,})/g)].map((m) => m[1]!);
 }
 
 /**

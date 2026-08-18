@@ -33,7 +33,7 @@ describe("installCommand (project scope)", () => {
 	it("installs all skills into the claude project dir as symlinks, then uninstalls", () => {
 		installCommand("install", [], { target: ["claude"], scope: "project" });
 		const dir = path.join(tmp, ".claude", "skills");
-		const entries = fs.readdirSync(dir);
+		const entries = fs.readdirSync(dir).filter((entry) => !entry.startsWith(".agent-skills"));
 
 		expect(entries.length).toBeGreaterThanOrEqual(16);
 
@@ -52,15 +52,23 @@ describe("installCommand (project scope)", () => {
 		expect(fs.existsSync(path.join(tmp, ".cursor", "rules", "ed-plan.mdc"))).toBe(true);
 	});
 
-	it("copy mode drops a marked copy; codex bundles; dry-run changes nothing", () => {
+	it("copy mode drops marked native copies for Claude and Codex; dry-run changes nothing", () => {
 		installCommand("install", ["ed-plan"], { target: ["claude"], scope: "project", copy: true });
 		expect(fs.existsSync(path.join(tmp, ".claude", "skills", "ed-plan", ".agent-skills"))).toBe(true);
 
-		installCommand("install", ["ed-work"], { target: ["codex"], scope: "project" });
-		expect(fs.readFileSync(path.join(tmp, "AGENTS.md"), "utf8")).toContain("<!-- skill:ed-work -->");
+		installCommand("install", ["ed-work"], { target: ["codex"], scope: "project", copy: true });
+		expect(fs.existsSync(path.join(tmp, ".agents", "skills", "ed-work", "SKILL.md"))).toBe(true);
+		expect(fs.existsSync(path.join(tmp, ".agents", "skills", "ed-work", ".agent-skills"))).toBe(true);
 
 		installCommand("install", ["ed-review"], { target: ["windsurf"], scope: "project", dryRun: true });
 		expect(fs.existsSync(path.join(tmp, ".windsurf"))).toBe(false);
+	});
+
+	it("uses Claude and Codex as the default project targets", () => {
+		installCommand("install", ["ed-plan"], { scope: "project" });
+
+		expect(fs.existsSync(path.join(tmp, ".claude", "skills", "ed-plan", "SKILL.md"))).toBe(true);
+		expect(fs.existsSync(path.join(tmp, ".agents", "skills", "ed-plan", "SKILL.md"))).toBe(true);
 	});
 
 	it("doctor reports healthy right after a project install, drift after an edit", () => {

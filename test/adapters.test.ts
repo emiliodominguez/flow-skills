@@ -14,7 +14,7 @@ import { copilotTarget } from "../src/targets/copilot";
 import { zedTarget } from "../src/targets/zed";
 import { aiderTarget } from "../src/targets/aider";
 import { MANAGED_LINE } from "../src/targets/render";
-import { BLOCK_START } from "../src/core/install-fs";
+import { BLOCK_START, writeManagedBlock } from "../src/core/install-fs";
 import type { InstallContext } from "../src/targets/types";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -74,6 +74,47 @@ describe("claude target", () => {
 		expect(fs.readFileSync(path.join(userDir, "SKILL.md"), "utf8")).toBe("the user's own file");
 	});
 
+	it("does not trust a forged or non-file copy marker", () => {
+		const dest = path.join(tmp, "skills");
+		const userDir = path.join(dest, skills[0]!.name);
+
+		fs.mkdirSync(path.join(userDir, ".agent-skills"), { recursive: true });
+		fs.writeFileSync(path.join(userDir, "SKILL.md"), "the user's own file");
+		const actions = claudeTarget.uninstall(ctx({ dest, skills: [skills[0]!] }));
+
+		expect(actions[0]!.verb).toBe("skip");
+		expect(fs.existsSync(userDir)).toBe(true);
+	});
+
+	it("does not follow a symlinked copy marker", () => {
+		const dest = path.join(tmp, "skills");
+		const userDir = path.join(dest, skills[0]!.name);
+		const genuineTextElsewhere = path.join(tmp, "marker-text");
+
+		fs.mkdirSync(userDir, { recursive: true });
+		fs.writeFileSync(genuineTextElsewhere, MANAGED_LINE + "\n");
+		fs.symlinkSync(genuineTextElsewhere, path.join(userDir, ".agent-skills"));
+		fs.writeFileSync(path.join(userDir, "user.txt"), "keep me");
+
+		const actions = claudeTarget.uninstall(ctx({ dest, skills: [skills[0]!] }));
+
+		expect(actions[0]!.verb).toBe("skip");
+		expect(fs.readFileSync(path.join(userDir, "user.txt"), "utf8")).toBe("keep me");
+	});
+
+	it("rejects a symlinked ownership manifest without mutating its target", () => {
+		const dest = path.join(tmp, "skills");
+		const externalManifest = path.join(tmp, "external-manifest.json");
+		const content = '{"managedBy":"agent-skills","version":1,"skills":{}}\n';
+
+		fs.mkdirSync(dest, { recursive: true });
+		fs.writeFileSync(externalManifest, content);
+		fs.symlinkSync(externalManifest, path.join(dest, ".agent-skills-manifest.json"));
+
+		expect(() => claudeTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }))).toThrow(/not a regular file/);
+		expect(fs.readFileSync(externalManifest, "utf8")).toBe(content);
+	});
+
 	it("F1: install refuses a non-managed dir without --force, obeys it with --force", () => {
 		const dest = path.join(tmp, "skills");
 		const userDir = path.join(dest, skills[0]!.name);
@@ -103,6 +144,62 @@ describe("claude target", () => {
 		claudeTarget.install(ctx({ dest, mode: "symlink", dryRun: true }));
 		expect(fs.existsSync(dest)).toBe(false);
 	});
+
+	it("repairs a stale managed symlink after the source checkout moves", () => {
+		const dest = path.join(tmp, "skills");
+
+		claudeTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+		const link = path.join(dest, skills[0]!.name);
+		const movedDir = path.join(tmp, "new-checkout", "skills", skills[0]!.name);
+		const movedSkill = { ...skills[0]!, dir: movedDir, file: path.join(movedDir, "SKILL.md") };
+
+		fs.cpSync(skills[0]!.dir, movedDir, { recursive: true });
+		const actions = claudeTarget.install(ctx({ dest, skills: [movedSkill], mode: "symlink" }));
+
+		expect(actions[0]!.verb).toBe("symlink");
+		expect(fs.realpathSync(link)).toBe(fs.realpathSync(movedDir));
+	});
+
+	it("does not trust a stale manifest after a managed symlink is replaced", () => {
+		const dest = path.join(tmp, "skills");
+		const replaced = path.join(dest, skills[0]!.name);
+
+		claudeTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+		fs.unlinkSync(replaced);
+		fs.mkdirSync(replaced);
+		fs.writeFileSync(path.join(replaced, "user.txt"), "keep me");
+
+		const installActions = claudeTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+		const uninstallActions = claudeTarget.uninstall(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+
+		expect(installActions[0]!.verb).toBe("skip");
+		expect(uninstallActions[0]!.verb).toBe("skip");
+		expect(fs.readFileSync(path.join(replaced, "user.txt"), "utf8")).toBe("keep me");
+
+		const forced = claudeTarget.uninstall(ctx({ dest, skills: [skills[0]!], mode: "symlink", force: true }));
+		const backupDir = fs.readdirSync(dest).find((entry) => entry.startsWith(`${skills[0]!.name}.bak-`));
+
+		expect(forced[0]!.verb).toBe("backup");
+		expect(backupDir).toBeTruthy();
+		expect(fs.readFileSync(path.join(dest, backupDir!, "user.txt"), "utf8")).toBe("keep me");
+		expect(fs.existsSync(path.join(dest, ".agent-skills-manifest.json"))).toBe(false);
+	});
+
+	it("drops stale manifest ownership when uninstall finds no entry", () => {
+		const dest = path.join(tmp, "skills");
+		const link = path.join(dest, skills[0]!.name);
+
+		claudeTarget.install(ctx({ dest, mode: "symlink" }));
+		fs.unlinkSync(link);
+		claudeTarget.uninstall(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+
+		const manifest = JSON.parse(fs.readFileSync(path.join(dest, ".agent-skills-manifest.json"), "utf8")) as {
+			skills: Record<string, unknown>;
+		};
+
+		expect(manifest.skills[skills[0]!.name]).toBeUndefined();
+		expect(manifest.skills[skills[1]!.name]).toBeTruthy();
+	});
 });
 
 describe("cursor / windsurf (file-per-skill)", () => {
@@ -122,6 +219,38 @@ describe("cursor / windsurf (file-per-skill)", () => {
 		expect(fs.existsSync(userFile)).toBe(true);
 	});
 
+	it("does not follow same-name symlinks that point outside the target directory", () => {
+		const dest = path.join(tmp, "rules");
+		const file = path.join(dest, `${skills[0]!.name}.mdc`);
+		const external = path.join(tmp, "external.mdc");
+		const externalContent = MANAGED_LINE + "\nuser-owned target\n";
+
+		fs.mkdirSync(dest, { recursive: true });
+		fs.writeFileSync(external, externalContent);
+		fs.symlinkSync(external, file);
+
+		const actions = cursorTarget.install(ctx({ dest, skills: [skills[0]!] }));
+
+		expect(actions[0]!.verb).toBe("skip");
+		expect(cursorTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("conflict");
+		expect(fs.readFileSync(external, "utf8")).toBe(externalContent);
+	});
+
+	it("treats broken same-name symlinks as conflicts instead of writing through them", () => {
+		const dest = path.join(tmp, "rules");
+		const file = path.join(dest, `${skills[0]!.name}.mdc`);
+		const external = path.join(tmp, "missing-external.mdc");
+
+		fs.mkdirSync(dest, { recursive: true });
+		fs.symlinkSync(external, file);
+
+		const actions = cursorTarget.install(ctx({ dest, skills: [skills[0]!] }));
+
+		expect(actions[0]!.verb).toBe("skip");
+		expect(cursorTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("conflict");
+		expect(fs.existsSync(external)).toBe(false);
+	});
+
 	it("F2: windsurf emits a quoted (valid-YAML) scalar for a colon-containing description", () => {
 		const dest = path.join(tmp, "wrules");
 		const colonSkill = allSkills.find((s) => s.frontmatter.description.includes(": "));
@@ -136,37 +265,73 @@ describe("cursor / windsurf (file-per-skill)", () => {
 	});
 });
 
-describe("codex target (bundle merge)", () => {
-	it("preserves surrounding user content", () => {
-		const dest = path.join(tmp, "AGENTS.md");
+describe("codex target (native skills)", () => {
+	it("symlinks complete skill directories and uninstalls cleanly", () => {
+		const dest = path.join(tmp, ".agents", "skills");
 
-		fs.writeFileSync(dest, "# My project\n\nUser instructions here.\n");
-		codexTarget.install(ctx({ dest }));
-		const content = fs.readFileSync(dest, "utf8");
+		codexTarget.install(ctx({ dest, mode: "symlink" }));
+		const link = path.join(dest, skills[0]!.name);
 
-		expect(content).toContain("User instructions here.");
-		expect(content).toContain(BLOCK_START);
+		expect(fs.lstatSync(link).isSymbolicLink()).toBe(true);
+		expect(fs.existsSync(path.join(link, "SKILL.md"))).toBe(true);
+		expect(codexTarget.status(ctx({ dest, mode: "symlink" }))[0]!.state).toBe("linked");
+
+		codexTarget.uninstall(ctx({ dest, mode: "symlink" }));
+		expect(fs.existsSync(link)).toBe(false);
 	});
 
-	it("F3: partial install merges; uninstall removes only the named skills", () => {
+	it("preserves an unmanaged skill unless --force is explicit", () => {
+		const dest = path.join(tmp, ".agents", "skills");
+		const userDir = path.join(dest, skills[0]!.name);
+
+		fs.mkdirSync(userDir, { recursive: true });
+		fs.writeFileSync(path.join(userDir, "SKILL.md"), "user-owned");
+
+		const actions = codexTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+
+		expect(actions[0]!.verb).toBe("skip");
+		expect(fs.readFileSync(path.join(userDir, "SKILL.md"), "utf8")).toBe("user-owned");
+	});
+
+	it("removes a legacy managed AGENTS.md block while preserving user instructions", () => {
+		const dest = path.join(tmp, ".agents", "skills");
+		const legacy = path.join(tmp, "AGENTS.md");
+		const name = skills[0]!.name;
+
+		fs.writeFileSync(legacy, "# User instructions\n\nKeep this.\n");
+		writeManagedBlock(legacy, `# Agent skills\n\n<!-- skill:${name} -->\n## ${name}\n\nold generated skill\n<!-- /skill:${name} -->`, false);
+		const actions = codexTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+		const content = fs.readFileSync(legacy, "utf8");
+
+		expect(content).toContain("Keep this.");
+		expect(content).not.toContain(BLOCK_START);
+		expect(actions.some((action) => action.note?.includes("legacy Codex AGENTS.md skill section"))).toBe(true);
+	});
+
+	it("migrates and uninstalls only selected legacy AGENTS.md sections", () => {
+		const dest = path.join(tmp, ".agents", "skills");
+		const legacy = path.join(tmp, "AGENTS.md");
+		const first = skills[0]!;
+		const second = skills[1]!;
+		const firstSection = `<!-- skill:${first.name} -->\n## ${first.name}\n\nold generated skill\n<!-- /skill:${first.name} -->`;
+		const secondSection = `<!-- skill:${second.name} -->\n## ${second.name}\n\nold generated skill\n<!-- /skill:${second.name} -->`;
+
+		writeManagedBlock(legacy, `# Agent skills\n\n${firstSection}\n\n${secondSection}`, false);
+		codexTarget.install(ctx({ dest, skills: [first], mode: "symlink" }));
+
+		expect(fs.readFileSync(legacy, "utf8")).not.toContain(`skill:${first.name}`);
+		expect(fs.readFileSync(legacy, "utf8")).toContain(`skill:${second.name}`);
+		expect(codexTarget.status(ctx({ dest, skills: [second] }))[0]!.state).toBe("conflict");
+
+		codexTarget.uninstall(ctx({ dest, skills: [second] }));
+		expect(fs.existsSync(legacy)).toBe(false);
+	});
+
+	it("rejects a legacy AGENTS.md destination even when the path does not exist", () => {
 		const dest = path.join(tmp, "AGENTS.md");
-		const [a, b] = [skills[0]!, skills[1]!];
 
-		codexTarget.install(ctx({ dest, skills: [a] }));
-		codexTarget.install(ctx({ dest, skills: [b] }));
-		let content = fs.readFileSync(dest, "utf8");
-
-		expect(content).toContain(`## ${a.name}`);
-		expect(content).toContain(`## ${b.name}`); // b did NOT clobber a
-		expect(content.match(new RegExp(`^${BLOCK_START}$`, "gm"))?.length).toBe(1);
-
-		codexTarget.uninstall(ctx({ dest, skills: [a] }));
-		content = fs.readFileSync(dest, "utf8");
-		expect(content).not.toContain(`## ${a.name}`);
-		expect(content).toContain(`## ${b.name}`); // b survived a's removal
-
-		codexTarget.uninstall(ctx({ dest, skills: [b] }));
-		expect(fs.existsSync(dest)).toBe(false); // last skill out removes the file we created
+		expect(() => codexTarget.install(ctx({ dest, skills: [skills[0]!] }))).toThrow(/native skill directories/i);
+		expect(fs.existsSync(dest)).toBe(false);
 	});
 });
 
@@ -277,6 +442,21 @@ describe("status (doctor)", () => {
 		expect(claudeTarget.status(ctx({ dest: dir, skills: [skills[0]!] }))[0]!.state).toBe("drifted");
 	});
 
+	it("claude copy: resource drift is detected even when SKILL.md is unchanged", () => {
+		const source = path.join(tmp, "resource-skill");
+		const dir = path.join(tmp, "claude-resource-copy");
+
+		fs.mkdirSync(path.join(source, "scripts"), { recursive: true });
+		fs.writeFileSync(path.join(source, "SKILL.md"), "---\nname: resource-skill\ndescription: resource test\n---\nbody");
+		fs.writeFileSync(path.join(source, "scripts", "tool.sh"), "v1\n");
+		const skill = { ...skills[0]!, name: "resource-skill", dir: source, file: path.join(source, "SKILL.md") };
+
+		claudeTarget.install(ctx({ dest: dir, skills: [skill], mode: "copy" }));
+		expect(claudeTarget.status(ctx({ dest: dir, skills: [skill] }))[0]!.state).toBe("copied");
+		fs.writeFileSync(path.join(source, "scripts", "tool.sh"), "v2\n");
+		expect(claudeTarget.status(ctx({ dest: dir, skills: [skill] }))[0]!.state).toBe("drifted");
+	});
+
 	it("cursor: generated, then drifted after editing the file", () => {
 		const dest = path.join(tmp, "rules");
 
@@ -286,11 +466,11 @@ describe("status (doctor)", () => {
 		expect(cursorTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("drifted");
 	});
 
-	it("codex: generated for an installed skill, missing for one that isn't", () => {
-		const dest = path.join(tmp, "AGENTS.md");
+	it("codex: linked for an installed skill, missing for one that isn't", () => {
+		const dest = path.join(tmp, ".agents", "skills");
 
-		codexTarget.install(ctx({ dest, skills: [skills[0]!] }));
-		expect(codexTarget.status(ctx({ dest, skills: [skills[0]!] }))[0]!.state).toBe("generated");
+		codexTarget.install(ctx({ dest, skills: [skills[0]!], mode: "symlink" }));
+		expect(codexTarget.status(ctx({ dest, skills: [skills[0]!], mode: "symlink" }))[0]!.state).toBe("linked");
 		expect(codexTarget.status(ctx({ dest, skills: [skills[1]!] }))[0]!.state).toBe("missing");
 	});
 });

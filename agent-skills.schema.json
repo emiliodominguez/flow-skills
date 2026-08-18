@@ -13,14 +13,14 @@
 		"installMode": {
 			"type": "string",
 			"enum": ["symlink", "copy"],
-			"description": "Default install strategy for the native (claude) target.",
+			"description": "Default install strategy for native Claude Code and Codex skill-directory targets.",
 			"default": "symlink"
 		},
 		"defaultTargets": {
 			"type": "array",
 			"items": { "type": "string" },
 			"description": "Targets used when --target is not passed.",
-			"default": ["claude"]
+			"default": ["claude", "codex"]
 		},
 		"profiles": {
 			"type": "object",

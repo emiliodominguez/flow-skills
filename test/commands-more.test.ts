@@ -50,9 +50,17 @@ describe("newCommand", () => {
 		const content = fs.readFileSync(path.join(tmp, "skills", "my-new-skill", "SKILL.md"), "utf8");
 
 		expect(content).toContain("name: my-new-skill");
-		expect(content).toContain("description: Does a thing");
+		expect(content).toContain('description: "Does a thing Invoke as /my-new-skill in Claude Code or $my-new-skill in Codex."');
 		expect(content).toContain("# My New Skill");
 		expect(process.exitCode).toBeFalsy();
+	});
+
+	it("quotes a colon-containing description as valid YAML", () => {
+		newCommand("yaml-safe", { description: "Use when: auditing" });
+
+		const content = fs.readFileSync(path.join(tmp, "skills", "yaml-safe", "SKILL.md"), "utf8");
+
+		expect(content).toContain('description: "Use when: auditing Invoke as /yaml-safe in Claude Code or $yaml-safe in Codex."');
 	});
 
 	it("falls back to a placeholder description when none is given", () => {

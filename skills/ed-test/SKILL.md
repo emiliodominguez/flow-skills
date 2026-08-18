@@ -1,8 +1,9 @@
 ---
 name: ed-test
-description: Design and write tests that pin behaviour, not implementation — choose the right level (unit / integration / e2e), pin legacy code with characterization tests before changing it, and kill flakiness at its source. Use when adding tests, deciding what to test, testing untested code before a refactor, or when a suite is flaky (also /ed-test, "write tests for this", "what should I test", "these tests are flaky"). Hands off to /ed-work to build against the tests, or /ed-review when the suite is the deliverable.
-version: 0.1.0
+description: "Design and write tests that pin behaviour, not implementation — choose the right level (unit / integration / e2e), pin legacy code with characterization tests before changing it, and kill flakiness at its source. Use when adding tests, deciding what to test, testing untested code before a refactor, or when a suite is flaky (also /ed-test, \"write tests for this\", \"what should I test\", \"these tests are flaky\"). Hands off to /ed-work to build against the tests, or /ed-review when the suite is the deliverable. Invoke as /ed-test in Claude Code or $ed-test in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Test
 
@@ -48,7 +49,7 @@ Before refactoring code with no tests, **capture what it does now** — bugs inc
 
 A flaky test is worse than no test — it trains everyone to ignore red. When one flaps, **find the nondeterminism; never add a blind retry**.
 
-Usual sources: real time/`sleep`, unseeded randomness, test-order coupling (shared mutable state), unawaited async, network/clock, filesystem leftovers. Isolate the source, control it (inject a clock, seed the RNG, await the promise, reset state in teardown), and prove the fix by running the test many times (`--repeat`) rather than once.
+Usual sources: real time/`sleep`, unseeded randomness, test-order coupling (shared mutable state), unawaited async, network/clock, filesystem leftovers. Isolate the source, control it (inject a clock, seed the RNG, await the promise, reset state in teardown), and prove the fix by running the test many times. Use the detected runner's supported repetition option or a bounded shell loop; don't assume a portable `--repeat` flag.
 
 ---
 

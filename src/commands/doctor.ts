@@ -2,7 +2,7 @@ import path from "node:path";
 import pc from "picocolors";
 import { findRepoRoot, loadConfig } from "../core/config.js";
 import { discoverSkills } from "../core/registry.js";
-import { resolveTargetPath } from "../core/paths.js";
+import { findProjectRoot, resolveTargetPath } from "../core/paths.js";
 import { log, targetHeader, sym } from "../core/logger.js";
 import { getTarget } from "../targets/index.js";
 import type { SkillState } from "../targets/types.js";
@@ -40,6 +40,7 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 	const skills = discoverSkills(path.join(root, config.skillsDir));
 	const scope = opts.scope ?? "user";
 	const targets = opts.target?.length ? opts.target : Object.keys(config.targets).filter((name) => config.targets[name]?.enabled);
+	const projectRoot = findProjectRoot();
 
 	const reports: TargetReport[] = [];
 	let problems = 0;
@@ -53,7 +54,7 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 			continue;
 		}
 
-		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
+		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, projectRoot);
 
 		try {
 			const statuses = getTarget(name).status({ skills, dest, mode: config.installMode, force: false, dryRun: true });

@@ -1,8 +1,9 @@
 ---
 name: ed-brainstorm
-description: Turn a vague idea into a clear, well-stress-tested design through dialogue before any code is written. Use when the user describes something new ("I want to build...", "what if we...", "I have an idea..."), when requirements are fuzzy, when the goal is exploring options, or when invoked as /ed-brainstorm. Has two modes — collaborative (default) and adversarial (can convene a small skeptic panel) — and hands off to /ed-plan once the design crystallises.
-version: 0.1.0
+description: "Turn a vague idea into a clear, well-stress-tested design through dialogue before any code is written. Use when the user describes something new (\"I want to build...\", \"what if we...\", \"I have an idea...\"), when requirements are fuzzy, when the goal is exploring options, or when invoked as /ed-brainstorm. Has two modes — collaborative (default) and adversarial (can convene a small skeptic panel) — and hands off to /ed-plan once the design crystallises. Invoke as /ed-brainstorm in Claude Code or $ed-brainstorm in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Brainstorm
 
@@ -57,9 +58,9 @@ When you do convene it, keep it light:
 
 1. **Brief** — one paragraph: the idea, its goal, its load-bearing assumptions. There's no
    code to diff yet, so you're briefing the panel on the *design*.
-2. **Fan out** — launch **2–3 subagents in parallel** (one message, N calls; Agent tool,
-   **prefer `type: Explore`**, read-only by construction; if you use `general-purpose`, tell
-   it not to edit — no code is written in this phase). Give each the
+2. **Fan out** — launch **2–3 subagents in parallel** with the host's delegation
+   mechanism. Explicitly keep them read-only; if the host has no subagent support, run the
+   same lenses sequentially, and otherwise stay within the available concurrency. Give each the
    brief plus one distinct attack angle:
    - **Edge-cases & failure modes** — boundaries, degraded network, dead dependency, partial failure.
    - **Abuse / hostile user** — exploitation, exhaustion, gaming the mechanics, cost amplification.

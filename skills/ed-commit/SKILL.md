@@ -1,8 +1,9 @@
 ---
 name: ed-commit
-description: Author atomic, conventional commits — split unrelated work into separate commits, pick the right type and scope, and write a subject and body that explain the why, not the diff. Use when committing a batch of changes, untangling a messy working tree, or rewording a weak message (also /ed-commit, "commit this", "write a commit message", "split these changes"). Hands off to /ed-ship to push, or /ed-pr-fix when addressing review.
-version: 0.1.0
+description: "Author atomic, conventional commits — split unrelated work into separate commits, pick the right type and scope, and write a subject and body that explain the why, not the diff. Use when committing a batch of changes, untangling a messy working tree, or rewording a weak message (also /ed-commit, \"commit this\", \"write a commit message\", \"split these changes\"). Hands off to /ed-ship to push, or /ed-pr-fix when addressing review. Invoke as /ed-commit in Claude Code or $ed-commit in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Commit
 

@@ -6,14 +6,14 @@
 2. Write it following [`docs/AUTHORING.md`](docs/AUTHORING.md) — shared anatomy, voice, and
    the multi-agent pattern (only where it earns its keep).
 3. `pnpm skills validate` — must be clean (no errors).
-4. `pnpm skills install -t claude` and try it in a real session.
+4. `pnpm skills install -t claude codex` and try it in real sessions on both hosts.
 5. `pnpm test` and `pnpm run format` before committing.
 
 ## What validation enforces
 
 - `SKILL.md` exists; frontmatter has `name` and a single-line `description`.
 - `name` is kebab-case and equals the directory name.
-- No `/skill-name` handoff points at a skill that doesn't exist (dangling reference).
+- No `/skill-name` or `$skill-name` handoff points at a skill that doesn't exist (dangling reference).
 - Warnings (non-blocking): description over 1024 chars, suspiciously thin body.
 
 Run with `--strict` to fail on warnings too (CI does not, by default).
@@ -26,12 +26,15 @@ Implement the `Target` interface in `src/targets/<name>.ts`:
 export const myTarget: Target = {
 	name: "mytool",
 	describe: "MyTool — where and what it emits",
-	bundle: false, // true if it's a single file for all skills
+	supportsSymlink: false,
 	install(ctx) {
 		/* return Action[] */
 	},
 	uninstall(ctx) {
 		/* return Action[] */
+	},
+	status(ctx) {
+		/* return SkillStatus[] */
 	},
 };
 ```

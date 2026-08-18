@@ -1,8 +1,9 @@
 ---
 name: ed-handoff
-description: Compact the current conversation into a handoff document so a fresh agent (or future-you) can pick up where this session left off without re-reading the entire transcript. Use when the conversation is getting long, when switching contexts, when the user says "save the state", "wrap this up", "handoff", or when invoked as /ed-handoff. Writes a portable markdown file with the essentials and points the next session at the right skill (a live plan → `/ed-work .plans/<file>` in a fresh context).
-version: 0.1.0
+description: "Compact the current conversation into a handoff document so a fresh agent (or future-you) can pick up where this session left off without re-reading the entire transcript. Use when the conversation is getting long, when switching contexts, when the user says \"save the state\", \"wrap this up\", \"handoff\", or when invoked as /ed-handoff. Writes a portable markdown file with the essentials and points the next session at the right skill (a live plan → `/ed-work .plans/PLAN.md` in a fresh context). Invoke as /ed-handoff in Claude Code or $ed-handoff in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Handoff
 

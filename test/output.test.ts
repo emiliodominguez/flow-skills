@@ -64,18 +64,17 @@ describe("generated output is valid for the whole corpus", () => {
 		}
 	});
 
-	it("codex bundles every skill as a recoverable section", () => {
-		const dest = path.join(tmp, "AGENTS.md");
+	it("codex installs every skill as a valid native SKILL.md", () => {
+		const dest = path.join(tmp, ".agents", "skills");
 
 		codexTarget.install(ctx({ dest }));
-		const content = fs.readFileSync(dest, "utf8");
 
 		for (const skill of skills) {
-			expect(content, skill.name).toContain(`<!-- skill:${skill.name} -->`);
-			expect(content, skill.name).toContain(`<!-- /skill:${skill.name} -->`);
-		}
+			const content = fs.readFileSync(path.join(dest, skill.name, "SKILL.md"), "utf8");
+			const fm = parseYamlFrontmatter(content);
 
-		// Marker count equals the skill count → no section swallowed another.
-		expect(content.match(/<!-- skill:/g)?.length).toBe(skills.length);
+			expect(fm.name, skill.name).toBe(skill.name);
+			expect(fm.description, skill.name).toBe(skill.frontmatter.description);
+		}
 	});
 });

@@ -1,8 +1,9 @@
 ---
 name: ed-adversarial-review
-description: Red-team a change before it ships — fan out attacker personas (exploit developer, chaos engineer, malicious user, boundary breaker, data-integrity auditor, time bomb) that each try to BREAK the code or HURT the user, then a verification pass keeps only breaks that are actually reachable in the real code. Use for anything security-, money-, data-, auth-, or concurrency-sensitive, after /ed-review, or when invoked as /ed-adversarial-review (also "red team this", "how could this break", "attack this", "poke holes in the code", "what could go wrong in prod"). Complements /ed-review (which asks "is it correct?"); this asks "how do I break it?". Hands off to /ed-work to fix, then re-run.
-version: 0.1.0
+description: "Red-team a change before it ships — fan out attacker personas (exploit developer, chaos engineer, malicious user, boundary breaker, data-integrity auditor, time bomb) that each try to BREAK the code or HURT the user, then a verification pass keeps only breaks that are actually reachable in the real code. Use for anything security-, money-, data-, auth-, or concurrency-sensitive, after /ed-review, or when invoked as /ed-adversarial-review (also \"red team this\", \"how could this break\", \"attack this\", \"poke holes in the code\", \"what could go wrong in prod\"). Complements /ed-review (which asks \"is it correct?\"); this asks \"how do I break it?\". Hands off to /ed-work to fix, then re-run. Invoke as /ed-adversarial-review in Claude Code or $ed-adversarial-review in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Adversarial Review
 
@@ -15,9 +16,11 @@ Run this on anything that touches: auth, money, user data, migrations, external 
 concurrency, file/network I/O, or anything irreversible. It's heavier than `/ed-review` —
 use it where the blast radius justifies it.
 
-**Scope by default:** `git diff main...HEAD`. Override on request. Also read enough of the
-*surrounding* code to know what the change can actually reach — an attack is only real if
-it's reachable.
+**Scope by default:** every committed and working-tree change since the merge base with the
+repository's default branch, including staged, unstaged, and untracked files. Resolve the
+default branch from repository metadata instead of assuming `main`. Override on request.
+Also read enough of the *surrounding* code to know what the change can actually reach — an
+attack is only real if it's reachable.
 
 ---
 
@@ -43,10 +46,12 @@ forbids.
 
 ## Step 2: Fan out the attacker personas (parallel, read-only)
 
-Launch as **parallel subagents in one message** (Agent tool, `type: Explore` or
-`general-purpose` — **read-only**). Scale the set to the change; always run at least
-Exploit Developer + Boundary Breaker. Each returns concrete **break scenarios** in the
-schema below — not "this could be unsafe", but "*this input → this bad outcome*".
+Launch the personas as **parallel subagents in one batch** using the host's delegation
+mechanism. Run them **read-only** and keep all writes in the orchestrator. If the host has
+no subagent support, run the personas sequentially; otherwise batch them within available
+concurrency. Scale the set to the change; always run at least Exploit Developer + Boundary
+Breaker. Each returns concrete **break scenarios** in the schema below — not "this could
+be unsafe", but "*this input → this bad outcome*".
 
 1. **Exploit Developer.** Injection (SQL / command / template / path traversal), auth
    bypass, IDOR / missing object-level authz, SSRF, unsafe deserialization, secret
@@ -84,9 +89,10 @@ schema below — not "this could be unsafe", but "*this input → this bad outco
 
 ## Step 3: Verify — is the break actually reachable?
 
-Attackers over-claim. For each scenario, spawn an independent **verifier subagent**
-(parallel, read-only) that must confirm the attack is reachable **in this code**. Verify
-every scenario for a small list; batch by file or persona for a large one.
+Attackers over-claim. For each scenario, use an independent **verifier subagent** (parallel
+and read-only when the host supports it; sequential otherwise) that must confirm the attack
+is reachable **in this code**. Verify every scenario for a small list; batch by file or
+persona for a large one while respecting available concurrency.
 
 > *"Here is a claimed break: <attack → outcome>. Trace the actual code path. Is there a
 > guard, validation, type, framework default, or auth check that already stops it? Verdict:

@@ -29,12 +29,12 @@ export interface Config {
 const DEFAULTS: Config = {
 	skillsDir: "skills",
 	installMode: "symlink",
-	defaultTargets: ["claude"],
+	defaultTargets: ["claude", "codex"],
 	profiles: {},
 	targets: {
 		claude: { enabled: true, userPath: "~/.claude/skills", projectPath: ".claude/skills" },
 		cursor: { enabled: true, userPath: "~/.cursor/rules", projectPath: ".cursor/rules" },
-		codex: { enabled: true, userPath: "~/.codex/AGENTS.md", projectPath: "AGENTS.md" },
+		codex: { enabled: true, userPath: "~/.agents/skills", projectPath: ".agents/skills" },
 		windsurf: { enabled: true, userPath: "~/.codeium/windsurf/memories", projectPath: ".windsurf/rules" },
 		// Project-oriented tools: no global rules location, so userPath mirrors the project path.
 		copilot: { enabled: true, userPath: ".github/copilot-instructions.md", projectPath: ".github/copilot-instructions.md" },

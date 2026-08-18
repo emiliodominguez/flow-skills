@@ -43,8 +43,12 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	}
 
 	const template = fs.readFileSync(path.join(root, "templates", "SKILL.md.tmpl"), "utf8");
-	const description = opts.description ?? `<one line: what it does — when to use / trigger phrases — handoff>.`;
-	const content = template.replaceAll("{{name}}", name).replaceAll("{{description}}", description).replaceAll("{{title}}", titleize(name));
+	const baseDescription = opts.description ?? `<one line: what it does — when to use / trigger phrases — handoff>.`;
+	const description = `${baseDescription} Invoke as /${name} in Claude Code or $${name} in Codex.`;
+	const content = template
+		.replaceAll("{{name}}", name)
+		.replaceAll("{{description}}", JSON.stringify(description))
+		.replaceAll("{{title}}", titleize(name));
 
 	fs.mkdirSync(dir, { recursive: true });
 	fs.writeFileSync(path.join(dir, "SKILL.md"), content, "utf8");

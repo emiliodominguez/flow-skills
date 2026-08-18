@@ -28,6 +28,8 @@ export type SkillState =
 export interface SkillStatus {
 	skill: string;
 	state: SkillState;
+	/** Native install mode, including when the installed entry has drifted. */
+	mode?: "symlink" | "copy";
 }
 
 /** A destination adapter: turns skills into one tool's on-disk convention. */

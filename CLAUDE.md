@@ -6,15 +6,15 @@ Project guidance for Claude Code sessions working in this repo. The user's globa
 ## What this is
 
 A **private** source-of-truth repo for the `ed-*` skill suite plus a tested CLI that installs
-the skills into Claude Code and other assistants. Not published to npm; distributed by cloning
-this repo. The skills author's own machine runs them **live via symlink** into `~/.claude/skills`.
+the skills into Claude Code, Codex, and other assistants. Not published to npm; distributed by
+cloning this repo. Native Claude Code and Codex installs run **live via symlink**.
 
 ## Architecture (one paragraph)
 
 `skills/<name>/SKILL.md` is the source of truth. **Target adapters** in `src/targets/` transform
-each skill into a tool's native format on install (claude = symlink/copy the dir; cursor/windsurf/
-cline/continue = one generated file per skill; codex/copilot/zed/aider = all skills in one managed
-block). `src/commands/` holds the CLI verbs; `src/cli.ts` builds the commander program and
+each skill into a tool's native format on install (claude/codex = symlink/copy the dir; cursor/
+windsurf/cline/continue = one generated file per skill; copilot/zed/aider = all skills in one
+managed block). `src/commands/` holds the CLI verbs; `src/cli.ts` builds the commander program and
 `src/index.ts` runs it. `src/core/` holds config, skill parsing/validation, path + install-fs
 helpers, and the logger. The installer only ever touches entries it created (markers / managed
 blocks); `--force` backs up, never deletes.
@@ -37,13 +37,13 @@ common trip-up.
 ## Authoring a skill
 
 - Scaffold with `pnpm skills new <name>`; keep the shared anatomy: frontmatter (`name`,
-  `description`, `version`) → phased body → `## Anti-patterns` → `## Done when` → a final handoff
+  `description`) → phased body → `## Anti-patterns` → `## Done when` → a final handoff
   line naming the next skill.
-- The **description** must name its own `/<skill>` trigger, stay under 1024 chars, and end with a
+- The **description** must name its own `/<skill>` (Claude Code) and `$<skill>` (Codex) triggers, stay under 1024 chars, and end with a
   handoff clause (`hands off to /ed-x`, `routes to`, or `feeds`) — the skill map is parsed from it.
 - Every skill needs an entry in **`evals/beats.json`** (3–5 lowercase substrings that appear in the
   body); `pnpm test` fails until the body delivers them. See `evals/README.md`.
-- `pnpm skills install -t claude` re-links; since installs are symlinks, source edits are already
+- `pnpm skills install -t claude codex` re-links; since native installs are symlinks, source edits are already
   live — `pnpm skills sync` re-generates the non-symlink targets.
 
 ## Releasing (changesets)

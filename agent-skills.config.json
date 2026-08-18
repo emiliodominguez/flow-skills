@@ -2,7 +2,7 @@
 	"$schema": "./agent-skills.schema.json",
 	"skillsDir": "skills",
 	"installMode": "symlink",
-	"defaultTargets": ["claude"],
+	"defaultTargets": ["claude", "codex"],
 	"profiles": {
 		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
 		"review": ["ed-review", "ed-adversarial-review", "ed-simplify", "ed-refactor"]
@@ -20,8 +20,8 @@
 		},
 		"codex": {
 			"enabled": true,
-			"userPath": "~/.codex/AGENTS.md",
-			"projectPath": "AGENTS.md"
+			"userPath": "~/.agents/skills",
+			"projectPath": ".agents/skills"
 		},
 		"windsurf": {
 			"enabled": true,

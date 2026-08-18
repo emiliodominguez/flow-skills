@@ -60,7 +60,7 @@ function renderBlock(heading: string, map: Map<string, string>): string {
  * Build a bundle target: a single file whose skills are merged as delimited
  * sections inside one managed block. A partial `install`/`uninstall` upserts or
  * removes only the named skills, leaving both the other skills and any
- * surrounding user content untouched. Shared by codex, copilot, zed, and aider.
+ * surrounding user content untouched. Shared by copilot, zed, and aider.
  *
  * @param opts - Target id, description, and block heading.
  * @returns The adapter.

@@ -32,6 +32,7 @@ It's how the model decides to invoke the skill. Pack it with:
 - **When** to use it — real trigger phrases a user would type ("review this", "make a
   plan").
 - **Handoff** — which skill comes next.
+- **Explicit invocation** — name `/<skill>` for Claude Code and `$<skill>` for Codex.
 
 Keep it one line. Long is fine (it's an index entry), but under ~1024 chars.
 
@@ -51,7 +52,8 @@ pass: review, adversarial review, research, large-scale simplification. The shar
 
 ```
 1. SCOPE   — determine the target.
-2. FAN OUT — launch distinct-PERSONA agents in parallel (run read-only; only you write).
+2. FAN OUT — launch distinct-PERSONA agents with the host's delegation mechanism
+             (run read-only; only you write; batch within available concurrency).
              Each returns findings in ONE fixed schema.
 3. MERGE   — dedup by file:line.
 4. VERIFY  — an independent agent tries to REFUTE each finding. Keep survivors, tagged
@@ -68,11 +70,11 @@ reading it cold", "the maintainer in two years" — not six copies of "review th
 ## Before you commit
 
 - `pnpm skills validate` is clean (naming, refs, and the quality lints: the description names
-  its own `/<skill>` trigger and is a real sentence, the body has no filler words).
+  its own `/<skill>` and `$<skill>` triggers and is a real sentence, the body has no filler words).
 - You added an **`evals/beats.json` entry** — 3–5 lowercase substrings naming the skill's
   distinctive mechanics that appear in its body. `pnpm test` fails until they do (see
   [`../evals/README.md`](../evals/README.md)).
 - `pnpm docs:gen` was run and the regenerated `docs/` is committed.
 - You invoked the skill in a real session and it did the right thing (evidence, not "looks
   right").
-- Every `/other-skill` handoff points at a skill that exists.
+- Every `/other-skill` or `$other-skill` handoff points at a skill that exists.

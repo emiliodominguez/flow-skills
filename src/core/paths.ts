@@ -1,5 +1,27 @@
 import os from "node:os";
+import fs from "node:fs";
 import path from "node:path";
+
+/**
+ * Find the consuming Git repository root for project-scoped installs. If the
+ * current directory is not inside a Git repository, keep the current directory.
+ *
+ * @param startDir - Directory from which the CLI was invoked.
+ * @returns The nearest ancestor containing a `.git` file or directory.
+ */
+export function findProjectRoot(startDir: string = process.cwd()): string {
+	let dir = path.resolve(startDir);
+
+	for (;;) {
+		if (fs.existsSync(path.join(dir, ".git"))) return dir;
+
+		const parent = path.dirname(dir);
+
+		if (parent === dir) return path.resolve(startDir);
+
+		dir = parent;
+	}
+}
 
 /**
  * Expand a leading `~` to the user's home directory.

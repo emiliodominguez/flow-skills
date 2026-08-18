@@ -153,6 +153,25 @@ function assertSinglePair(existing: string, dest: string): number {
 }
 
 /**
+ * Require a managed bundle destination to be missing or a regular file.
+ * Refusing symlinks prevents reads and writes from escaping the configured target.
+ *
+ * @param dest - Bundle path to inspect.
+ * @returns True when a regular file exists, or false when the path is absent.
+ */
+function bundleFileExists(dest: string): boolean {
+	try {
+		if (!fs.lstatSync(dest).isFile()) throw new Error(`${dest} is not a regular file; refusing to follow or replace it`);
+
+		return true;
+	} catch (err) {
+		if (err && typeof err === "object" && "code" in err && err.code === "ENOENT") return false;
+
+		throw err;
+	}
+}
+
+/**
  * Read the content inside our managed block, or null if there is none. Used by
  * bundle adapters to merge new skills with already-installed ones.
  *
@@ -160,7 +179,7 @@ function assertSinglePair(existing: string, dest: string): number {
  * @returns The inner block content, or null.
  */
 export function readManagedBlock(dest: string): string | null {
-	if (!fs.existsSync(dest)) return null;
+	if (!bundleFileExists(dest)) return null;
 
 	const existing = fs.readFileSync(dest, "utf8");
 
@@ -184,7 +203,7 @@ export function writeManagedBlock(dest: string, content: string, dryRun: boolean
 	const block = `${BLOCK_START}\n${content}\n${BLOCK_END}`;
 	let next: string;
 
-	if (fs.existsSync(dest)) {
+	if (bundleFileExists(dest)) {
 		const existing = fs.readFileSync(dest, "utf8");
 		const pairs = assertSinglePair(existing, dest);
 		const blockRe = new RegExp(`^${escapeRe(BLOCK_START)}$[\\s\\S]*?^${escapeRe(BLOCK_END)}$`, "m");
@@ -211,7 +230,7 @@ export function writeManagedBlock(dest: string, content: string, dryRun: boolean
  * @returns The recorded action, or null if there was nothing to remove.
  */
 export function removeManagedBlock(dest: string, dryRun: boolean): Action | null {
-	if (!fs.existsSync(dest)) return null;
+	if (!bundleFileExists(dest)) return null;
 
 	const existing = fs.readFileSync(dest, "utf8");
 

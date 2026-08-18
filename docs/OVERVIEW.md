@@ -39,8 +39,8 @@ support: ed-diagnose · ed-triage (route it) · ed-benchmark (measure first) · 
 claim · scenario · fix`) so results dedup and rank deterministically.
 4. **Plan / execute separation.** Write the plan to disk; execute it in a fresh session.
    Cheaper (warm cache), cleaner (no stale exploration), reproducible.
-5. **Read-only reviewers, one writer.** Review/research agents are run read-only (prefer
-   `Explore`; instruct `general-purpose` not to edit); only the
+5. **Read-only reviewers, one writer.** Review/research agents are run read-only through
+   the host's delegation mechanism and batched within available concurrency; only the
    orchestrator writes. No parallel-edit corruption.
 6. **Evidence gates.** "Done" needs observable proof — a test, a reproduced break, a
    screenshot. A green typecheck is never, alone, evidence a feature works.
@@ -51,7 +51,8 @@ claim · scenario · fix`) so results dedup and rank deterministically.
 
 `ed-review` and `ed-adversarial-review` share one shape:
 
-1. **Scope** the diff (`git diff main...HEAD` by default).
+1. **Scope** committed and working-tree changes since the default branch's merge base,
+   including staged, unstaged, and untracked files.
 2. **Fan out** distinct persona agents in parallel (read-only). ed-review lenses:
    correctness, readability, architecture, security, performance, simplicity.
    ed-adversarial-review attackers: exploit developer, chaos engineer, malicious user,

@@ -11,13 +11,12 @@ import type { InstallContext } from "../src/targets/types";
  * Golden snapshots freeze the EXACT bytes each adapter emits for a fixed synthetic
  * skill. A format change in any adapter shows up as a snapshot diff in review.
  * The fixture is synthetic (not a real skill) so the snapshots never churn when
- * the skill corpus is edited. Its description carries a colon and a `/ed-x` ref to
- * exercise YAML quoting and cross-references.
+ * the skill corpus is edited. Its description carries a colon and both invocation
+ * syntaxes to exercise YAML quoting and cross-references.
  */
 const FIXTURE = `---
 name: ed-fixture
-description: "A fixture skill: freeze the exact adapter output. Use when snapshot-testing; hands off to /ed-work."
-version: 0.1.0
+description: "A fixture skill: freeze the exact adapter output. Use when snapshot-testing; invoke /ed-fixture in Claude Code or $ed-fixture in Codex; hand off to /ed-work or $ed-work."
 ---
 
 # Fixture
@@ -43,7 +42,7 @@ One line about the fixture and the discipline it enforces.
 
 - The snapshot matches
 
-Then: hand off to \`/ed-work\`.
+Then: hand off to \`/ed-work\` in Claude Code or \`$ed-work\` in Codex.
 `;
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -89,7 +88,7 @@ describe("golden adapter output", () => {
 		{ target: "windsurf", snap: "windsurf.md", bundle: false, rel: "ed-fixture.md" },
 		{ target: "cline", snap: "cline.md", bundle: false, rel: "ed-fixture.md" },
 		{ target: "continue", snap: "continue.md", bundle: false, rel: "ed-fixture.md" },
-		{ target: "codex", snap: "codex-AGENTS.md", bundle: true, rel: "AGENTS.md" },
+		{ target: "codex", snap: "claude-SKILL.md", bundle: false, rel: "ed-fixture/SKILL.md" },
 		{ target: "copilot", snap: "copilot-instructions.md", bundle: true, rel: "copilot-instructions.md" },
 		{ target: "zed", snap: "zed.rules", bundle: true, rel: ".rules" },
 		{ target: "aider", snap: "aider-CONVENTIONS.md", bundle: true, rel: "CONVENTIONS.md" },

@@ -5,7 +5,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseFrontmatter } from "../src/core/skill";
 import { frontmatter } from "../src/targets/render";
-import { prettyPath } from "../src/core/paths";
+import { findProjectRoot, prettyPath } from "../src/core/paths";
+import { effectiveInstallMode } from "../src/core/install-mode";
+import { claudeTarget } from "../src/targets/claude";
+import { cursorTarget } from "../src/targets/cursor";
 import { packageRoot } from "../src/core/config";
 import { readManagedBlock, writeManagedBlock, removeManagedBlock, BLOCK_START, BLOCK_END } from "../src/core/install-fs";
 import { resolveSelection } from "../src/commands/install";
@@ -16,7 +19,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cfg = (profiles: Record<string, string[]>): Config => ({
 	skillsDir: "skills",
 	installMode: "symlink",
-	defaultTargets: ["claude"],
+	defaultTargets: ["claude", "codex"],
 	profiles,
 	targets: {},
 });
@@ -29,10 +32,11 @@ describe("parseFrontmatter (F5)", () => {
 		expect(data.description).toBe("Foo");
 	});
 
-	it("keeps a value that itself contains a colon", () => {
-		const { data } = parseFrontmatter(`---\nname: x\ndescription: Out of scope: nope\n---\nbody`);
+	it("reports invalid YAML instead of accepting an unquoted colon-space", () => {
+		const { data, error } = parseFrontmatter(`---\nname: x\ndescription: Out of scope: nope\n---\nbody`);
 
-		expect(data.description).toBe("Out of scope: nope");
+		expect(data).toEqual({});
+		expect(error).toBeTruthy();
 	});
 });
 
@@ -58,6 +62,28 @@ describe("prettyPath (home-prefix boundary)", () => {
 		expect(prettyPath(home)).toBe("~");
 		expect(prettyPath(path.join(home, "skills"))).toBe(path.join("~", "skills"));
 		expect(prettyPath(home + "-sibling/x")).toBe(home + "-sibling/x");
+	});
+});
+
+describe("project roots and install modes", () => {
+	it("finds a consuming repository root from a nested directory", () => {
+		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "agent-skills-root-"));
+		const nested = path.join(tmp, "packages", "app");
+
+		fs.mkdirSync(path.join(tmp, ".git"));
+		fs.mkdirSync(nested, { recursive: true });
+
+		try {
+			expect(findProjectRoot(nested)).toBe(tmp);
+		} finally {
+			fs.rmSync(tmp, { recursive: true, force: true });
+		}
+	});
+
+	it("uses copy for Windows native installs and every generated target", () => {
+		expect(effectiveInstallMode(claudeTarget, "symlink", "win32")).toBe("copy");
+		expect(effectiveInstallMode(claudeTarget, "symlink", "darwin")).toBe("symlink");
+		expect(effectiveInstallMode(cursorTarget, "symlink", "darwin")).toBe("copy");
 	});
 });
 
@@ -126,6 +152,20 @@ describe("managed block hardening (F6)", () => {
 
 		fs.writeFileSync(dest, `${BLOCK_START}\na\n${BLOCK_END}\n\n${BLOCK_START}\nb\n${BLOCK_END}\n`);
 		expect(() => writeManagedBlock(dest, "x", false)).toThrow(/duplicate/i);
+	});
+
+	it("refuses bundle symlinks without reading or writing through them", () => {
+		const dest = path.join(tmp, "AGENTS.md");
+		const external = path.join(tmp, "external.md");
+		const content = `${BLOCK_START}\nexternal\n${BLOCK_END}\n`;
+
+		fs.writeFileSync(external, content);
+		fs.symlinkSync(external, dest);
+
+		expect(() => readManagedBlock(dest)).toThrow(/not a regular file/);
+		expect(() => writeManagedBlock(dest, "replacement", false)).toThrow(/not a regular file/);
+		expect(() => removeManagedBlock(dest, false)).toThrow(/not a regular file/);
+		expect(fs.readFileSync(external, "utf8")).toBe(content);
 	});
 
 	it("keeps surrounding user content on removal", () => {

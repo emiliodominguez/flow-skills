@@ -3,7 +3,7 @@
 # Ensures Node + pnpm, installs deps, builds the CLI, then runs `install`.
 # Everything after `--` (or any extra args) is passed through to the CLI.
 #
-#   ./install.sh                      # install all skills into Claude Code (symlink)
+#   ./install.sh                      # install all skills into Claude Code + Codex (symlink)
 #   ./install.sh -- -t cursor codex   # install into Cursor + Codex
 #   ./install.sh -- --copy            # copy instead of symlink
 #

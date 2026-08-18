@@ -30,10 +30,10 @@ src/
     types.ts            the Target interface + InstallContext
     index.ts            target registry (name → adapter)
     render.ts           frontmatter renderer + escaping + file-per-skill helpers
-    claude.ts           native: one dir per skill (symlink or marked copy)
+    claude.ts           shared native skill-directory installer (symlink or marked copy)
+    codex.ts            native Codex wrapper + guarded legacy migration
     cursor.ts           file-per-skill: .cursor/rules/<name>.mdc
     windsurf.ts         file-per-skill: .windsurf/rules/<name>.md
-    codex.ts            bundle: AGENTS.md sections in one managed block
 scripts/gen-skill-docs.ts   regenerates docs/SKILLS.md
 test/                        vitest: corpus validation, adapters, core units
 ```
@@ -46,7 +46,7 @@ Every destination implements one small contract (`src/targets/types.ts`):
 interface Target {
 	name: string; // "claude" | "cursor" | "codex" | "windsurf"
 	describe: string; // shown by `list --targets`
-	supportsSymlink: boolean; // true only for the native (claude) format
+	supportsSymlink: boolean; // true for native Claude Code and Codex skill directories
 	install(ctx: InstallContext): Action[];
 	uninstall(ctx: InstallContext): Action[];
 	status(ctx: InstallContext): SkillStatus[]; // for `doctor`: linked/generated/drifted/conflict/missing
@@ -60,12 +60,12 @@ directly, which keeps them testable.
 
 Three adapter shapes:
 
-- **dir-per-skill** (`claude`) — each skill is a directory; symlinked to the repo (live) or
+- **dir-per-skill** (`claude`, `codex`) — each skill is a directory; symlinked to the repo (live) or
   copied (frozen).
 - **file-per-skill** (`cursor`, `windsurf`) — each skill is one generated file; they share
   `installFilePerSkill` / `uninstallFilePerSkill` in `render.ts`.
-- **bundle** (`codex`) — all skills live in one file (`AGENTS.md`) as delimited sections
-  inside a managed block.
+- **bundle** (`copilot`, `zed`, `aider`) — all skills live in one target-specific file as
+  delimited sections inside a managed block.
 
 Adding a target = implement the interface, register it in `targets/index.ts`, add a default
 path to `agent-skills.config.json`, add a test. See [CONTRIBUTING.md](../CONTRIBUTING.md).
@@ -89,29 +89,29 @@ install [skills...] --target … --scope … [--copy] [--force] [--dry-run]
 This is the important part. The installer writes into your real config directories, so it is
 deliberately conservative about **destroying anything it did not create**.
 
-- **Native (claude).** An entry is "managed" if it is a symlink into this repo, or a copied
+- **Native (claude/codex).** An entry is "managed" if it is recorded in the ownership
+  manifest, a symlink into this repo, or a copied
   directory carrying an `.agent-skills` marker file. `install` **refuses** to overwrite an
-  unmanaged `~/.claude/skills/<name>/` (a directory you hand-authored) unless you pass
+  unmanaged native skill directory unless you pass
   `--force`; `uninstall` **skips** unmanaged entries entirely. So a name collision with your
   own skill can never silently delete your work.
 - **File-per-skill (cursor, windsurf).** Generated files carry a marker comment. Both
   `install` and `uninstall` touch a file **only if it carries that marker**, never a
   hand-written rule of the same name.
-- **Bundle (codex).** Edits are confined to a delimited managed block inside `AGENTS.md`.
-  Surrounding content you wrote is preserved. Markers are matched only when alone on their
-  own line, and duplicate/malformed marker pairs cause a hard error instead of a guess.
+- **Codex upgrade migration.** The native adapter removes only the old installer-managed
+  block from legacy `AGENTS.md` files and migrates only legacy skill entries it can prove
+  belong to this repo. Surrounding instructions and unmanaged skills are preserved.
 - **`--force`** is the explicit escape hatch — but it **backs up** (moves to a `.bak-<n>`
   sibling), never deletes outright.
-- **Windows** has no symlink privilege by default, so the native target falls back to copy.
+- **Windows** has no symlink privilege by default, so native targets fall back to copy.
 - **`--dry-run`** prints every action without touching the filesystem; **`doctor`** reports
   drift/conflicts read-only.
-- One target throwing (e.g. a malformed `AGENTS.md`) is caught and reported — the other
+- One target throwing is caught and reported — the other
   targets still run, and the command exits non-zero.
 
 ## Parsing note
 
-`SKILL.md` frontmatter is parsed by a small tolerant reader (`parseFrontmatter`), not a
-strict YAML library — on purpose. Agent skill loaders accept unquoted descriptions
-containing a colon (e.g. "Out of scope: …"); a strict YAML parser rejects them. The tool
-reads frontmatter the way the consuming agents do. When the tool _writes_ frontmatter for
-cursor/windsurf, it quotes such values so the output is valid YAML for those tools.
+`SKILL.md` frontmatter is parsed with `js-yaml`, matching the shared agent-skills format.
+Invalid YAML is reported as a validation error without aborting the rest of the corpus scan.
+The scaffolder and generated targets quote arbitrary descriptions so colon-containing text
+round-trips safely.

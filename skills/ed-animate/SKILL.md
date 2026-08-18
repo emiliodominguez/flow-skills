@@ -1,8 +1,9 @@
 ---
 name: ed-animate
-description: Build, refactor, and tune animated React interfaces using a storyboard DSL, live control panels, and structured design critique. Use when working with animations, transitions, motion, easing, springs, staggered reveals, entrance/exit, scroll-driven sequences, or when the user says "animate", "make it bouncy", "smoother transition", "polish this UI", "critique this design", or invokes /ed-animate. Has three sub-modes — storyboard (write/refactor animations), dials (add live tuning controls), and critique (audit a UI). Hands off to /ed-work for production wiring or /ed-review when polished.
-version: 0.1.0
+description: "Build, refactor, and tune animated React interfaces using a storyboard DSL, live control panels, and structured design critique. Use when working with animations, transitions, motion, easing, springs, staggered reveals, entrance/exit, scroll-driven sequences, or when the user says \"animate\", \"make it bouncy\", \"smoother transition\", \"polish this UI\", \"critique this design\", or invokes /ed-animate. Has three sub-modes — storyboard (write/refactor animations), dials (add live tuning controls), and critique (audit a UI). Hands off to /ed-work for production wiring or /ed-review when polished. Invoke as /ed-animate in Claude Code or $ed-animate in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Animate
 

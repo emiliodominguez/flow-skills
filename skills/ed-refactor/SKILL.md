@@ -1,8 +1,9 @@
 ---
 name: ed-refactor
-description: Behavior-preserving improvement of existing code — find structural friction, deepen shallow modules, consolidate duplication, manage deprecations and migrations. Use when the user says "refactor this", "clean this up", "this is getting messy", "let's restructure", or when invoked as /ed-refactor. NOT for changing behavior (that's /ed-work) and NOT for line-level slop reduction (that's /ed-simplify). Hands off to /ed-work for the actual changes or /ed-review when done.
-version: 0.1.0
+description: "Behavior-preserving improvement of existing code — find structural friction, deepen shallow modules, consolidate duplication, manage deprecations and migrations. Use when the user says \"refactor this\", \"clean this up\", \"this is getting messy\", \"let's restructure\", or when invoked as /ed-refactor. NOT for changing behavior (that's /ed-work) and NOT for line-level slop reduction (that's /ed-simplify). Hands off to /ed-work for the actual changes or /ed-review when done. Invoke as /ed-refactor in Claude Code or $ed-refactor in Codex."
 ---
+
+> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
 
 # Refactor
 

@@ -3,7 +3,8 @@ import path from "node:path";
 import pc from "picocolors";
 import { findRepoRoot, loadConfig, type Config } from "../core/config.js";
 import { selectSkills } from "../core/registry.js";
-import { resolveTargetPath, prettyPath } from "../core/paths.js";
+import { findProjectRoot, resolveTargetPath, prettyPath } from "../core/paths.js";
+import { effectiveInstallMode } from "../core/install-mode.js";
 import { log, printActions, targetHeader, reportSummary, sym } from "../core/logger.js";
 import type { Action } from "../core/install-fs.js";
 import { getTarget } from "../targets/index.js";
@@ -109,9 +110,7 @@ function runOnce(
 	const targets = opts.target?.length ? opts.target : config.defaultTargets;
 	const scope = opts.scope ?? "user";
 	const installMode = opts.copy ? "copy" : config.installMode;
-
-	// Windows can't create symlinks without elevation; fall back to copy for the native target.
-	const onWindows = process.platform === "win32";
+	const projectRoot = findProjectRoot();
 
 	if (opts.dryRun) log.warn("dry run — no files will be changed");
 
@@ -131,11 +130,10 @@ function runOnce(
 		}
 
 		const target = getTarget(name);
-		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, process.cwd());
-		let usedMode = target.supportsSymlink ? installMode : "copy";
+		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, projectRoot);
+		const usedMode = effectiveInstallMode(target, installMode);
 
-		if (usedMode === "symlink" && onWindows) {
-			usedMode = "copy";
+		if (target.supportsSymlink && installMode === "symlink" && usedMode === "copy") {
 			log.warn(`${name}: symlinks need elevation on Windows — using copy mode`);
 		}
 

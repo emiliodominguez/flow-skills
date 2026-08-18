@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -39,13 +39,12 @@ jobs:
       # Pinned to a full commit SHA (supply-chain): this is the only step that sees the
       # npm token, and the token is scoped to this step's env — not the whole workflow.
       - name: Create version PR or publish
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1
+        uses: changesets/action@198f833dd7d863100ea6e28967bc9a9fdefadb0a # v2.1.0
         with:
-          version: pnpm run version:packages
+          version-script: pnpm run version:packages
           # Empty publish command until NPM_TOKEN exists → version-PR only, never a failed publish.
-          publish: ${{ secrets.NPM_TOKEN != '' && 'pnpm run release' || '' }}
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
+          publish-script: ${{ secrets.NPM_TOKEN != '' && 'pnpm run release' || '' }}
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

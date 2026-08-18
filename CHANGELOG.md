@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- f61c003: Install native, progressively disclosed Codex skills alongside Claude Code by default, migrate managed legacy Codex installs safely, and make the full skill suite portable across both hosts.
+
 ## 0.5.0
 
 ### Minor Changes

@@ -96,8 +96,15 @@ describe("sync", () => {
 
 		expect(fs.lstatSync(copied).isSymbolicLink()).toBe(false);
 		expect(fs.existsSync(path.join(copied, "drift.txt"))).toBe(false);
-		expect(fs.lstatSync(linked).isSymbolicLink()).toBe(true);
-		expect(fs.realpathSync(linked)).toBe(fs.realpathSync(skills[1]!.dir));
+
+		if (process.platform === "win32") {
+			expect(fs.lstatSync(linked).isSymbolicLink()).toBe(false);
+			expect(fs.existsSync(path.join(linked, ".agent-skills"))).toBe(true);
+			expect(fs.readFileSync(path.join(linked, "SKILL.md"), "utf8")).toBe(fs.readFileSync(skills[1]!.file, "utf8"));
+		} else {
+			expect(fs.lstatSync(linked).isSymbolicLink()).toBe(true);
+			expect(fs.realpathSync(linked)).toBe(fs.realpathSync(skills[1]!.dir));
+		}
 	});
 });
 

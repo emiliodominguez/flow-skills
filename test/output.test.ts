@@ -15,7 +15,7 @@ const skills = discoverSkills(path.join(root, "skills"));
 
 /** Extract and parse the leading `---` frontmatter of a generated file with a real YAML parser. */
 function parseYamlFrontmatter(content: string): Record<string, unknown> {
-	const match = /^---\n([\s\S]*?)\n---/.exec(content);
+	const match = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
 
 	expect(match, "generated file should have frontmatter").toBeTruthy();
 

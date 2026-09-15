@@ -1,110 +1,65 @@
 ---
 name: ed-handoff
-description: "Compact the current conversation into a handoff document so a fresh agent (or future-you) can pick up where this session left off without re-reading the entire transcript. Use when the conversation is getting long, when switching contexts, when the user says \"save the state\", \"wrap this up\", \"handoff\", or when invoked as /ed-handoff. Writes a portable markdown file with the essentials and points the next session at the right skill (a live plan → `/ed-work .plans/PLAN.md` in a fresh context). Invoke as /ed-handoff in Claude Code or $ed-handoff in Codex."
+description: "Persist the decisions, artifacts, verification state, and next action needed to resume work in another session. Use when switching context, pausing an investigation, or saving an interrupted plan or orchestration run. Invoke as /ed-handoff in Claude Code or $ed-handoff in Codex. Routes to /ed-orchestrate for an existing run, /ed-work for a direct plan, or the named next specialist."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
 # Handoff
 
-End-of-session compaction. Capture what was decided, what's done, what's next - in a form a fresh agent can read in 30 seconds and continue.
-
-The handoff doc is not a summary of the conversation. It's a **starting point for the next session.**
-
----
+Give a fresh agent a reliable starting point. Preserve current intent, evidence and unresolved
+work rather than retelling the conversation.
 
 ## Process
 
-1. **Write the file** to a durable, discoverable path in the repo:
-   `./.handoffs/<YYYY-MM-DD>-<topic-slug>.md`. Not `mktemp`/`/tmp` - a temp file is wiped on
-   reboot and gone on another machine, the opposite of what a doc meant to survive into the
-   *next* session needs; a repo path also travels with the code. Keep it out of git: if a
-   `.gitignore` exists and doesn't ignore `.handoffs/`, append a `.handoffs/` line (create
-   one if there's none); if the project isn't a git repo, just write the file and say so.
+1. Identify the user's latest goal and steering, current branch/revision, local changes, live
+   plan and any orchestration run. Do not replace the goal with the last status question.
+2. Write to the user's location or `.handoffs/<date>-<topic>.md`. Preserve ignore policy.
+   A Git-ignored file stays on this machine; explicitly share it or use an agreed tracked
+   location when the next session runs elsewhere. A path alone does not transfer the file.
+3. Record decisions with rationale, relevant source paths, accepted and pending work,
+   dead-ends, missing prerequisites, and the exact next action. Reference existing plan/run
+   records instead of duplicating them.
+4. Include verification revision and evidence location, not just a list of green commands.
+   For orchestration, preserve worker/verifier identities, rejected attempts, budgets consumed,
+   stale acceptance, and in-flight actions. Do not reset limits in the next session.
+5. Name the resume command and first inspection. Before resuming writes, compare current source
+   with recorded inputs and reconcile in-flight operations; inspect unknown postconditions
+   before replaying non-idempotent actions.
 
-2. **Check for a live plan.** If a `./.plans/*.md` exists (written by `/ed-plan`), it *is* most of the handoff - the next session should resume from it in a fresh context. If this session already produced a plan file, the handoff can be little more than a pointer to it. Note the plan path and how far its task checklist got.
-3. **Fill in the template** (below).
-4. **Print the path** to the user so they can pass it to the next session.
-
----
-
-## Template
+## Handoff record
 
 ```markdown
-# Handoff - [one-line topic]
-
-**Date:** YYYY-MM-DD
-**Branch:** [git branch if relevant]
-**Status:** [in-progress | blocked | review-pending | done-but-not-shipped]
-
-## What we set out to do
-
-[1-3 sentences. The goal, not the journey.]
-
-## What's been done
-
-- [bullet - what changed, where, why]
-- [bullet]
-- [bullet]
-
-## What's left
-
-- [bullet - concrete next action]
-- [bullet]
-- [bullet]
-
-## Key decisions
-
-- [decision] - [one-line reasoning, the *why* the next agent will need]
-
-## Things to watch out for
-
-- [gotcha encountered, dead-end ruled out, non-obvious constraint]
-
-## Suggested next skill
-
-[If a live plan exists:]
-`/ed-work .plans/<file>` in a FRESH session - [N of M tasks done; resume at T#].
-
-[Otherwise:]
-`/ed-plan` if [...], `/ed-work` if [...], `/ed-diagnose` if [...]
-
-## Useful context
-
-- Plan file: `.plans/<date>-<slug>.md` [or "none"]
-- Relevant files: `path/to/file.ts`, `path/to/other.ts`
-- Open PR: [link or "none yet"]
-- Related issue: [link or "none"]
-- Things the next agent should read first: [...]
+# Handoff - <goal>
+Status: in-progress | blocked | review-pending | complete
+Repository: <branch, commit, relevant staged/unstaged/untracked changes>
+Current intent: <goal, non-goals, latest user constraints>
+Plan/run: <paths, revision, direct or orchestrated>
+Accepted work: <tasks, verifier/evidence, revision>
+Pending/rejected work: <task, reason, next action>
+In-flight actions: <identity, known outcome, how to inspect>
+Budget: <attempts/time consumed, remaining limits>
+Decisions and dead-ends: <why, not transcript>
+Required access: <capability names, no credentials>
+Resume: <skill + artifact path + first check>
+Artifact availability: <local-only or shared location>
 ```
 
----
-
-## Rules
-
-- **Compact, not comprehensive.** A handoff doc longer than the conversation isn't useful.
-- **A live plan carries most of the load.** When `.plans/<file>.md` exists, don't re-derive the plan into the handoff - point at it and record only what the plan file doesn't already have (branch, blockers hit, which task is next).
-- **Capture decisions and reasoning, not just outcomes.** "We chose X over Y because Z" is worth saving; "we chose X" is not.
-- **Name dead-ends explicitly.** Saves the next agent from repeating them.
-- **No transcript-style narration.** "Then I tried A. Then I tried B. Then..." - extract the lesson, drop the journey.
-- **Point at the next skill** with a one-line trigger condition. If there's a live plan, that's `/ed-work .plans/<file>` in a fresh context - the next agent should start cold and read the plan first.
-
----
+Skip fields that do not apply, but never omit an unresolved dependency or unknown external
+outcome. A live plan carries the checklist; the handoff carries the context needed to trust it.
 
 ## Anti-patterns
 
-- ❌ Dumping the whole transcript into the handoff
-- ❌ Re-writing the plan's tasks into the handoff when a `.plans/<file>.md` already holds them - point at the file
-- ❌ Skipping the *why* - the next agent will repeat your mistakes
-- ❌ Vague next steps ("continue the work") - be specific
-- ❌ Forgetting to mention which branch / which file / which commit / which plan
-- ❌ Saving the handoff but forgetting to tell the user where it is
-
----
+- Calling an ignored directory durable across machines merely because it sits inside a repo.
+- Resuming at the next unchecked task while its dependency evidence is stale.
+- Dumping the transcript or copying credentials into a handoff.
+- Using a new session to reset a failed correction loop.
 
 ## Done when
 
-- File exists at `./.handoffs/<date>-<slug>.md` (git-ignored in a git repo), path is printed
-- Template fields are filled (skip a field only if it genuinely doesn't apply)
-- If a plan is live, the handoff names it and how far it got, and points at `/ed-work .plans/<file>` in a fresh session
-- The next agent could pick up cold and know what to do first
+- The file exists and its actual availability is stated.
+- The next session can recover current intent, accepted evidence, remaining work and blockers.
+- The first resume action checks state before making further changes.
+
+Resume an existing run with /ed-orchestrate, a direct plan with /ed-work, or the documented
+specialist when the task is diagnosis, research, or review.

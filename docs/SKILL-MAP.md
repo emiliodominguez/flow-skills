@@ -6,93 +6,33 @@ How the skills hand off to one another. Edges come from each skill's handoff cla
 (`hands off to`, `hands back to`, `routes to`, or `feeds`); a few skills are terminal
 (they close a loop rather than start the next one). For the phase tour, see [OVERVIEW.md](OVERVIEW.md).
 
-```mermaid
-flowchart LR
-  ed_adversarial_review["ed-adversarial-review"]
-  ed_animate["ed-animate"]
-  ed_benchmark["ed-benchmark"]
-  ed_brainstorm["ed-brainstorm"]
-  ed_commit["ed-commit"]
-  ed_deps["ed-deps"]
-  ed_diagnose["ed-diagnose"]
-  ed_docs["ed-docs"]
-  ed_git_fix["ed-git-fix"]
-  ed_handoff["ed-handoff"]
-  ed_migrate["ed-migrate"]
-  ed_onboard["ed-onboard"]
-  ed_plan["ed-plan"]
-  ed_pr_fix["ed-pr-fix"]
-  ed_prototype["ed-prototype"]
-  ed_prune_claude_setup["ed-prune-claude-setup"]
-  ed_refactor["ed-refactor"]
-  ed_review["ed-review"]
-  ed_ship["ed-ship"]
-  ed_simplify["ed-simplify"]
-  ed_styles["ed-styles"]
-  ed_test["ed-test"]
-  ed_triage["ed-triage"]
-  ed_work["ed-work"]
-  ed_adversarial_review --> ed_work
-  ed_animate --> ed_work
-  ed_animate --> ed_review
-  ed_benchmark --> ed_diagnose
-  ed_benchmark --> ed_work
-  ed_brainstorm --> ed_plan
-  ed_commit --> ed_ship
-  ed_commit --> ed_pr_fix
-  ed_deps --> ed_review
-  ed_deps --> ed_ship
-  ed_docs --> ed_ship
-  ed_git_fix --> ed_ship
-  ed_migrate --> ed_review
-  ed_migrate --> ed_ship
-  ed_onboard --> ed_plan
-  ed_onboard --> ed_diagnose
-  ed_plan --> ed_work
-  ed_pr_fix --> ed_ship
-  ed_prototype --> ed_brainstorm
-  ed_prototype --> ed_plan
-  ed_refactor --> ed_work
-  ed_refactor --> ed_review
-  ed_review --> ed_adversarial_review
-  ed_review --> ed_simplify
-  ed_review --> ed_ship
-  ed_ship --> ed_pr_fix
-  ed_ship --> ed_git_fix
-  ed_simplify --> ed_review
-  ed_simplify --> ed_ship
-  ed_styles --> ed_animate
-  ed_test --> ed_work
-  ed_test --> ed_review
-  ed_triage --> ed_diagnose
-  ed_triage --> ed_work
-  ed_triage --> ed_adversarial_review
-  ed_work --> ed_review
-```
-
-## Handoffs
-
-- **ed-adversarial-review** → `ed-work`
-- **ed-animate** → `ed-work`, `ed-review`
-- **ed-benchmark** → `ed-diagnose`, `ed-work`
-- **ed-brainstorm** → `ed-plan`
-- **ed-commit** → `ed-ship`, `ed-pr-fix`
-- **ed-deps** → `ed-review`, `ed-ship`
-- **ed-diagnose** → _(terminal)_
-- **ed-docs** → `ed-ship`
-- **ed-git-fix** → `ed-ship`
-- **ed-handoff** → _(terminal)_
-- **ed-migrate** → `ed-review`, `ed-ship`
-- **ed-onboard** → `ed-plan`, `ed-diagnose`
-- **ed-plan** → `ed-work`
-- **ed-pr-fix** → `ed-ship`
-- **ed-prototype** → `ed-brainstorm`, `ed-plan`
-- **ed-prune-claude-setup** → _(terminal)_
-- **ed-refactor** → `ed-work`, `ed-review`
-- **ed-review** → `ed-adversarial-review`, `ed-simplify`, `ed-ship`
-- **ed-ship** → `ed-pr-fix`, `ed-git-fix`
-- **ed-simplify** → `ed-review`, `ed-ship`
-- **ed-styles** → `ed-animate`
-- **ed-test** → `ed-work`, `ed-review`
-- **ed-triage** → `ed-diagnose`, `ed-work`, `ed-adversarial-review`
-- **ed-work** → `ed-review`
+| Skill | Next skills |
+| --- | --- |
+| ed-adversarial-review | `ed-work`, `ed-review` |
+| ed-animate | `ed-styles`, `ed-review` |
+| ed-benchmark | `ed-work`, `ed-refactor` |
+| ed-brainstorm | `ed-prototype`, `ed-plan` |
+| ed-commit | `ed-ship` |
+| ed-deps | `ed-review`, `ed-migrate` |
+| ed-diagnose | `ed-work`, `ed-triage` |
+| ed-docs | `ed-review`, `ed-ship` |
+| ed-git-fix | `ed-work`, `ed-ship` |
+| ed-handoff | `ed-orchestrate`, `ed-work` |
+| ed-migrate | `ed-review`, `ed-orchestrate` |
+| ed-onboard | `ed-plan`, `ed-diagnose`, `ed-repo-brief` |
+| ed-orchestrate | `ed-plan`, `ed-verify`, `ed-review`, `ed-handoff` |
+| ed-plan | `ed-work`, `ed-orchestrate` |
+| ed-pr-fix | `ed-review`, `ed-ship` |
+| ed-prototype | `ed-brainstorm`, `ed-plan` |
+| ed-prune-claude-setup | `ed-handoff` |
+| ed-refactor | `ed-review`, `ed-migrate` |
+| ed-repo-brief | `ed-plan`, `ed-specialize` |
+| ed-review | `ed-work`, `ed-adversarial-review`, `ed-ship` |
+| ed-ship | `ed-commit`, `ed-pr-fix`, `ed-git-fix` |
+| ed-simplify | `ed-review`, `ed-refactor` |
+| ed-specialize | `ed-orchestrate`, `ed-work` |
+| ed-styles | `ed-animate`, `ed-review` |
+| ed-test | `ed-work`, `ed-verify` |
+| ed-triage | `ed-diagnose`, `ed-work`, `ed-plan` |
+| ed-verify | `ed-orchestrate` |
+| ed-work | `ed-review`, `ed-verify` |

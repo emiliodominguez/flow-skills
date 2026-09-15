@@ -1,70 +1,44 @@
 ---
 name: ed-onboard
-description: "Understand an unfamiliar codebase fast - find how it builds and runs, trace one real request end to end, fan out parallel read-only explorers over the subsystems, and distil it to the handful of files that actually matter. Use when you're new to a repo, picking up someone else's project, or need a mental map before planning (also /ed-onboard, \"help me understand this codebase\", \"where do I start\", \"how does this work\"). Hands off to /ed-plan to design a change, or /ed-diagnose when onboarding to chase a specific bug. Invoke as /ed-onboard in Claude Code or $ed-onboard in Codex."
+description: "Map an unfamiliar repository by discovering its commands, tracing one real flow, and identifying ownership, conventions and constraints. Use for an initial codebase tour; use /ed-repo-brief for maintained task-specific knowledge. Invoke as /ed-onboard in Claude Code or $ed-onboard in Codex. Hands off to /ed-plan, /ed-diagnose, or /ed-repo-brief."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
 # Onboard
 
-The goal is a **map, not a memory dump**: enough structure to know where a change goes and what it will touch. You reach it fastest by tracing real flows and reading breadth-first, not by opening files alphabetically.
+Build enough of a map to place the next change confidently. Explore breadth-first, then go
+deep on a representative flow instead of reading every file.
 
----
+## Process
 
-## Phase 1: How does it build and run?
-
-Start where the machine starts.
-
-- Read `README`, `package.json`/`Makefile`/`pyproject`/`Cargo.toml` scripts, CI config. Find the commands to **build, run, and test**.
-- Actually run them if you can. A repo you can't build, you don't yet understand.
-- Note the entry points: `main`, the server bootstrap, the route table, the CLI command registry. This is the front door.
-
----
-
-## Phase 2: Trace one real flow end to end
-
-Pick a single representative operation - a login, one API request, one CLI command - and follow it **all the way through**: entry → routing → business logic → data layer → response.
-
-Write down each hop and the file it lives in. One traced flow teaches the architecture (layers, boundaries, conventions) better than reading ten files in isolation.
-
----
-
-## Phase 3: Fan out parallel explorers
-
-For anything past a small repo, read the subsystems **in parallel, read-only**.
-
-1. **One agent per subsystem.** Launch parallel read-only subagents with the host's delegation mechanism; they never edit. Stay within available concurrency, running waves or inspecting sequentially when needed. Give each a scope: "the data layer", "auth", "the build pipeline", "the request lifecycle".
-2. **Each returns the same shape:** its purpose in two sentences, the 3-5 files that matter, the key types/functions, how it connects to the rest, and anything surprising or load-bearing.
-3. **You stitch the reports into one map.** The explorers cover breadth cheaply; you keep the synthesis.
-
-Match effort to size - a small project doesn't need a fan-out, just read it.
-
----
-
-## Phase 4: Distil to what matters
-
-- Name the **5-10 files** a newcomer must know, each with a one-line "this is where X happens".
-- Note the **conventions** the code follows (error handling, naming, layering) so your change looks native, not bolted on.
-- Note the **landmines**: the global everything depends on, the module that's secretly stateful, the "do not touch" comment and why.
-- Capture it as a short written map (in the PR, a scratch note, or `/ed-handoff` format) so the understanding outlives this session.
-
----
+1. Read applicable instructions, README, manifests, lockfiles and CI. Identify how to build,
+   run, test and lint, and the actual entry points. Inspect scripts before running them so
+   database resets, installations or external actions are not mistaken for read-only checks.
+2. Run relevant permitted commands when the environment supports them. Record verified,
+   failed, and unrun commands separately, with reasons. Missing credentials do not prevent a
+   useful source-based map, but they limit what runtime claims are supported.
+3. Trace one real flow end to end: entry, routing, domain logic, storage/integration and result.
+   Cite the files and symbols at each boundary. Do not infer architecture from directory names.
+4. For a large repository, assign independent read-only subsystem explorers when authorized
+   and available. Ask for purpose, important files/types, connections and landmines in a common
+   compact shape. A small repository does not need a fan-out.
+5. Distil the map to the files the next task actually needs, with conventions, invariants,
+   ownership and unresolved questions. Separate enforced rules from observed precedent.
+6. Write the map in the user's location or the repository's existing knowledge convention.
+   Use /ed-repo-brief when it needs citations, freshness tracking and reuse across sessions.
 
 ## Anti-patterns
 
-- ❌ Reading files alphabetically instead of following a real execution path
-- ❌ Trying to understand everything before you understand anything - breadth-first, then depth where you'll work
-- ❌ Letting explorer subagents edit or "improve" code - they read and report, nothing else
-- ❌ A map that lists every file instead of the handful that actually matter
-- ❌ Onboarding forever - stop when you can place a change confidently, not when you've read it all
-
----
+- Calling source-based understanding runtime verification.
+- Automatically executing setup scripts that mutate external services.
+- Listing every file instead of tracing useful boundaries and decisions.
+- Blocking the entire map because one environment-dependent command cannot run.
 
 ## Done when
 
-- You can build, run, and test the project
-- You've traced at least one real flow end to end, hop by hop
-- You can name the handful of files that matter and the conventions to follow
-- The map is written down somewhere it will outlive this session
+- The main commands and their verification status are known.
+- One real flow and its ownership boundaries are mapped with source locations.
+- The next task's relevant conventions, landmines and uncertainty are captured.
 
-Then: pick up `/ed-plan` to design your change against the map, or `/ed-diagnose` if you onboarded to chase a specific bug.
+Continue with /ed-plan, /ed-diagnose for a specific bug, or /ed-repo-brief for maintained context.

@@ -33,14 +33,16 @@ const DEFAULTS: Config = {
 	profiles: {},
 	targets: {
 		claude: { enabled: true, userPath: "~/.claude/skills", projectPath: ".claude/skills" },
-		cursor: { enabled: true, userPath: "~/.cursor/rules", projectPath: ".cursor/rules" },
+		// Cursor user rules are configured in its UI; this adapter writes project rule files.
+		cursor: { enabled: true, userPath: ".cursor/rules", projectPath: ".cursor/rules" },
 		codex: { enabled: true, userPath: "~/.agents/skills", projectPath: ".agents/skills" },
-		windsurf: { enabled: true, userPath: "~/.codeium/windsurf/memories", projectPath: ".windsurf/rules" },
-		// Project-oriented tools: no global rules location, so userPath mirrors the project path.
+		// Cascade's global rule is one limited file; per-skill rules use the workspace location.
+		windsurf: { enabled: true, userPath: ".devin/rules", projectPath: ".devin/rules" },
+		// These bundle adapters use project files in either scope.
 		copilot: { enabled: true, userPath: ".github/copilot-instructions.md", projectPath: ".github/copilot-instructions.md" },
 		zed: { enabled: true, userPath: ".rules", projectPath: ".rules" },
 		aider: { enabled: true, userPath: "CONVENTIONS.md", projectPath: "CONVENTIONS.md" },
-		cline: { enabled: true, userPath: ".clinerules", projectPath: ".clinerules" },
+		cline: { enabled: true, userPath: "~/.cline/rules", projectPath: ".cline/rules" },
 		continue: { enabled: true, userPath: "~/.continue/rules", projectPath: ".continue/rules" },
 	},
 };

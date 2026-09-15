@@ -7,7 +7,7 @@ Project guidance for Claude Code sessions working in this repo. The user's globa
 
 A **private** source-of-truth repo for the `ed-*` skill suite plus a tested CLI that installs
 the skills into Claude Code, Codex, and other assistants. Not published to npm; distributed by
-cloning this repo. Native Claude Code and Codex installs run **live via symlink**.
+cloning this repo. Native Claude Code and Codex installs use **live symlinks** or explicit copy mode.
 
 ## Architecture (one paragraph)
 
@@ -31,8 +31,8 @@ pnpm run build       # tsup bundle
 ```
 
 **Whenever a skill changes (body, description, or a new/removed skill), run `pnpm docs:gen`** and
-inspect and commit the generated result. GitHub Actions is disabled, so no remote check will catch
-stale generated docs.
+inspect and commit the generated result, then run `pnpm docs:check`. Use `pnpm smoke` for CLI/package
+changes. Check actual hosted CI status; local evidence is required even when Actions is disabled.
 
 ## Authoring a skill
 
@@ -42,13 +42,14 @@ stale generated docs.
 - The **description** must name its own `/<skill>` (Claude Code) and `$<skill>` (Codex) triggers, stay under 1024 chars, and end with a
   handoff clause (`hands off to /ed-x`, `routes to`, or `feeds`) - the skill map is parsed from it.
 - Every skill needs an entry in **`evals/beats.json`** (3-5 lowercase substrings that appear in the
-  body); `pnpm test` fails until the body delivers them. See `evals/README.md`.
-- `pnpm skills install -t claude codex` re-links; since native installs are symlinks, source edits are already
-  live - `pnpm skills sync` re-generates the non-symlink targets.
+  body); `pnpm test` checks text presence, not actual behavior. See `evals/README.md`.
+- Test native installation in a throwaway project using `--scope project`. Source edits are live for symlinks;
+  `pnpm skills sync` refreshes copies and generated targets. Distinguish installation tests from real host sessions.
+- Keep shared skills self-contained for rendered targets. Native agent definitions are a separate capability.
 
 ## Releasing (changesets)
 
-GitHub Actions is currently disabled, so versioning and publishing are manual.
+Do not assume a release workflow ran. Inspect actual Actions status and keep publishing within the user request.
 
 - Add a changeset for each user-facing change (new skills = `minor`, fixes = `patch`).
 - When a version is ready, run `pnpm run version:packages`, review the version and changelog changes, and commit them.

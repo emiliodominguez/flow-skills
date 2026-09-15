@@ -2,27 +2,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { findRepoRoot, loadConfig } from "../src/core/config.js";
 import { discoverSkills } from "../src/core/registry.js";
+import { parseVerdicts, type Verdict } from "./lib/eval-verdict.js";
 
 /**
- * LLM-graded behavioral eval. For each skill, a judge model decides whether an
- * agent faithfully following the skill would exhibit each of its declared beats
- * (see `evals/beats.json`). The cheap, model-free version runs in `pnpm test`;
- * this is the "real" grader and is gated on ANTHROPIC_API_KEY.
- *
- * Usage: `pnpm eval:llm [skill-name]` (omit the name to grade every skill).
+ * Optional model audit of instruction coverage. It does not execute an agent task.
+ * Usage: pnpm eval:llm [skill-name]; requires ANTHROPIC_API_KEY and ANTHROPIC_MODEL.
  */
 const API = "https://api.anthropic.com/v1/messages";
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5";
+const MODEL = process.env.ANTHROPIC_MODEL;
 
 interface AnthropicResponse {
 	content?: { text?: string }[];
 	error?: { message: string };
-}
-
-interface Verdict {
-	beat: string;
-	present: boolean;
-	why?: string;
 }
 
 /**
@@ -52,8 +43,9 @@ async function grade(body: string, beats: string[], apiKey: string): Promise<Ver
 
 	const res = await fetch(API, {
 		method: "POST",
+		signal: AbortSignal.timeout(60_000),
 		headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-		body: JSON.stringify({ model: MODEL, max_tokens: 1024, messages: [{ role: "user", content: prompt }] }),
+		body: JSON.stringify({ model: MODEL, max_tokens: 2048, messages: [{ role: "user", content: prompt }] }),
 	});
 
 	// Guard the parse so a non-JSON error body (5xx/gateway) throws our message, not a SyntaxError.
@@ -61,27 +53,17 @@ async function grade(body: string, beats: string[], apiKey: string): Promise<Ver
 
 	if (!res.ok || data.error) throw new Error(data.error?.message ?? `HTTP ${res.status}`);
 
-	const text = (data.content?.map((block) => block.text ?? "").join("") ?? "").replace(/```(?:json)?/gi, "").trim();
+	const text = data.content?.map((block) => block.text ?? "").join("") ?? "";
 
-	// The prompt asks for only a JSON array; parse the whole reply, else fall back to the
-	// first array (non-greedy, so trailing prose with a stray "]" can't corrupt it).
-	try {
-		return JSON.parse(text) as Verdict[];
-	} catch {
-		const match = /\[[\s\S]*?\]/.exec(text);
-
-		if (!match) throw new Error(`judge did not return a JSON array: ${text.slice(0, 120)}`);
-
-		return JSON.parse(match[0]) as Verdict[];
-	}
+	return parseVerdicts(text, beats);
 }
 
 const apiKey = process.env.ANTHROPIC_API_KEY;
 
-if (!apiKey) {
-	console.log("ANTHROPIC_API_KEY is not set - skipping LLM evals.");
-	console.log("The model-free beat check runs in `pnpm test`. Set the key to grade with a judge model.");
-	process.exit(0);
+if (!apiKey || !MODEL) {
+	console.error("Instruction audit not run: set ANTHROPIC_API_KEY and an available ANTHROPIC_MODEL.");
+	console.error("This command fails when unavailable; pnpm test needs no API credentials.");
+	process.exit(2);
 }
 
 const root = findRepoRoot();

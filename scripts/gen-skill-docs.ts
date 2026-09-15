@@ -12,6 +12,8 @@ import { extractSkillRefs } from "../src/core/skill.js";
 const root = findRepoRoot();
 const skills = discoverSkills(path.join(root, loadConfig(root).skillsDir));
 const names = new Set(skills.map((s) => s.name));
+const outputs = new Map<string, string>();
+const checkOnly = process.argv.includes("--check");
 
 // Verbs that introduce a handoff clause. Word-boundaried so "feeds" doesn't match
 // inside "feedback"; "hands back to" is a handoff too (e.g. ed-pr-fix → ed-ship).
@@ -58,14 +60,10 @@ for (const skill of skills) {
 
 const catalogOut = path.join(root, "docs", "SKILLS.md");
 
-fs.writeFileSync(catalogOut, catalog.join("\n").trimEnd() + "\n", "utf8");
+outputs.set(catalogOut, catalog.join("\n").trimEnd() + "\n");
 
 // --- Per-skill pages: docs/skills/<name>.md ------------------------------------
 const skillsDocDir = path.join(root, "docs", "skills");
-
-// Rebuild the dir from scratch so a removed skill's page doesn't linger.
-fs.rmSync(skillsDocDir, { recursive: true, force: true });
-fs.mkdirSync(skillsDocDir, { recursive: true });
 
 for (const skill of skills) {
 	const page = [
@@ -80,25 +78,14 @@ for (const skill of skills) {
 		skill.body,
 	];
 
-	fs.writeFileSync(path.join(skillsDocDir, `${skill.name}.md`), page.join("\n").trimEnd() + "\n", "utf8");
+	outputs.set(path.join(skillsDocDir, `${skill.name}.md`), page.join("\n").trimEnd() + "\n");
 }
 
 // --- Handoff map: docs/SKILL-MAP.md --------------------------------------------
-const nodeId = (name: string): string => name.replace(/-/g, "_");
-const edges = skills.flatMap((skill) => handoffTargets(skill).map((target) => ({ from: skill.name, to: target })));
-
-const mermaid = [
-	"```mermaid",
-	"flowchart LR",
-	...skills.map((skill) => `  ${nodeId(skill.name)}["${skill.name}"]`),
-	...edges.map((edge) => `  ${nodeId(edge.from)} --> ${nodeId(edge.to)}`),
-	"```",
-];
-
-const handoffList = skills.map((skill) => {
+const handoffList = skills.map(function (skill) {
 	const targets = handoffTargets(skill);
 
-	return `- **${skill.name}** → ${targets.length ? targets.map((t) => `\`${t}\``).join(", ") : "_(terminal)_"}`;
+	return `| ${skill.name} | ${targets.length ? targets.map((target) => `\`${target}\``).join(", ") : "Terminal"} |`;
 });
 
 const map = [
@@ -110,17 +97,59 @@ const map = [
 	"(`hands off to`, `hands back to`, `routes to`, or `feeds`); a few skills are terminal",
 	"(they close a loop rather than start the next one). For the phase tour, see [OVERVIEW.md](OVERVIEW.md).",
 	"",
-	...mermaid,
-	"",
-	"## Handoffs",
-	"",
+	"| Skill | Next skills |",
+	"| --- | --- |",
 	...handoffList,
 ];
 
 const mapOut = path.join(root, "docs", "SKILL-MAP.md");
 
-fs.writeFileSync(mapOut, map.join("\n").trimEnd() + "\n", "utf8");
+outputs.set(mapOut, map.join("\n").trimEnd() + "\n");
 
-console.log(
-	`Wrote ${path.relative(root, catalogOut)}, ${path.relative(root, mapOut)} + ${skills.length} pages in ${path.relative(root, skillsDocDir)}/`,
-);
+/** Refuse paths that would redirect generated reads or writes outside regular outputs. */
+function checkOutputPath(file: string, directory: boolean): void {
+	const entry = fs.lstatSync(file, { throwIfNoEntry: false });
+
+	if (entry && (directory ? !entry.isDirectory() : !entry.isFile())) {
+		throw new Error(`Refusing non-regular generated ${directory ? "directory" : "file"}: ${file}`);
+	}
+}
+
+// Check parents first, including dangling symlinks, before reading or mutating children.
+checkOutputPath(path.join(root, "docs"), true);
+checkOutputPath(skillsDocDir, true);
+
+for (const file of outputs.keys()) checkOutputPath(file, false);
+
+const stale = [...outputs].filter(function ([file, expected]) {
+	return !fs.existsSync(file) || fs.readFileSync(file, "utf8") !== expected;
+});
+const obsolete = fs.existsSync(skillsDocDir)
+	? fs.readdirSync(skillsDocDir).filter(function (file) {
+			return file.endsWith(".md") && !outputs.has(path.join(skillsDocDir, file));
+		})
+	: [];
+
+for (const file of obsolete) checkOutputPath(path.join(skillsDocDir, file), false);
+
+if (checkOnly) {
+	if (stale.length > 0 || obsolete.length > 0) {
+		console.error("Generated documentation is stale. Run pnpm docs:gen.");
+
+		for (const [file] of stale) console.error(path.relative(root, file));
+
+		for (const file of obsolete) console.error(`Obsolete: docs/skills/${file}`);
+
+		process.exitCode = 1;
+	} else {
+		console.log(`Generated documentation matches ${skills.length} skills.`);
+	}
+} else {
+	fs.mkdirSync(skillsDocDir, { recursive: true });
+
+	for (const file of obsolete) fs.rmSync(path.join(skillsDocDir, file));
+
+	for (const [file, content] of outputs) fs.writeFileSync(file, content, "utf8");
+
+	console.log(`Wrote catalog, handoff map and ${skills.length} skill pages.`);
+}

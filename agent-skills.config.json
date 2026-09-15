@@ -5,7 +5,21 @@
 	"defaultTargets": ["claude", "codex"],
 	"profiles": {
 		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
-		"review": ["ed-review", "ed-adversarial-review", "ed-simplify", "ed-refactor"]
+		"review": ["ed-review", "ed-adversarial-review", "ed-simplify", "ed-refactor"],
+		"core": ["ed-plan", "ed-work", "ed-test", "ed-review", "ed-commit", "ed-ship", "ed-handoff"],
+		"orchestration": ["ed-plan", "ed-orchestrate", "ed-verify", "ed-repo-brief", "ed-specialize", "ed-work", "ed-review", "ed-handoff"],
+		"maintenance": [
+			"ed-deps",
+			"ed-diagnose",
+			"ed-triage",
+			"ed-benchmark",
+			"ed-refactor",
+			"ed-simplify",
+			"ed-migrate",
+			"ed-git-fix",
+			"ed-pr-fix",
+			"ed-prune-claude-setup"
+		]
 	},
 	"targets": {
 		"claude": {
@@ -15,7 +29,7 @@
 		},
 		"cursor": {
 			"enabled": true,
-			"userPath": "~/.cursor/rules",
+			"userPath": ".cursor/rules",
 			"projectPath": ".cursor/rules"
 		},
 		"codex": {
@@ -25,8 +39,8 @@
 		},
 		"windsurf": {
 			"enabled": true,
-			"userPath": "~/.codeium/windsurf/memories",
-			"projectPath": ".windsurf/rules"
+			"userPath": ".devin/rules",
+			"projectPath": ".devin/rules"
 		},
 		"copilot": {
 			"enabled": true,
@@ -45,8 +59,8 @@
 		},
 		"cline": {
 			"enabled": true,
-			"userPath": ".clinerules",
-			"projectPath": ".clinerules"
+			"userPath": "~/.cline/rules",
+			"projectPath": ".cline/rules"
 		},
 		"continue": {
 			"enabled": true,

@@ -1,0 +1,46 @@
+[
+	{
+		"id": "staged-review",
+		"skill": "ed-review",
+		"prompt": "Review the changes in this fixture before commit. Explain any concrete correctness issue and identify the Git layer you inspected. This is a review-only task; do not change the source or index.",
+		"files": {
+			"README.md": "Documents are private to their owner. Review changes before commit.\n",
+			"access.mjs": "export function mayRead(actor, document) {\n\treturn actor.id === document.ownerId;\n}\n"
+		},
+		"git": true,
+		"stagedFiles": {
+			"access.mjs": "export function mayRead(actor, document) {\n\treturn true;\n}\n"
+		},
+		"workingFiles": {
+			"access.mjs": "export function mayRead(actor, document) {\n\treturn actor.id === document.ownerId;\n}\n"
+		}
+	},
+	{
+		"id": "contract-verification",
+		"skill": "ed-verify",
+		"prompt": "Independently verify worker.md against contract.md and the current source. Report a verdict for every criterion with evidence. Do not fix or rewrite the deliverable.",
+		"files": {
+			"contract.md": "Task T1. Production profile. Independent verification required.\nArtifact: total.mjs in this directory. Current file bytes are the target revision.\nC1: total(lines) returns the sum of priceCents multiplied by quantity for each line.\nC2: Empty input returns zero.\nC3: The existing tests run successfully with node --test total.test.mjs.\nDownstream: use total in an order preview. No external calls or deployment.\n",
+			"total.mjs": "export function total(lines) {\n\treturn lines.reduce((sum, line) => sum + line.priceCents, 0);\n}\n",
+			"total.test.mjs": "import { test } from \"node:test\";\nimport assert from \"node:assert/strict\";\nimport { total } from \"./total.mjs\";\ntest(\"one item\", () => assert.equal(total([{ priceCents: 250, quantity: 1 }]), 250));\ntest(\"empty\", () => assert.equal(total([]), 0));\n",
+			"worker.md": "T1 ready. Existing tests pass. total.mjs implements the total calculation.\n"
+		}
+	},
+	{
+		"id": "resume-budget",
+		"skill": "ed-orchestrate",
+		"prompt": "Resume plan.md using the existing run records. Reconcile current artifacts and determine what can proceed within the recorded contract. Keep work local to this fixture; no network actions.",
+		"files": {
+			"extract.csv": "sku\nA02\n",
+			"input.csv": "sku\n0007\nA02\n",
+			"plan.md": "# Plan - searchable inventory report\nStatus: in-progress\nExecution: orchestrated\nRevision: 1\nGoal: produce a validated data extract, analysis and report.\nLimits: maximum three execution attempts per task; two active workers; 30 minute dispatch budget.\nT1: Extract all SKUs from input.csv. Depends on none. Artifact extract.csv. Acceptance: preserve every nonempty SKU including 0007. Pragmatic gate.\nT2: Count unique SKUs from accepted extract.csv. Depends on T1. Artifact counts.md. Acceptance: correct count with a reproducible calculation.\nT3: Write final report from accepted T1 and T2. Depends on T1,T2. Artifact report.md. Acceptance: sources and count agree.\n",
+			"plan.run/T1-attempt-1-verifier.md": "T1 attempt 1. Independent pragmatic gate. REJECT. SKU 0007 is omitted from ../extract.csv although present in ../input.csv. Preserve it.\n",
+			"plan.run/T1-attempt-1-worker.md": "T1 attempt 1: ../extract.csv contains the extracted SKUs.\n",
+			"plan.run/T1-attempt-2-verifier.md": "T1 attempt 2. Independent pragmatic gate. REJECT. SKU 0007 is omitted from ../extract.csv although present in ../input.csv. Preserve it.\n",
+			"plan.run/T1-attempt-2-worker.md": "T1 attempt 2: ../extract.csv contains the extracted SKUs.\n",
+			"plan.run/T1-attempt-3-verifier.md": "T1 attempt 3. Independent pragmatic gate. REJECT. SKU 0007 is omitted from ../extract.csv although present in ../input.csv. Preserve it.\n",
+			"plan.run/T1-attempt-3-worker.md": "T1 attempt 3: ../extract.csv contains the extracted SKUs.\n",
+			"plan.run/state.md": "# Run state\nPlan: ../plan.md revision 1.\nElapsed dispatch time: 12 minutes of the 30-minute budget consumed.\nMaximum execution attempts per task: 3. Active workers: maximum 2.\nT1: rejected, attempt 3/3. See all three worker/verifier records.\nT2: pending, attempt 0, depends on accepted T1.\nT3: pending, attempt 0, depends on accepted T1 and T2.\nNo workers remain in flight. No external action has an unknown outcome.\n"
+		}
+	}
+]

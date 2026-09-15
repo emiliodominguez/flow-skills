@@ -1,268 +1,169 @@
 # agent-skills
 
-Author agent skills **once**, install them **anywhere**.
+A private source-of-truth repository for **28 focused workflow skills** and a TypeScript CLI
+that installs them into Claude Code, Codex and other assistants.
 
-A source-of-truth repo for a suite of workflow skills (the `ed-*` family) plus a small,
-tested CLI that installs them into **Claude Code**, **Codex**, **Cursor**,
-**Windsurf**, **GitHub Copilot**, **Zed**, **aider**, **Cline**, and **Continue** - with
-validation, scaffolding, and a symlink-or-copy installer.
+The suite covers design, implementation, review, delivery and maintenance. Longer work can use
+an orchestrator with separate workers, independent acceptance gates and resumable evidence.
+Small work stays direct.
 
-```sh
-./install.sh                 # all skills → Claude Code + Codex (symlinked, edit-live)
-pnpm skills install -t cursor codex
-pnpm skills new my-skill
-pnpm skills validate
-```
+## Start
 
----
-
-## Why
-
-Every assistant has its own place and format for "always-available instructions": Claude
-Code has `~/.claude/skills/<name>/SKILL.md`, Codex has `~/.agents/skills/<name>/SKILL.md`,
-Cursor has `.cursor/rules/*.mdc`, Windsurf has `.windsurf/rules`, and Copilot, Zed, aider, Cline and Continue each
-have their own. Writing the same guidance over and over rots fast.
-
-Here each skill is written once as a `SKILL.md`. Target **adapters** transform it into each
-tool's native format on install. One source, many destinations.
-
----
-
-## The skill suite
-
-A connected workflow that moves work from idea to shipped. See the full map in
-[`docs/OVERVIEW.md`](docs/OVERVIEW.md).
-
-| Phase          | Skills                                                                                                                         |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Think**      | `ed-brainstorm` · `ed-prototype`                                                                                               |
-| **Understand** | `ed-onboard` - map an unfamiliar codebase fast                                                                                 |
-| **Plan**       | `ed-plan` - parallel research, writes `.plans/<file>`                                                                          |
-| **Build**      | `ed-work` · `ed-test` (test strategy) · `ed-migrate` (cross-file sweeps)                                                       |
-| **Check**      | `ed-review` (persona panel + verification) · `ed-adversarial-review` (red-team)                                                |
-| **Polish**     | `ed-simplify` · `ed-refactor`                                                                                                  |
-| **Ship**       | `ed-ship` · `ed-commit` · `ed-docs` · `ed-pr-fix` · `ed-git-fix`                                                               |
-| **Support**    | `ed-diagnose` · `ed-triage` · `ed-benchmark` · `ed-deps` · `ed-handoff` · `ed-styles` · `ed-animate` · `ed-prune-claude-setup` |
-
-`ed-plan` writes a plan file, then you execute it in a **fresh session** with `/ed-work` -
-planning and building don't share a crowded context window.
-
----
-
-## Install
-
-**Requirements:** Node ≥ 22. pnpm is auto-enabled via corepack if missing.
-
-> This is a **private, personal** repo - it's not published to npm, and the `git clone` /
-> `npx github:` paths assume your git is authenticated to it (they work on your own machines,
-> not for the public).
-
-### Option A - bootstrap script (no setup)
+Requirements: Node.js 22.12 or newer and the repository's pnpm version.
 
 ```sh
 git clone https://github.com/emiliodominguez/agent-skills.git
 cd agent-skills
-./install.sh                       # → Claude Code + Codex, symlinked
-./install.sh -- -t cursor codex    # → Cursor + Codex
-./install.sh -- --copy             # → copy a frozen snapshot instead of symlinking
+pnpm install --frozen-lockfile
+pnpm skills install --profile core -t claude codex
 ```
 
-### Option B - pnpm
+This repository is private; cloning requires your existing GitHub authentication. Native
+Claude Code and Codex installations use live directory symlinks, or `--copy` for a snapshot.
+`./install.sh` remains the bootstrap entry point and installs the full suite by default.
+
+Prefer a profile to keep discovery focused:
+
+| Profile         | Purpose                                                                   |
+| --------------- | ------------------------------------------------------------------------- |
+| `core`          | Plan, implement, test, review, commit, deliver and hand off               |
+| `orchestration` | Plan, coordinate, verify, build repository context and specialize workers |
+| `frontend`      | Prototype, style and animate                                              |
+| `review`        | Review, adversarial review, simplify and refactor                         |
+| `maintenance`   | Diagnose, triage, benchmark, upgrade, migrate and repair workflows        |
+
+Explicit skill names override a profile. Install all skills by omitting names and profiles.
+
+## Use the skills
+
+Use `/ed-plan` in Claude Code and `$ed-plan` in Codex. Skill descriptions also support
+automatic selection when the host provides it. These are instruction workflows; installing
+one does not start a background process, register subagents or grant tool permissions.
+
+| Need                                                  | Skill                                                              |
+| ----------------------------------------------------- | ------------------------------------------------------------------ |
+| Explore an idea or test a hypothesis                  | `ed-brainstorm`, `ed-prototype`                                    |
+| Understand a repository or maintain cited context     | `ed-onboard`, `ed-repo-brief`                                      |
+| Produce an executable plan                            | `ed-plan`                                                          |
+| Implement a bounded change                            | `ed-work`, `ed-test`                                               |
+| Coordinate dependent work with independent gates      | `ed-orchestrate`, `ed-verify`                                      |
+| Match a worker and verifier to repository conventions | `ed-specialize`                                                    |
+| Review or improve existing code                       | `ed-review`, `ed-adversarial-review`, `ed-refactor`, `ed-simplify` |
+| Migrate, upgrade or measure                           | `ed-migrate`, `ed-deps`, `ed-benchmark`                            |
+| Diagnose or triage                                    | `ed-diagnose`, `ed-triage`                                         |
+| Deliver and address feedback                          | `ed-commit`, `ed-ship`, `ed-pr-fix`, `ed-git-fix`                  |
+| Refine UI and documentation                           | `ed-styles`, `ed-animate`, `ed-docs`                               |
+| Resume work or curate agent setup                     | `ed-handoff`, `ed-prune-claude-setup`                              |
+
+Examples, using Claude spelling:
+
+```text
+/ed-work Fix the empty search state and verify it in the browser.
+/ed-plan Plan the account export feature with explicit acceptance and non-goals.
+/ed-orchestrate .plans/account-export.md
+/ed-repo-brief Capture this subsystem's contracts and actual lint/test commands.
+/ed-specialize Create portable worker and verifier briefs for this repository.
+```
+
+An orchestrated task moves from worker output to an independent `ACCEPT`, `REJECT` or `BLOCKED`
+verdict. Only accepted, current evidence releases dependent tasks. Retry budgets and acceptance
+records survive a handoff. Direct execution remains available when independent delegation is
+unnecessary or unavailable, without claiming that self-checks are independent review.
+
+Read [the workflow guide](docs/OVERVIEW.md), [orchestration example](docs/ORCHESTRATION.md),
+[full catalog](docs/SKILLS.md) or [handoff table](docs/SKILL-MAP.md).
+
+## CLI
+
+```text
+agent-skills                              Interactive picker in a terminal
+agent-skills list [--targets] [--profiles] [--json]
+agent-skills validate [--strict]
+agent-skills install [skills...]           Install selected skills
+agent-skills uninstall [skills...]         Remove selected managed installations
+agent-skills sync                          Refresh already installed skills
+agent-skills doctor [--json]               Inspect installation health
+agent-skills new <name> [-d "description"]
+agent-skills completion [bash|zsh|fish]
+```
+
+| Install/uninstall flag      | Behavior                                                    |
+| --------------------------- | ----------------------------------------------------------- |
+| `-t, --target <name...>`    | Select target adapters; defaults to Claude Code and Codex   |
+| `-s, --scope user\|project` | Configured user or project destination (see target caveats) |
+| `--profile <name...>`       | Union of configured skill groups                            |
+| `--copy`                    | Copy native skill directories instead of linking            |
+| `--force`                   | Back up unmanaged collisions before replacement/removal     |
+| `--dry-run`                 | Preview without filesystem changes                          |
+| `--watch`                   | Reinstall on source changes; install only                   |
+
+Unknown or disabled explicitly selected targets exit unsuccessfully. `doctor --json` reports
+these as unhealthy instead of silently treating them as successful empty checks. An empty skill
+corpus fails validation. Names are limited to 64 characters and descriptions to 1024.
+
+## Target formats
+
+| Target         | Installed format                                    |
+| -------------- | --------------------------------------------------- |
+| Claude Code    | Native `~/.claude/skills/<name>/SKILL.md` directory |
+| Codex          | Native `~/.agents/skills/<name>/SKILL.md` directory |
+| Cursor         | Generated `.mdc` rules                              |
+| Windsurf       | Generated Markdown rules                            |
+| Cline          | Generated `.cline/rules/*.md` files                 |
+| Continue       | Generated Markdown rules                            |
+| GitHub Copilot | Managed block in `copilot-instructions.md`          |
+| Zed            | Managed block in `.rules`                           |
+| aider          | Managed block in `CONVENTIONS.md`                   |
+
+Native directories preserve supporting files. Generated rule/bundle targets currently render
+the skill body and description; they do not install native agents or copy supporting resources.
+The current suite is self-contained so these exports remain usable. Host discovery, permissions
+and delegation differ; see [current practices and compatibility](docs/PRACTICES.md).
+
+## Configuration and ownership
+
+`agent-skills.config.json` defines `skillsDir`, installation mode, profiles, enabled targets and
+user/project paths. `.agent-skills.local.json` supplies machine-specific overrides. See
+[configuration](docs/CONFIGURATION.md) and its [schema](agent-skills.schema.json).
+
+The installer recognizes its native symlinks/copies and generated markers. It preserves
+unmanaged collisions unless `--force` requests a backup and replacement. Native Windows installs
+use copy mode. Codex migration only removes provably managed legacy content. `sync` preserves
+existing native copy/symlink modes and does not install unrelated missing skills.
+
+If discovery fails, inspect `pnpm skills doctor --json` and an install `--dry-run`. Check the
+configured path against your host/version. After moving a source checkout, reinstall to repair
+its managed links or choose copy mode. Detailed behavior lives in [architecture](docs/ARCHITECTURE.md).
+
+## Develop and validate
 
 ```sh
-pnpm install
-pnpm skills install                # default target(s) from config
-pnpm skills install -t windsurf -s project   # into ./.windsurf/rules of the current project
+pnpm run format
+pnpm run lint
+pnpm run typecheck
+pnpm run validate
+pnpm run test:coverage
+pnpm run build
+pnpm docs:gen
+pnpm docs:check
+pnpm smoke
 ```
 
-### Option C - one-off via npx (from git, if you have access)
+TypeScript entry points use `node --import tsx`, avoiding the extra IPC server used by the tsx
+CLI. Formatting, padding and JSDoc conventions remain strict. Generated docs are derived from
+`skills/*/SKILL.md`; `docs:check` detects drift without changing files or the Git index.
 
-```sh
-npx github:emiliodominguez/agent-skills install -t claude
-```
+Three evaluation layers have different claims: instruction-marker tests check text presence;
+`eval:llm` audits instructions using an explicitly configured model; realistic isolated agent
+runs evaluate actual decisions and artifacts. See [evals](evals/README.md) for cases and limits.
 
----
+All original skill names remain available. Plans can continue in the current session; a fresh
+session is optional. Artifact paths follow user/repository tracking policy rather than changing
+ignore rules automatically. [Migration notes](docs/PRACTICES.md) explain the changed defaults.
 
-## Usage
-
-```
-agent-skills                          (no args, in a terminal) interactive picker
-agent-skills list [--targets] [--profiles] [--json]   List skills (and, optionally, adapters / profiles)
-agent-skills validate [--strict]      Validate frontmatter, naming, cross-references
-agent-skills install [skills...]      Install skills into target(s)
-agent-skills uninstall [skills...]    Remove installed skills
-agent-skills sync                     Re-install whatever is already installed (propagate edits)
-agent-skills doctor [--json]          Report install state per target; flag drift/conflicts
-agent-skills new <name> [-d "desc"]   Scaffold a new skill from the template
-agent-skills completion [shell]       Print a bash/zsh/fish completion script to eval/source
-```
-
-Run **`agent-skills`** with no arguments in a terminal for an interactive picker.
-`list` and `doctor` take **`--json`** for machine-readable output. Enable tab-completion
-with e.g. `eval "$(agent-skills completion zsh)"` in your shell rc.
-
-**Common flags** (`install` / `uninstall`):
-
-| Flag                     | Meaning                                                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `-t, --target <name...>` | `claude`, `cursor`, `codex`, `windsurf`, `copilot`, `zed`, `aider`, `cline`, `continue` (default: config) |
-| `-s, --scope <scope>`    | `user` (global, default) or `project` (into the current repo)                                             |
-| `--profile <name...>`    | install/remove a named set of skills from config `profiles`                                               |
-| `--copy`                 | copy files instead of symlinking (native `claude` target)                                                 |
-| `--force`                | overwrite/remove entries not created by agent-skills                                                      |
-| `--dry-run`              | print the plan without touching anything                                                                  |
-| `--watch`                | (`install`) keep running and re-generate targets on source change                                         |
-
-Run **`agent-skills doctor`** any time to see what's installed where and whether anything
-has drifted from the source or conflicts with a hand-written file. Run **`agent-skills sync`**
-to re-generate whatever is currently installed across all targets, so a source edit
-propagates everywhere with one command.
-
-Pass specific skills to scope an operation: `agent-skills install ed-plan ed-work`. Or install
-a curated subset with a profile: `agent-skills install --profile frontend`.
-
----
-
-## Targets
-
-| Target       | Emits                             | Install shape                                       |
-| ------------ | --------------------------------- | --------------------------------------------------- |
-| **claude**   | `SKILL.md` (unchanged)            | one directory per skill; **symlink** (live) or copy |
-| **cursor**   | `.mdc` rule with frontmatter      | one file per skill in `.cursor/rules/`              |
-| **codex**    | `SKILL.md` (unchanged)            | one directory per skill; **symlink** (live) or copy |
-| **windsurf** | `.md` rule                        | one file per skill in `.windsurf/rules/`            |
-| **copilot**  | `.github/copilot-instructions.md` | all skills in one **managed block**                 |
-| **zed**      | `.rules`                          | all skills in one **managed block**                 |
-| **aider**    | `CONVENTIONS.md`                  | all skills in one **managed block**                 |
-| **cline**    | `.md` rule                        | one file per skill in `.clinerules/`                |
-| **continue** | `.md` rule                        | one file per skill in `.continue/rules/`            |
-
-The `claude` and `codex` targets support symlinking because their native format is identical
-to the source. The others are transformed, so they're always generated fresh - re-run
-`install` (or `sync`) to update. The bundle targets (copilot, zed, aider) merge every skill into one delimited
-managed block, preserving any surrounding content you wrote in the same file.
-
-### Safety model
-
-The installer writes into your real config directories, so it never destroys anything it did
-not create:
-
-- **claude/codex** only overwrite/remove a directory that is _their own_ symlink or a copy
-  they marked. A hand-authored native skill that collides with a skill name is
-  **left alone** unless you pass `--force`.
-- **cursor/windsurf** files carry a marker; both `install` and `uninstall` touch only
-  marked files.
-- On upgrade, **codex** removes only the old installer-managed block from `AGENTS.md` and
-  migrates provably managed legacy `~/.codex/skills` entries; user-authored content is preserved.
-- `--force` never deletes outright - it **backs the entry up** to a `.bak-<n>` sibling first.
-- On Windows (no symlink privilege), the native target automatically falls back to `--copy`.
-- `--dry-run` previews every action; `doctor` reports drift without changing anything.
-
-Full detail: [Safety model](docs/ARCHITECTURE.md#safety-model).
-
----
-
-## Configure
-
-`agent-skills.config.json` (JSON-schema-backed) sets defaults and per-target paths:
-
-```jsonc
-{
-	"installMode": "symlink", // or "copy"
-	"defaultTargets": ["claude", "codex"],
-	"profiles": {
-		// named install sets: `install --profile frontend`
-		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
-	},
-	"targets": {
-		"claude": { "enabled": true, "userPath": "~/.claude/skills", "projectPath": ".claude/skills" },
-		"cursor": { "enabled": true, "userPath": "~/.cursor/rules", "projectPath": ".cursor/rules" },
-		"codex": { "enabled": true, "userPath": "~/.agents/skills", "projectPath": ".agents/skills" },
-		// windsurf, copilot, zed, aider, cline, continue ...
-	},
-}
-```
-
-Paths for the non-native targets follow each tool's documented convention; adjust them here
-if your version differs (the newer tools' rules directories move - re-check yours). A
-`profiles` map lets you curate subsets for `install --profile <name>`. Keep machine-specific
-overrides in a git-ignored `.agent-skills.local.json` (same shape, deep-merged on top). Full
-reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
-
----
-
-## Documentation
-
-| Doc                                                               | What's in it                                               |
-| ----------------------------------------------------------------- | ---------------------------------------------------------- |
-| [docs/SKILLS.md](docs/SKILLS.md)                                  | Catalog of every skill and what it's for (auto-generated)  |
-| [docs/SKILL-MAP.md](docs/SKILL-MAP.md)                            | Rendered graph of how the skills hand off (auto-generated) |
-| [docs/OVERVIEW.md](docs/OVERVIEW.md)                              | The skill workflow and the practices behind it             |
-| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)                    | Config reference - targets, scopes, paths                  |
-| [docs/AUTHORING.md](docs/AUTHORING.md)                            | How to write a good skill                                  |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                      | How the CLI works + the safety model                       |
-| [CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md) | Contributing & release history                             |
-
----
-
-## Author a new skill
-
-```sh
-pnpm skills new my-skill -d "One line: what it does - when to use - handoff."
-# edit skills/my-skill/SKILL.md
-pnpm skills validate
-pnpm skills install -t claude codex
-```
-
-Skills follow a shared anatomy (frontmatter → phased body → `Anti-patterns` → `Done when`).
-See [`docs/AUTHORING.md`](docs/AUTHORING.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
----
-
-## Develop
-
-```sh
-pnpm skills <cmd>       # run the CLI from source (tsx)
-pnpm test               # vitest - corpus validation, adapters, core units, CLI
-pnpm run test:coverage  # vitest with v8 coverage (70% threshold)
-pnpm run typecheck      # tsc over src + test + scripts
-pnpm run lint           # eslint (typescript-eslint)
-pnpm run format         # prettier (tabs, width 150)
-pnpm docs:gen           # regenerate docs/SKILLS.md from the skills
-pnpm smoke              # pack + install the tarball in a clean project, run the bin
-pnpm run build          # bundle to dist/ (tsup)
-```
-
-A husky pre-commit hook runs prettier + eslint on staged files. The repository keeps CI and
-Changesets workflow definitions for linting, tests, packaging, and release versioning, but
-GitHub Actions is currently disabled. Run the gate above locally before merging. Follow the
-manual release steps in [CONTRIBUTING.md](CONTRIBUTING.md#releasing-changesets) when a version
-is ready. Publishing to npm requires explicit npm authentication.
-
----
-
-## Troubleshooting
-
-**A skill isn't showing up in the tool.** Confirm it installed to the right place:
-`pnpm skills install -t <target> --dry-run`. For non-`claude` targets, check the path
-matches your tool's current rules directory and override it in `agent-skills.config.json`
-if not (see [docs/CONFIGURATION.md](docs/CONFIGURATION.md)).
-
-**`install` says "exists, not managed".** There's already a directory/file at the
-destination that this tool didn't create. Inspect it; if it's safe to replace, re-run with
-`--force`.
-
-**Codex reports that its destination is an `AGENTS.md` file.** An older local config still
-uses the pre-native bundle path. Change it to `~/.agents/skills` (user) or `.agents/skills`
-(project), then re-run; the installer removes only its legacy managed block.
-
-**`pnpm install` warns about ignored build scripts (esbuild).** Allow it once - this repo
-already lists esbuild in `pnpm-workspace.yaml`; run `pnpm install` again after cloning.
-
-**Broken symlinks after moving the repo.** Symlinked native (`claude`/`codex`) installs point at the repo's
-path. If you move the repo, re-run `pnpm skills install` to repoint them, or use `--copy`.
-
----
+Add a changeset for user-facing changes and follow [contributing](CONTRIBUTING.md). Existing CI
+and release definitions remain available; check whether Actions is enabled for a particular run.
+Publishing a package, merging or deploying requires the corresponding user request.
 
 ## License
 

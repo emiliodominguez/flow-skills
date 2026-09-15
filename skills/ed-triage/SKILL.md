@@ -1,73 +1,42 @@
 ---
 name: ed-triage
-description: "Triage an incident or issue fast - confirm it's real and reproducible, assess blast radius and severity, contain an active incident before hunting root cause, then decide fix-now vs. later and route to the right skill. Use for a new bug report, a production alert, or a pile of issues to prioritize (also /ed-triage, \"is this a real problem\", \"how bad is this\", \"what should I do about this bug\", \"prod is down\"). Routes to /ed-diagnose for root cause, /ed-work to fix, or /ed-adversarial-review when it's a security issue. Invoke as /ed-triage in Claude Code or $ed-triage in Codex."
+description: "Assess a reported failure's severity, blast radius and trajectory, identify authorized containment, and route the next investigation or fix. Use for incidents and uncertain bug reports; deep root-cause analysis belongs in /ed-diagnose. Invoke as /ed-triage in Claude Code or $ed-triage in Codex. Routes to /ed-diagnose, /ed-work, or /ed-plan."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
 # Triage
 
-Triage is a routing decision, not a fix. Its job is to answer **is this real, how bad is it, and what happens next** - quickly and honestly - so effort lands where it matters. Getting root-cause-happy here is a trap: for an active incident, stopping the bleeding comes before understanding the wound.
+Turn a noisy report into an actionable next step. Establish impact and evidence before
+assigning urgency or prescribing a production action.
 
----
+## Process
 
-## Phase 1: Confirm it's real
-
-- Reproduce it, or find the evidence that it happened (logs, traces, a screenshot, error rates). An unreproduced, unevidenced report is *unconfirmed* - say so.
-- Pin down the conditions: which users, which version, since when, what changed around then (a deploy? a data migration? traffic?).
-- Rule out the non-bug: misconfiguration, expected behaviour, user error, an already-known issue. Don't spin up an investigation for a dupe.
-
----
-
-## Phase 2: Assess blast radius and severity
-
-Severity is **impact × reach**, not how alarming it looks.
-
-- **Reach**: one user or all of them? one edge case or the main path?
-- **Impact**: cosmetic, degraded, data-loss, security, money. Silent data corruption outranks a loud crash.
-- **Trajectory**: stable, or getting worse each minute? A small-but-spreading problem is a big problem.
-- Land on a severity you can defend in one sentence: *"data-loss on the checkout path for ~5% of users, growing."*
-
----
-
-## Phase 3: Contain, if it's live
-
-For an **active incident**, mitigate before you root-cause.
-
-- Confirm the user has authorized production changes before mutating deployments, flags,
-  traffic, or failover state. A request to assess or diagnose is not containment authority.
-- Stop the bleeding: roll back the suspect deploy, feature-flag it off, throttle, fail over. A mitigated incident buys you time to diagnose calmly.
-- Containment is not the fix - it's the tourniquet. Note that the root cause is still open.
-- For a non-urgent issue, skip this phase.
-
----
-
-## Phase 4: Decide and route
-
-Decide **fix-now vs. later** from severity × effort, then route - don't fix it here.
-
-- **Now**: high severity, or cheap enough that deferring costs more than doing it.
-- **Later**: low impact, or high effort with a workaround - file it with the severity, repro, and evidence so it's actionable later, not re-triaged from scratch.
-- **Route to the right skill**: `/ed-diagnose` when the cause is unknown and needs hunting; `/ed-work` when the fix is understood and spans slices; `/ed-adversarial-review` when it's security-, auth-, money-, or data-integrity-sensitive.
-
----
+1. Capture expected versus observed behavior, affected users/data, onset, environment/revision,
+   and reproduction or traces. Identify recent changes without assuming they caused the issue.
+2. Assess blast radius, severity, duration and trajectory using the organization's incident
+   scheme where one exists. Separate confirmed impact from plausible exposure and unknowns.
+3. Identify whether a reversible containment can reduce ongoing harm. Verify prerequisites,
+   user authorization and relevant operational rules before changing live state. Preparation
+   and read-only checks can proceed while a consequential action awaits authorization.
+4. If mitigation is authorized, apply it and verify health actually improves. Record the
+   before/after signal and rollback condition. If it cannot proceed, report containment as
+   pending or blocked instead of implying the incident is contained.
+5. Route by the remaining problem: /ed-diagnose for unknown cause, /ed-work for a bounded
+   understood fix, or /ed-plan for broader dependent work. A fix-now/later recommendation needs
+   a reason, concrete owner/next action where known, and the evidence required to resume.
 
 ## Anti-patterns
 
-- ❌ Diving into root-cause on a live incident before containing it
-- ❌ Rating severity by how scary it looks instead of impact × reach
-- ❌ Treating an unreproduced report as a confirmed bug
-- ❌ Spending high-severity effort on a low-impact issue because it's easy
-- ❌ Filing "later" work with no repro or severity, so it must be triaged again
-- ❌ Fixing it inside triage instead of routing - triage decides, other skills do
-
----
+- Declaring severity from how alarming the report sounds.
+- Performing an unrequested deployment, rollback or data repair during triage.
+- Equating a mitigation attempt with restored health.
+- Filing vague later work that must be rediscovered from scratch.
 
 ## Done when
 
-- The issue is confirmed real (reproduced or evidenced) or explicitly marked unconfirmed
-- Severity is stated as impact × reach in one defensible sentence
-- An active incident is contained, with the root cause noted as still open
-- A fix-now-vs-later call is made and routed to the right skill, with repro + evidence attached
+- Impact, uncertainty and containment status are explicit.
+- The next actor receives evidence, scope and a concrete route.
+- Any unresolved authorization or operational prerequisite is named precisely.
 
-Then: hand off to `/ed-diagnose` to root-cause, `/ed-work` to fix a known cause, or `/ed-adversarial-review` for a security-sensitive issue.
+Route to /ed-diagnose, /ed-work or /ed-plan according to the evidence.

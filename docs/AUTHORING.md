@@ -1,80 +1,48 @@
-# Authoring a skill
+# Authoring skills
 
-A skill is a prompt a future agent reads when a task matches its `description`. Write it
-like terse, opinionated documentation for a capable colleague - not a tutorial.
+Write the information that changes an agent's decisions. Assume the agent understands ordinary
+coding; avoid copied manuals, repeated global rules and universal solutions to local failures.
 
-## Anatomy
+## Contract
 
-```
----
-name: ed-<x>
-description: <what it does> - <when to use / trigger phrases> - <handoff line>.
----
+Scaffold with `pnpm skills new <name>`. Keep portable frontmatter to `name` and `description`.
+Names match the directory, use kebab-case and contain at most 64 characters. Descriptions stay
+within 1024 characters, front-load the use case, name both `/skill` and `$skill`, and include
+real handoffs using `hands off to`, `hands back to`, `routes to` or `feeds`.
 
-# <Title>
+Descriptions are discovery metadata, not a place for an entire workflow. Prefer concise,
+discriminating triggers and boundaries. In the body include the outcome, necessary process,
+likely failure modes, evidence and a `Done when` gate. A small skill needs no extra resources.
 
-<1-3 lines: what this skill is for and the ONE discipline it enforces.>
+## Execution rules
 
----
+- Follow current user intent and repository requirements; preserve an existing authorization.
+- Use actual host capabilities. Skills, agents, tools and model names are different resources.
+- Delegate useful independent work only when available and authorized. Define write ownership.
+- For retrying work, specify finite stop conditions and preserve attempts across handoffs.
+- Distinguish worker checks, independent acceptance, broad review and delivery authorization.
+- Follow the user's artifact location and tracking policy. Ignored files do not travel with Git.
+- Verify current official documentation or pinned source for unstable APIs and configuration.
 
-## <Phases or Process>     ← numbered steps, each with a clear job
+Use a concise self-contained body where practical. Native targets copy/link supporting
+resources, but rendered targets currently export only body and description. A required relative
+reference or script therefore needs adapter support before a skill relying on it is portable.
+Do not add hidden dependencies on sibling skills that may not be installed; provide a meaningful
+fallback or state the needed capability.
 
-## Anti-patterns           ← ❌ concrete things not to do
+## Evaluation
 
-## Done when               ← observable completion gate + a concrete handoff sentence
-```
+Add 3-5 instruction markers to `evals/beats.json`. These are inexpensive wording regressions,
+not proof of agent behavior. For a complex skill, execute representative requests in isolated
+fixtures using a fresh worker and minimal task context. Give expected outcomes only to the
+assessor, not the worker. Record the actual result and revise demonstrated failures.
 
-## The description is load-bearing
+Test both intended triggers and nearby requests that should stay outside the skill. Include
+missing evidence, changed inputs, interruption, permission boundaries and small-task routing
+where they affect the workflow. See [evaluation cases](../evals/README.md).
 
-It's how the model decides to invoke the skill. Pack it with:
+## Before committing
 
-- **What** it does, in the first clause.
-- **When** to use it - real trigger phrases a user would type ("review this", "make a
-  plan").
-- **Handoff** - which skill comes next.
-- **Explicit invocation** - name `/<skill>` for Claude Code and `$<skill>` for Codex.
-
-Keep it one line. Long is fine (it's an index entry), but under ~1024 chars.
-
-## Voice
-
-- Terse, imperative, second person. No hedging, no filler, no "you might consider".
-- Opinionated defaults. A skill that refuses to decide is useless.
-- `❌` for anti-patterns. Concrete, not abstract ("names like `data`/`manager`", not "bad
-  names").
-- End with a sentence the agent can literally say to hand off.
-- Tabs in code samples. `function foo()` over arrow functions.
-
-## The multi-agent pattern - only where it earns its keep
-
-Reach for parallel subagents when **diverse viewpoints or breadth** genuinely beat one
-pass: review, adversarial review, research, large-scale simplification. The shared shape:
-
-```
-1. SCOPE   - determine the target.
-2. FAN OUT - launch distinct-PERSONA agents with the host's delegation mechanism
-             (run read-only; only you write; batch within available concurrency).
-             Each returns findings in ONE fixed schema.
-3. MERGE   - dedup by file:line.
-4. VERIFY  - an independent agent tries to REFUTE each finding. Keep survivors, tagged
-             CONFIRMED / PLAUSIBLE. Default to refuted when unsure.
-5. REPORT  - triaged, deduped, no padding.
-```
-
-Do **not** bolt this onto a skill where a single agent is obviously better
-(`ed-git-fix`, `ed-handoff`, `ed-styles`). Over-engineering is itself an anti-pattern.
-
-Personas must have _different mental models_ - "the security adversary", "the new hire
-reading it cold", "the maintainer in two years" - not six copies of "review this code".
-
-## Before you commit
-
-- `pnpm skills validate` is clean (naming, refs, and the quality lints: the description names
-  its own `/<skill>` and `$<skill>` triggers and is a real sentence, the body has no filler words).
-- You added an **`evals/beats.json` entry** - 3-5 lowercase substrings naming the skill's
-  distinctive mechanics that appear in its body. `pnpm test` fails until they do (see
-  [`../evals/README.md`](../evals/README.md)).
-- `pnpm docs:gen` was run and the regenerated `docs/` is committed.
-- You invoked the skill in a real session and it did the right thing (evidence, not "looks
-  right").
-- Every `/other-skill` or `$other-skill` handoff points at a skill that exists.
+Run the repository gate in [AGENTS.md](../AGENTS.md), regenerate docs with `pnpm docs:gen`,
+and check them with `pnpm docs:check`. Inspect the generated result and test native installs
+in an isolated project. Keep strict formatting, padding and JSDoc conventions intact.

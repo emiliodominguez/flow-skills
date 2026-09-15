@@ -1,117 +1,77 @@
 # Architecture
 
-How the tool is put together, for anyone changing it.
-
-## The idea in one line
-
-Skills are authored once as `SKILL.md`; **target adapters** transform each skill into one
-tool's on-disk convention at install time. One source, many destinations.
+Skills are authored once as `skills/<name>/SKILL.md`. Target adapters install native skill
+directories or render the body into a host's rule format. These are different delivery modes;
+a rendered rule does not acquire native skill discovery, supporting files or agent configuration.
 
 ## Module map
 
-```
-src/
-  index.ts              CLI wiring (commander) - parses args, dispatches to commands
-  commands/
-    install.ts          install / uninstall - resolves config + targets, runs adapters
-    doctor.ts           doctor - report install state + drift/conflicts per target
-    validate.ts         validate - one scan, shared with the test suite
-    list.ts             list - skills and target adapters
-    new.ts              new - scaffold a skill from templates/SKILL.md.tmpl
-  core/
-    skill.ts            parse SKILL.md frontmatter (tolerant), validate, KEBAB
-    registry.ts         discover / select skills on disk
-    config.ts           load + merge config; findRepoRoot / packageRoot
-    paths.ts            ~ expansion, target-path resolution, prettyPath
-    install-fs.ts       filesystem primitives: symlink, copyDir, writeFile,
-                        managed-block read/write/remove (line-anchored, guarded)
-    logger.ts           colorized output + action printing
-  targets/
-    types.ts            the Target interface + InstallContext
-    index.ts            target registry (name → adapter)
-    render.ts           frontmatter renderer + escaping + file-per-skill helpers
-    claude.ts           shared native skill-directory installer (symlink or marked copy)
-    codex.ts            native Codex wrapper + guarded legacy migration
-    cursor.ts           file-per-skill: .cursor/rules/<name>.mdc
-    windsurf.ts         file-per-skill: .windsurf/rules/<name>.md
-scripts/gen-skill-docs.ts   regenerates docs/SKILLS.md
-test/                        vitest: corpus validation, adapters, core units
-```
+| Module                                               | Responsibility                                                                   |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `src/index.ts`, `src/cli.ts`                         | Process entry point and Commander command wiring                                 |
+| `src/commands/`                                      | Install/uninstall, sync, doctor, validation, listing, scaffolding and completion |
+| `src/core/config.ts`                                 | Root discovery, built-in defaults and config precedence                          |
+| `src/core/registry.ts`, `skill.ts`                   | Discover, select, parse and validate the corpus                                  |
+| `src/core/paths.ts`, `install-mode.ts`               | Resolve destinations and supported native install mode                           |
+| `src/core/install-fs.ts`                             | Ownership-aware filesystem operations and managed blocks                         |
+| `src/targets/`                                       | Format-specific install, uninstall and status adapters                           |
+| `scripts/gen-skill-docs.ts`                          | Catalog, handoff table and per-skill pages; read-only freshness mode             |
+| `scripts/eval-llm.ts`, `scripts/lib/eval-verdict.ts` | Optional instruction audit and complete-verdict validation                       |
+| `test/`, `evals/`                                    | CLI regression checks, instruction markers and realistic agent scenarios         |
 
-## The Target interface
+## Adapter contract
 
-Every destination implements one small contract (`src/targets/types.ts`):
+Each `Target` has a name, description, `supportsSymlink` flag and three methods:
+`install(ctx): Action[]`, `uninstall(ctx): Action[]`, `status(ctx): SkillStatus[]`.
+The context supplies selected skills, resolved destination, mode, force and dry-run flags.
+Adapters return actions instead of logging, keeping behavior testable.
 
-```ts
-interface Target {
-	name: string; // "claude" | "cursor" | "codex" | "windsurf"
-	describe: string; // shown by `list --targets`
-	supportsSymlink: boolean; // true for native Claude Code and Codex skill directories
-	install(ctx: InstallContext): Action[];
-	uninstall(ctx: InstallContext): Action[];
-	status(ctx: InstallContext): SkillStatus[]; // for `doctor`: linked/generated/drifted/conflict/missing
-}
-```
+| Adapter shape       | Targets                           | Output                                           |
+| ------------------- | --------------------------------- | ------------------------------------------------ |
+| Directory per skill | Claude Code, Codex                | Symlinked or copied complete directory           |
+| File per skill      | Cursor, Windsurf, Cline, Continue | Generated rule containing body and description   |
+| Managed bundle      | Copilot, Zed, aider               | Selected skill sections within a delimited block |
 
-`InstallContext` carries the selected `skills`, the resolved `dest`, the `mode`
-(`symlink | copy`), a `force` flag, and `dryRun`. Adapters return a list of `Action`s
-(`symlink | copy | write | remove | skip`) that the command layer prints - they never log
-directly, which keeps them testable.
+Keep native host capabilities separate from what an adapter actually emits. Current target
+paths and migration considerations are in [configuration](CONFIGURATION.md).
 
-Three adapter shapes:
+## Command flow
 
-- **dir-per-skill** (`claude`, `codex`) - each skill is a directory; symlinked to the repo (live) or
-  copied (frozen).
-- **file-per-skill** (`cursor`, `windsurf`) - each skill is one generated file; they share
-  `installFilePerSkill` / `uninstallFilePerSkill` in `render.ts`.
-- **bundle** (`copilot`, `zed`, `aider`) - all skills live in one target-specific file as
-  delimited sections inside a managed block.
+Install resolves the corpus root and merged config, selects explicit names or profile unions,
+then resolves each selected target's consuming-project or user path. It invokes the adapter
+with the effective mode, prints actions and collects failures. One target's failure does not
+prevent subsequent targets from being inspected. Unknown or disabled requested targets fail.
 
-Adding a target = implement the interface, register it in `targets/index.ts`, add a default
-path to `agent-skills.config.json`, add a test. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+`sync` refreshes only existing managed installations and preserves native copy/symlink modes.
+`doctor` reads state without mutation; missing skills mean uninstalled, while drift, conflicts
+and target errors make the report unhealthy. A healthy doctor report is not proof of host
+activation. `validate` rejects an empty corpus and reports all discoverable skill issues.
 
-## Install flow
+## Ownership and safety
 
-```
-install [skills...] --target … --scope … [--copy] [--force] [--dry-run]
-  → findRepoRoot()                     locate the repo (or installed package)
-  → loadConfig(root)                   defaults ← config file ← .local override
-  → selectSkills(skillsDir, names)     all skills, or the named subset
-  → for each target:
-       resolve dest (user|project path, ~ expanded)
-       mode = target.supportsSymlink ? installMode : "copy"
-       target.install({ skills, dest, mode, force, dryRun })
-  → print the actions
-```
+- Native entries are managed through the ownership manifest, a recognized source symlink or
+  a copied directory's marker. An unmanaged collision is preserved unless `--force` requests
+  a backup and replacement. Uninstall skips unmanaged entries.
+- File-per-skill outputs carry a marker; managed blocks delimit only the installer-owned
+  portion of a shared file. Hand-written surrounding content is preserved.
+- `--force` backs up collisions to a sibling path. It is not blanket permission to remove
+  unrelated configuration. `--dry-run` previews without changes.
+- Codex legacy migration touches only content it can attribute to this installer. Windows
+  native installations use copy mode when symlinking is unavailable.
+- Changes to default destinations do not scan or delete old locations. Migration must preserve
+  hand-written content and inspect the old install explicitly.
 
-## Safety model
+## Validation and generated artifacts
 
-This is the important part. The installer writes into your real config directories, so it is
-deliberately conservative about **destroying anything it did not create**.
+Frontmatter is parsed with `js-yaml`; malformed YAML becomes an issue rather than aborting the
+corpus scan. Descriptions are quoted when rendering to preserve colon-containing text.
+`docs:gen` owns the catalog, handoff table and generated skill pages. `docs:check` reports stale
+or obsolete output without rewriting files or the Git index.
 
-- **Native (claude/codex).** An entry is "managed" if it is recorded in the ownership
-  manifest, a symlink into this repo, or a copied
-  directory carrying an `.agent-skills` marker file. `install` **refuses** to overwrite an
-  unmanaged native skill directory unless you pass
-  `--force`; `uninstall` **skips** unmanaged entries entirely. So a name collision with your
-  own skill can never silently delete your work.
-- **File-per-skill (cursor, windsurf).** Generated files carry a marker comment. Both
-  `install` and `uninstall` touch a file **only if it carries that marker**, never a
-  hand-written rule of the same name.
-- **Codex upgrade migration.** The native adapter removes only the old installer-managed
-  block from legacy `AGENTS.md` files and migrates only legacy skill entries it can prove
-  belong to this repo. Surrounding instructions and unmanaged skills are preserved.
-- **`--force`** is the explicit escape hatch - but it **backs up** (moves to a `.bak-<n>`
-  sibling), never deletes outright.
-- **Windows** has no symlink privilege by default, so native targets fall back to copy.
-- **`--dry-run`** prints every action without touching the filesystem; **`doctor`** reports
-  drift/conflicts read-only.
-- One target throwing is caught and reported - the other
-  targets still run, and the command exits non-zero.
+Instruction markers catch textual omissions. The optional model audit accepts only one typed,
+nonempty verdict for every requested marker; empty, partial, duplicate or unknown verdicts fail.
+It requires an explicit model and API key and fails visibly when unavailable. Neither check
+executes a skill. Actual agent decisions are assessed with isolated scenarios in [evals](../evals/README.md).
 
-## Parsing note
-
-`SKILL.md` frontmatter is parsed with `js-yaml`, matching the shared agent-skills format.
-Invalid YAML is reported as a validation error without aborting the rest of the corpus scan.
-The scaffolder and generated targets quote arbitrary descriptions so colon-containing text
-round-trips safely.
+TypeScript scripts run through Node's `--import tsx` loader. The build remains a bundled CLI;
+`pnpm smoke` checks the packed artifact from a clean consumer project.

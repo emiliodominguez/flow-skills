@@ -24,8 +24,8 @@ function titleize(name: string): string {
  * @param opts - `description` for the frontmatter.
  */
 export function newCommand(name: string, opts: { description?: string }): void {
-	if (!KEBAB.test(name)) {
-		log.error(`"${name}" is not kebab-case (a-z, 0-9, hyphens).`);
+	if (!KEBAB.test(name) || name.length > 64) {
+		log.error(`"${name}" must be kebab-case (a-z, 0-9, hyphens) and at most 64 characters.`);
 		process.exitCode = 1;
 
 		return;

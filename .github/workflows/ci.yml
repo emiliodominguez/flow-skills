@@ -24,13 +24,7 @@ jobs:
       - name: Format check
         run: pnpm run format:check
       - name: Docs are up to date
-        run: |
-          pnpm run docs:gen
-          git add -A docs/
-          git diff --cached --exit-code docs/ || {
-            echo "::error::Generated docs are stale - run 'pnpm docs:gen' and commit the result."
-            exit 1
-          }
+        run: pnpm run docs:check
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level=high
 

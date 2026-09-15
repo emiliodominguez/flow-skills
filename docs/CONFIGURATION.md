@@ -1,104 +1,101 @@
 # Configuration
 
-The installer reads `agent-skills.config.json` at the repo root. Everything has a built-in
-default, so the file is optional - it exists to change target paths and defaults.
+The CLI merges built-in defaults, `agent-skills.config.json`, then the git-ignored
+`.agent-skills.local.json`. Overrides are merged by field and target. The
+[JSON Schema](../agent-skills.schema.json) provides editor validation; unknown runtime
+adapter names still fail rather than creating a host integration.
 
-Precedence (later wins, deep-merged):
+## Fields and profiles
 
-1. built-in defaults (`src/core/config.ts`)
-2. `agent-skills.config.json` (committed)
-3. `.agent-skills.local.json` (git-ignored - machine-specific overrides)
+| Field                        | Meaning                                                     |
+| ---------------------------- | ----------------------------------------------------------- |
+| `skillsDir`                  | Skill corpus directory relative to its configuration root   |
+| `installMode`                | `symlink` or `copy` for native targets                      |
+| `defaultTargets`             | Targets for install/uninstall when `--target` is omitted    |
+| `profiles`                   | Named arrays of skill names; inspect with `list --profiles` |
+| `targets.<name>.enabled`     | Whether an adapter is available for selection               |
+| `targets.<name>.userPath`    | Destination for `--scope user`                              |
+| `targets.<name>.projectPath` | Destination for `--scope project`                           |
 
-## Fields
+The committed profiles are `core`, `orchestration`, `frontend`, `review` and `maintenance`.
+Multiple profiles resolve to their union. Explicit skill names override profiles. An unknown
+or empty profile fails; it never falls through to an operation on every skill.
 
-```jsonc
-{
-	"$schema": "./agent-skills.schema.json",
+Install/uninstall skip disabled inherited default targets. Explicitly requesting a disabled
+or unknown target fails. `sync` and `doctor` default to enabled targets; explicit invalid
+selections fail there too. Configuration does not dynamically register target adapters.
 
-	// Directory (relative to repo root) that holds the skill folders.
-	"skillsDir": "skills",
+## Destination defaults
 
-	// Default strategy for native Claude Code and Codex targets: symlink (live) or copy (frozen).
-	"installMode": "symlink",
+Relative paths resolve against the consuming Git project root, or the invocation directory
+when outside Git. The source corpus may live elsewhere. `~` expands to the user's home.
 
-	// Targets used when --target is not passed.
-	"defaultTargets": ["claude", "codex"],
+| Target     | User scope                        | Project scope                     |
+| ---------- | --------------------------------- | --------------------------------- |
+| `claude`   | `~/.claude/skills`                | `.claude/skills`                  |
+| `cursor`   | `.cursor/rules`                   | `.cursor/rules`                   |
+| `codex`    | `~/.agents/skills`                | `.agents/skills`                  |
+| `windsurf` | `.devin/rules`                    | `.devin/rules`                    |
+| `copilot`  | `.github/copilot-instructions.md` | `.github/copilot-instructions.md` |
+| `zed`      | `.rules`                          | `.rules`                          |
+| `aider`    | `CONVENTIONS.md`                  | `CONVENTIONS.md`                  |
+| `cline`    | `~/.cline/rules`                  | `.cline/rules`                    |
+| `continue` | `~/.continue/rules`               | `.continue/rules`                 |
 
-	// Named install sets: `install --profile <name>` installs just these skills.
-	"profiles": {
-		"frontend": ["ed-styles", "ed-animate", "ed-prototype"],
-		"review": ["ed-review", "ed-adversarial-review", "ed-simplify", "ed-refactor"],
-	},
+The scope selects a configured destination; it does not guarantee a global host feature.
+Cursor, Windsurf, Copilot, Zed and aider use project files in either scope with these defaults.
+Use `--scope project` when trying adapters in a throwaway project.
 
-	// Per-target enablement and install paths. `userPath` is used with --scope user
-	// (global); `projectPath` with --scope project (relative to the current directory).
-	"targets": {
-		"claude": { "enabled": true, "userPath": "~/.claude/skills", "projectPath": ".claude/skills" },
-		"cursor": { "enabled": true, "userPath": "~/.cursor/rules", "projectPath": ".cursor/rules" },
-		"codex": { "enabled": true, "userPath": "~/.agents/skills", "projectPath": ".agents/skills" },
-		"windsurf": { "enabled": true, "userPath": "~/.codeium/windsurf/memories", "projectPath": ".windsurf/rules" },
-		"copilot": { "enabled": true, "userPath": ".github/copilot-instructions.md", "projectPath": ".github/copilot-instructions.md" },
-		"zed": { "enabled": true, "userPath": ".rules", "projectPath": ".rules" },
-		"aider": { "enabled": true, "userPath": "CONVENTIONS.md", "projectPath": "CONVENTIONS.md" },
-		"cline": { "enabled": true, "userPath": ".clinerules", "projectPath": ".clinerules" },
-		"continue": { "enabled": true, "userPath": "~/.continue/rules", "projectPath": ".continue/rules" },
-	},
-}
-```
+## Host compatibility and path migration
 
-The JSON Schema at `agent-skills.schema.json` gives editor autocomplete and validation via
-the `$schema` key.
+The defaults were reviewed on 2026-09-15. Host formats and local overrides still need to match
+the installed application version.
 
-## Profiles
+- **Cursor:** `.cursor/rules/*.mdc` is a project rules location. Global user rules are configured
+  through the host UI, so the previous `~/.cursor/rules` default was misleading. The adapter
+  now uses the project path in either scope. [Cursor rules](https://cursor.com/docs/rules).
+- **Windsurf/Cascade:** current documentation prefers `.devin/rules/*.md`; `.windsurf/rules`
+  remains a legacy fallback. The global location is one `global_rules.md` file, limited to
+  6,000 characters, rather than arbitrary per-skill files in its memories directory. The adapter
+  now writes project rules under `.devin/rules` in either scope. Older builds can retain the
+  legacy project path with a local override. [Cascade rules](https://docs.devin.ai/desktop/cascade/memories).
+- **Cline:** rules now use `~/.cline/rules` globally and `.cline/rules` for the project. This
+  adapter emits rules, even though Cline also has native skills. Existing `.clinerules` output
+  is not automatically removed. [Cline configuration](https://docs.cline.bot/getting-started/config).
+- **Continue:** the adapter emits Markdown rules with descriptions. Project rules live in
+  `.continue/rules`. Confirm global loading with the installed Continue version rather than
+  treating a successful file write as activation. [Continue rules](https://docs.continue.dev/customize/deep-dives/rules).
+- **aider:** explicitly load `CONVENTIONS.md` with `aider --read CONVENTIONS.md`, or configure
+  `read: CONVENTIONS.md` in `.aider.conf.yml`. [aider conventions](https://aider.chat/docs/usage/conventions.html).
 
-A `profiles` map names curated subsets of skills. `install --profile frontend` (or
-`uninstall --profile frontend`) resolves to the union of the listed skills; pass several
-(`--profile frontend review`) to combine them. Explicit skill arguments override a profile,
-and a profile overrides "all". `list --profiles` prints the configured sets.
-
-## Scopes
-
-- `--scope user` (default) installs into the global path (`userPath`), so the skills are
-  available in every project.
-- `--scope project` installs into the current repo (`projectPath`), so the skills travel
-  with that project and can be committed.
-
-## A note on target paths
-
-The `claude` and `codex` native skill paths are exact. Every other target's path follows that tool's **documented
-convention at the time of writing**, but these tools move - a new version may change where it
-reads rules from. The newer targets (copilot, zed, aider, cline, continue) are
-**project-oriented** - the tools read from the working tree, so `userPath` mirrors `projectPath`
-(except Continue, which also has a global `~/.continue/rules`). If a target installs to the
-wrong place:
-
-1. Check the tool's current docs for its rules/instructions directory.
-2. Override the path in `agent-skills.config.json` (or `.agent-skills.local.json` for a
-   machine-specific tweak).
-
-Verify without touching anything first:
-
-```sh
-pnpm skills install -t cursor --dry-run
-```
-
-**Two caveats worth knowing (verified July 2026):**
-
-- **windsurf** - `.windsurf/rules/` still works, but after the Cognition rebrand newer builds
-  also read `.devin/rules/`. If Windsurf ignores the rules, point the path at `.devin/rules`.
-- **aider** - the `CONVENTIONS.md` we write is the right file, but aider does **not** auto-load
-  it. Tell aider to read it, either per session (`aider --read CONVENTIONS.md`) or persistently
-  via `.aider.conf.yml` (`read: CONVENTIONS.md`).
+Before moving an existing install, inspect its old destination and managed markers. Preview
+installation to the new destination, install and check host discovery. Then remove only the
+old managed entries after reviewing their ownership. The CLI does not scan or delete old paths
+when defaults change. Existing local overrides take precedence and may keep the old location.
+Avoid loading both old and new copies at once.
 
 ## Local overrides
 
-Keep machine-specific paths out of the committed config by putting them in
-`.agent-skills.local.json` (git-ignored), same shape, deep-merged on top:
+For an older Windsurf build, for example:
 
 ```json
 {
 	"targets": {
-		"cursor": { "userPath": "/custom/path/.cursor/rules" }
+		"windsurf": {
+			"userPath": ".windsurf/rules",
+			"projectPath": ".windsurf/rules"
+		}
 	}
 }
 ```
+
+Save machine-specific overrides in `.agent-skills.local.json`. Use the committed config for
+intentional shared defaults. Inspect before writing:
+
+```sh
+pnpm skills install --profile core -t cursor --scope project --dry-run
+pnpm skills doctor -t cursor --scope project --json
+```
+
+`doctor` measures filesystem ownership and drift. A healthy report can include missing skills;
+it does not prove the application discovered or executed anything.

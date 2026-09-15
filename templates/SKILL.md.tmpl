@@ -5,32 +5,25 @@ description: {{description}}
 
 # {{title}}
 
-<One to three lines: what this skill is for and the ONE discipline it enforces.>
-
----
+<The outcome and the task-specific discipline. Keep this self-contained and concise.>
 
 ## Process
 
-1. **<Step one>** - <what to do and why>.
-2. **<Step two>** - <...>.
-3. **<Step three>** - <...>.
+1. <Read the relevant source, contract and actual host capabilities.>
+2. <Perform the bounded task within the user's scope and existing authorization.>
+3. <Verify the observable result and record actual evidence or a precise blocker.>
 
-<If this skill fans out to parallel subagents, follow the shared shape: scope →
-fan out read-only persona agents → merge/dedup → adversarially verify → report.
-Do NOT add multi-agent orchestration unless it genuinely helps.>
-
----
+<Delegate only useful independent work when available and authorized. Define ownership,
+acceptance and finite stop conditions for retrying or coordinated workflows. Do not invent
+host tool names, model defaults, universal permission pauses or mandatory fresh sessions.>
 
 ## Anti-patterns
 
-- ❌ <A concrete thing not to do>
-- ❌ <Another>
-
----
+- <A concrete likely failure this skill prevents.>
 
 ## Done when
 
-- <Observable completion check>
-- <Evidence, not "looks right">
+- <Observable result and the evidence needed to claim it.>
+- <Remaining uncertainty or unavailable checks are explicit.>
 
-Then say: **"<concrete handoff sentence pointing at the next skill>"**
+<Next relevant skill or terminal result. Continue work already requested by the user.>

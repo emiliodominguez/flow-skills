@@ -1,130 +1,57 @@
 ---
 name: ed-diagnose
-description: "Root-cause a bug or performance regression through a disciplined loop - reproduce, minimise, hypothesise, instrument, fix, then add a regression test. Use when something is broken, throwing, failing, slow, or behaving unexpectedly (or when invoked as /ed-diagnose, when the user says \"debug this\", \"why isn't this working\", \"it's broken\", \"investigate\"). Makes the minimal root-cause fix and locks it in with a regression test, escalating to /ed-work when the fix spans multiple slices. Invoke as /ed-diagnose in Claude Code or $ed-diagnose in Codex."
+description: "Investigate a difficult failure with evidence, competing hypotheses and discriminating experiments, then verify the smallest supported correction. Use for reproducible bugs or intermittent incidents with traces; a deterministic repro is useful but not required. Invoke as /ed-diagnose in Claude Code or $ed-diagnose in Codex. Hands off to /ed-work for a fix or /ed-triage for urgent impact management."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
 # Diagnose
 
-For bugs that don't yield to a quick fix. The discipline below stops you from guessing your way deeper into the problem. The one rule underneath all six phases: **a cause is confirmed by evidence that matches a prediction - never by "seems likely".**
+Reduce uncertainty before changing behavior. A matching prediction supports a hypothesis;
+confirmation needs evidence that distinguishes it from plausible alternatives.
 
-**Do NOT skip phases.** When you feel you "already know" the answer, that's exactly when you skip step 1 and waste an hour fixing the wrong thing.
+## Process
 
----
+1. Establish the symptom, expected behavior, environment, revision and impact. Reproduce with
+   a small input when possible. For intermittent failures, record observed frequency, logs,
+   traces and conditions instead of blocking investigation until it happens on command.
+2. State a falsifiable hypothesis for each plausible cause, with predictions and evidence
+   for/against it. Separate observations from explanations. Inspect the actual data/control
+   flow and changes near the onset of failure.
+3. Choose an experiment that discriminates among causes. A stale read alone cannot distinguish
+   cache invalidation from replica lag. Use a controlled intervention, boundary trace, or
+   relevant counterexample while accounting for confounding factors and observer effects.
+4. Instrument the smallest useful boundaries. Keep logs structured and avoid sensitive payloads.
+   Record inputs, correlation and timing needed for the question; do not dump entire systems.
+   For performance, profile the workload rather than guessing the hot path.
+5. Run experiments and update hypothesis status: refuted, supported, confirmed, or unresolved.
+   Parallel read-only investigation helps independent questions when authorized, but agents
+   must not race to patch competing theories. Keep evidence and uncertainty in a compact table.
+6. Once the cause is sufficiently supported, make the smallest correction within scope. Use a
+   regression test that fails on the defect and passes on the fix where practical; otherwise
+   preserve a reproducible trace or controlled acceptance check and name its limitations.
+7. Check the fix, affected behavior and required repository gates. Remove temporary diagnostic
+   code unless it is intentionally retained. Report root cause confidence and remaining risk.
 
-## Phase 1: Reproduce reliably
+## Stop conditions
 
-You don't understand a bug you can't reproduce.
-
-- Get a single command, click sequence, or input that **always** triggers it.
-- Note the environment (OS, browser, node version, env vars, data).
-- If it's intermittent, find the conditions that change failure rate - concurrency, time of day, dataset size, cache state.
-- **Write down the steps.** You'll need them again in Phase 6.
-
-If you cannot reproduce, stop and gather more data. Logs from the user, a recording, a packet capture. Do not move on.
-
----
-
-## Phase 2: Minimise
-
-Shrink the failing case until removing one more thing makes it stop failing.
-
-- Delete unrelated code paths.
-- Cut down the input.
-- Stub out dependencies one by one.
-- Isolate to the smallest function/component/query that still breaks.
-
-The minimal case usually points at the cause.
-
----
-
-## Phase 3: Hypothesise
-
-State an explicit, falsifiable hypothesis:
-
-> *"The bug is X. I expect Y to be true if X is correct. If Y is false, X is wrong."*
-
-Hold it lightly. Strong hypotheses are wrong faster, which is good.
-
-Rank candidate causes by likelihood and ease-of-test. Test the easiest one first.
-
-### When it's murky: fan out competing hypotheses (optional)
-
-**Match effort to difficulty.** For a simple or obvious bug, stay single-threaded - one hypothesis, test it, move on. Fanning out here would be ceremony, not speed.
-
-But when the bug is genuinely murky and you have **several plausible, competing causes** (e.g. "it's a stale cache" vs. "it's a race in the writer" vs. "it's a serialization boundary"), you MAY investigate them in parallel instead of serially:
-
-1. **One agent per competing hypothesis.** Launch them as **parallel read-only subagents in one batch** using the host's delegation mechanism; they never edit and never fix. Stay within the host's available concurrency, running waves or investigating sequentially when needed. Assign each agent exactly one candidate cause.
-2. **Each agent's job is evidence, not verdicts.** Give it the reproduction, the minimal case, and its assigned hypothesis. It reads the relevant code and gathers evidence **FOR and AGAINST** that cause - the guard that would prevent it, the call path that would trigger it, the state that would have to hold - and reports back what it found.
-3. **You pick the survivor.** Collect the reports. Discard the causes the evidence argues against. The hypothesis left standing - the one nothing refuted and something supports - is the one you carry into Phase 4 to **prove**. A parallel sweep narrows the field fast; it does not confirm anything on its own.
-
-This is optional acceleration, not mandatory ceremony. It replaces serial guessing with a parallel narrowing pass - the actual confirmation still happens in Phase 4, against instrumentation.
-
----
-
-## Phase 4: Instrument
-
-Add observation, not fixes. Yet.
-
-- Log values at every boundary between your hypothesis and the failure.
-- Add asserts on invariants you assume hold.
-- Use a debugger for stepwise inspection if the state is complex.
-- For perf: profile, capture traces, measure - never guess what's slow.
-
-Re-run the reproduction. Read what the instrumentation says. Compare it to the prediction your hypothesis made in Phase 3.
-
-**When observation perturbs the bug:** if adding instrumentation makes it vanish or shift (an observer effect on timing-sensitive code), switch to lower-perturbation observation - sampling, a ring buffer, a post-hoc trace, hardware counters - rather than heavier logging. And if the repro is flaky, one clean re-run neither confirms nor refutes: require N runs or a before/after failure-rate delta before you trust the result.
-
-**This is the evidence gate.** A hypothesis is confirmed only when the instrumentation output **matches its prediction** - the value you expected to be null is null, the branch you expected to run ran, the query you blamed is the one that's slow. "It seems likely" and "that would explain it" are not confirmation.
-
-If reality matches the prediction → you've found it.
-If not → the hypothesis is wrong, no matter how plausible it felt. Back to Phase 3 with what you learned. If several hypotheses in a row fail against the evidence, stop trusting the reproduction or the minimal case and redo Phases 1-2 - a wrong repro sends every hypothesis astray - and escalate rather than keep looping if it still won't yield.
-
----
-
-## Phase 5: Fix at the right level
-
-Now you may change code. Make the **smallest fix that addresses the root cause**, not a symptom.
-
-- A null-check that silences the error is usually a band-aid. Why was the value null?
-- A `try/catch` that swallows the failure hides it. Why did it throw?
-- A retry that masks the race condition leaves the race. What is the race?
-
-When tempted by a band-aid: write down what the right fix would be, even if you don't ship it now. Don't pretend the band-aid is the answer.
-
----
-
-## Phase 6: Regression test
-
-Lock the fix in.
-
-- Write a test that **fails on the broken version** and **passes on the fixed version**.
-- The test should target the behaviour, not the implementation. If you refactor the fix, the test should still pass.
-- Run the full suite. Confirm nothing else broke.
-
-If you can't write a regression test for this class of bug, name what's missing in the test infrastructure as a follow-up.
-
----
+Honor an explicit investigation budget. If experiments stop producing information, access is
+missing, or the current evidence cannot distinguish causes, report the smallest missing
+observation rather than guessing or repeating the same patch. Urgent containment belongs in
+/ed-triage and follows the user's operational authorization.
 
 ## Anti-patterns
 
-- ❌ "Let me try adding a null check" before you know what's null and why
-- ❌ Calling a hypothesis confirmed because it's plausible, without instrumentation that matches its prediction
-- ❌ Fanning out parallel hypothesis agents for a simple bug - that's ceremony, not speed
-- ❌ Letting a hypothesis subagent edit or "fix" code - they gather evidence, read-only
-- ❌ Fixing the first thing that makes the symptom go away
-- ❌ Adding logs and then forgetting to read them
-- ❌ "It works on my machine" - that's a data point, not a conclusion
-- ❌ Shipping the fix without a regression test
-
----
+- Treating correlation or one matching prediction as proof of causation.
+- Requiring deterministic reproduction before collecting better telemetry.
+- Applying multiple speculative fixes so no one knows which cause mattered.
+- Calling a test/import failure the intended regression signal without inspecting it.
 
 ## Done when
 
-- The reproduction case is documented
-- The root cause is named in one sentence, backed by instrumentation that matched its prediction
-- The fix is minimal and addresses the cause, not a symptom
-- A regression test fails before the fix and passes after
+- A cause and correction have discriminating evidence, or the investigation ends with a
+  precise unresolved hypothesis and required next observation.
+- The final artifact and relevant checks support the claimed outcome.
+- Temporary instrumentation and uncertainty are accounted for.
 
-Then: pick up `/ed-work` if the fix needs more than one slice, or go straight to `/ed-review`.
+Use /ed-work for implementation or /ed-triage when production impact needs containment.

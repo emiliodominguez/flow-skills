@@ -124,6 +124,8 @@ export function validateSkill(skill: Skill): Issue[] {
 	} else {
 		if (name !== skill.name) add("error", "name.match-dir", `frontmatter name "${name}" != directory "${skill.name}"`);
 
+		if (name.length > 64) add("error", "name.length", "skill names must not exceed 64 characters");
+
 		if (!KEBAB.test(name)) add("error", "name.kebab", `name "${name}" is not kebab-case`);
 	}
 
@@ -133,7 +135,7 @@ export function validateSkill(skill: Skill): Issue[] {
 		if (description.includes("\n")) add("error", "description.single-line", "description must be a single line");
 
 		if (description.length > DESCRIPTION_WARN_LIMIT) {
-			add("warn", "description.length", `description is ${description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
+			add("error", "description.length", `description is ${description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
 		}
 
 		if (description.length < DESCRIPTION_MIN_LENGTH) {

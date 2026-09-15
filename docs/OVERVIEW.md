@@ -1,67 +1,50 @@
-# The ed-* skill suite
+# The workflow
 
-A connected workflow. Each skill does one job and hands off to the next. For a
-rendered graph of every handoff, see the auto-generated [SKILL-MAP.md](SKILL-MAP.md).
+Choose the smallest workflow that has a checkable outcome. The suite separates exploration,
+execution and verification without forcing a new session or a fixed agent panel.
 
+| Situation                                | Flow                                                          |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| Small understood change                  | `ed-work` with relevant evidence                              |
+| Unclear outcome                          | `ed-brainstorm`, optionally `ed-prototype`, then `ed-plan`    |
+| Unfamiliar repository                    | `ed-onboard`, then a task-specific `ed-repo-brief` if useful  |
+| Multi-step direct work                   | `ed-plan` then `ed-work`                                      |
+| Dependent work needing independent gates | `ed-plan` then `ed-orchestrate` with `ed-verify`              |
+| Repeated mismatch with local conventions | `ed-repo-brief` then `ed-specialize`                          |
+| Review-only request                      | `ed-review` or `ed-adversarial-review`, ending with findings  |
+| Already authorized delivery              | `ed-commit` / `ed-ship` through the requested terminal action |
+
+## Contracts and evidence
+
+A task defines its outcome, owned files, dependencies, acceptance criteria, evidence and stop
+conditions. Workers return artifacts. An independent verifier decides whether a required gate
+accepts the current artifact. Pragmatic verification is appropriate for decision artifacts;
+production code uses production criteria and required repository checks.
+
+```mermaid
+flowchart TD
+  A["Ready task"] --> B["Worker artifact"]
+  B --> C["Independent verification"]
+  C -->|ACCEPT| D["Release dependents"]
+  C -->|REJECT| E["Correction within budget"]
+  E --> B
+  C -->|BLOCKED| F["Record prerequisite"]
 ```
-ed-onboard    ──map an unfamiliar codebase──┐
-ed-brainstorm ──idea → sharp design──────────┤
-ed-prototype  ──throwaway answer──────────────┤
-                                              ▼
-ed-plan ──parallel research + design → writes .plans/<date>-<slug>.md
-   │
-   │   ⟢ start a FRESH session (plan is on disk)
-   ▼
-ed-work ──executes the plan task-by-task in clean context
-ed-test ──test strategy + authoring        ed-migrate ──large cross-file sweeps
-   │
-   ▼
-ed-review ───────── multi-persona review + adversarial verification
-ed-adversarial-review ─ red-team: try to BREAK it / hurt the user
-   │
-   ▼
-ed-simplify ──de-slop      ed-refactor ──structure-only
-   │
-   ▼
-ed-ship ──commits + PR──► ed-pr-fix ──► ed-git-fix (when git snags)
-ed-docs ──explain the why, land it with the change
 
-support: ed-diagnose · ed-triage (route it) · ed-benchmark (measure first) · ed-handoff · ed-styles · ed-animate · ed-prune-claude-setup
-```
+An available subagent capability and applicable authorization are prerequisites for claiming
+independent verification. Running two personas in one context is still one reviewer. Parallel
+workers need independent tasks, disjoint writes and integrated verification afterward.
 
-## The seven practices threaded through the suite
+## Continuity
 
-1. **Distinct personas, not clones.** N agents with different mental models catch failure
-   modes that N identical agents never will.
-2. **Adversarial verification.** Every finding is handed to an independent agent whose job
-   is to _refute_ it. Only survivors are reported, tagged `CONFIRMED` / `PLAUSIBLE`.
-3. **Structured findings.** Reviewers return one fixed shape (`file:line · severity ·
-claim · scenario · fix`) so results dedup and rank deterministically.
-4. **Plan / execute separation.** Write the plan to disk; execute it in a fresh session.
-   Cheaper (warm cache), cleaner (no stale exploration), reproducible.
-5. **Read-only reviewers, one writer.** Review/research agents are run read-only through
-   the host's delegation mechanism and batched within available concurrency; only the
-   orchestrator writes. No parallel-edit corruption.
-6. **Evidence gates.** "Done" needs observable proof - a test, a reproduced break, a
-   screenshot. A green typecheck is never, alone, evidence a feature works.
-7. **Severity + confidence, no padding.** Triaged, tagged, and honest. "No blockers" is a
-   complete result; nothing is invented to look thorough.
+A plan can be used in the same session or a fresh session. Current user steering remains
+binding. Handoffs preserve source revisions, evidence, decisions, pending work and attempts
+already consumed. Changed inputs invalidate affected acceptance, not every unrelated result.
+An ignored artifact stays local unless it is actually shared.
 
-## How a multi-agent review runs
+## Keep adoption selective
 
-`ed-review` and `ed-adversarial-review` share one shape:
-
-1. **Scope** committed and working-tree changes since the default branch's merge base,
-   including staged, unstaged, and untracked files.
-2. **Fan out** distinct persona agents in parallel (read-only). ed-review lenses:
-   correctness, readability, architecture, security, performance, simplicity.
-   ed-adversarial-review attackers: exploit developer, chaos engineer, malicious user,
-   boundary breaker, data-integrity auditor, time bomb.
-3. **Merge** - dedup by `file:line`.
-4. **Verify** - an independent agent tries to refute each finding (ed-review) or confirm
-   each attack is reachable (ed-adversarial-review). Default to refuted when unsure.
-5. **Report** - triaged, deduped, confidence-tagged, with a concrete fix per item.
-
-`ed-review` asks _"is it correct and maintainable?"_; `ed-adversarial-review` asks _"how do
-I break it?"_. Run the latter on anything touching auth, money, data, migrations, or
-concurrency.
+Use profiles to limit the discovery surface. The original 24 skills retain their names;
+four added workflows provide orchestration, verification, repository briefs and specialization.
+See [the catalog](SKILLS.md), [handoff table](SKILL-MAP.md), [worked orchestration example](ORCHESTRATION.md)
+and [current-practices notes](PRACTICES.md).

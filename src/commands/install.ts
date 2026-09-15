@@ -107,7 +107,7 @@ function runOnce(
 	skillsDir: string,
 ): { failures: string[]; actions: Action[] } {
 	const skills = selectSkills(skillsDir, skillNames);
-	const targets = opts.target?.length ? opts.target : config.defaultTargets;
+	const targets = opts.target?.length ? opts.target : config.defaultTargets.filter((name) => config.targets[name]?.enabled !== false);
 	const scope = opts.scope ?? "user";
 	const installMode = opts.copy ? "copy" : config.installMode;
 	const projectRoot = findProjectRoot();
@@ -125,23 +125,24 @@ function runOnce(
 		const tc = config.targets[name];
 
 		if (!tc || !tc.enabled) {
-			log.warn(`target "${name}" is disabled or unknown in config - skipping`);
+			failures.push(name);
+			log.error(`target "${name}" is disabled or unknown in config`);
 			continue;
 		}
 
-		const target = getTarget(name);
-		const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, projectRoot);
-		const usedMode = effectiveInstallMode(target, installMode);
-
-		if (target.supportsSymlink && installMode === "symlink" && usedMode === "copy") {
-			log.warn(`${name}: symlinks need elevation on Windows - using copy mode`);
-		}
-
-		const ctx = { skills, dest, mode: usedMode, force: !!opts.force, dryRun: !!opts.dryRun };
-
-		targetHeader(target.name, dest, target.supportsSymlink ? usedMode : "generated");
-
 		try {
+			const target = getTarget(name);
+			const dest = resolveTargetPath(scope === "user" ? tc.userPath : tc.projectPath, projectRoot);
+			const usedMode = effectiveInstallMode(target, installMode);
+
+			if (target.supportsSymlink && installMode === "symlink" && usedMode === "copy") {
+				log.warn(`${name}: symlinks need elevation on Windows - using copy mode`);
+			}
+
+			const ctx = { skills, dest, mode: usedMode, force: !!opts.force, dryRun: !!opts.dryRun };
+
+			targetHeader(target.name, dest, target.supportsSymlink ? usedMode : "generated");
+
 			const actions = mode === "install" ? target.install(ctx) : target.uninstall(ctx);
 
 			if (actions.length === 0) log.muted("  nothing to do");

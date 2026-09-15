@@ -4,7 +4,7 @@ Project guidance for Codex sessions working in this repository. Global user inst
 
 ## What this is
 
-This is the private source-of-truth repository for the `ed-*` skill suite and the CLI that installs it into Claude Code, Codex, and other assistants. Native Claude Code and Codex installs use live symlinks.
+This is the private source-of-truth repository for the `ed-*` skill suite and the CLI that installs it into Claude Code, Codex, and other assistants. Native Claude Code and Codex installs use live symlinks or explicit copy mode.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ pnpm run test:coverage
 pnpm run build
 ```
 
-Whenever a skill body or description changes, run `pnpm docs:gen` and commit the generated docs.
+Whenever a skill body or description changes, run `pnpm docs:gen`, inspect and commit the generated docs, and run `pnpm docs:check`. Use `pnpm smoke` for CLI/package changes.
 
 ## Skill authoring
 
@@ -31,7 +31,9 @@ Whenever a skill body or description changes, run `pnpm docs:gen` and commit the
 - Keep frontmatter valid YAML and include only `name` and `description`.
 - Name both explicit invocation forms in descriptions: `/<skill>` for Claude Code and `$<skill>` for Codex.
 - Add 3-5 required body substrings to `evals/beats.json` for every skill.
-- Test native installs with `pnpm skills install -t claude codex`.
+- Test native installs in a throwaway project with `pnpm skills install -t claude codex --scope project`. Report actual host exercises separately from filesystem installation checks.
+- Instruction markers and the optional LLM instruction audit do not prove behavior. See `evals/README.md`.
+- Keep workflows self-contained for rendered targets; host agent configs and supporting-file installation are separate capabilities.
 
 ## Repository conventions
 
@@ -40,4 +42,4 @@ Whenever a skill body or description changes, run `pnpm docs:gen` and commit the
 - Use tabs with width 4 and a print width of 150.
 - Add JSDoc to every function in `src/`, including `@param` and non-void `@returns`.
 - Do not use em or en dashes in prose, comments, metadata, or user-facing text. Rewrite the sentence or use an ASCII hyphen.
-- Use changesets for user-facing changes. While GitHub Actions is disabled, version packages manually and publish only when explicitly requested and npm-authenticated.
+- Use changesets for user-facing changes. Check actual GitHub Actions status rather than assuming remote checks ran. Publish only when explicitly requested and npm-authenticated.

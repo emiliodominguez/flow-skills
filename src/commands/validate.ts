@@ -14,6 +14,10 @@ import { log, sym, sanitize } from "../core/logger.js";
 export function collectIssuesFor(skills: Skill[]): Issue[] {
 	const issues = skills.flatMap((skill) => validateSkill(skill));
 
+	if (skills.length === 0) {
+		issues.push({ skill: "corpus", level: "error", rule: "corpus.empty", message: "No skills found; check skillsDir and the source checkout." });
+	}
+
 	issues.push(...validateReferences(skills));
 
 	return issues;

@@ -1,158 +1,50 @@
 ---
 name: ed-pr-fix
-description: "Address GitHub PR review comments - pull ALL open feedback, group it by intent, fix in a coherent order, and reply to every thread with a commit link. Use after /ed-ship when reviewers leave comments (or when invoked as /ed-pr-fix, when the user says \"address the review\", \"fix the PR feedback\", \"respond to comments\"). Fixes use /ed-work discipline; hands back to /ed-ship to push the follow-up commits. Invoke as /ed-pr-fix in Claude Code or $ed-pr-fix in Codex."
+description: "Address actionable pull-request feedback with traceable code changes and verified published state. Separate local fixes, pushing, replies and thread resolution according to user authorization. Invoke as /ed-pr-fix in Claude Code or $ed-pr-fix in Codex. Hands back to /ed-review for changed behavior or /ed-ship for authorized delivery."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
-# PR Fix
+# Fix PR feedback
 
-Reviewers left comments. Don't attack them one by one - pull all of them, group by
-intent, plan a coherent order, then fix and reply. The discipline this skill enforces:
-**no comment is left without a response, and every "fixed" reply links the commit that
-fixed it.** A reviewer must be able to trace your reply straight to the diff.
+Map every actionable discussion to a disposition and evidence. Do not announce or resolve a
+fix that reviewers cannot inspect on the published revision.
 
----
+## Process
 
-## Phase 1: Pull all the feedback
-
-First resolve the PR number - the `gh api` calls need it:
-
-```bash
-PR=$(gh pr view --json number -q .number)     # auto-detects from the current branch
-```
-
-If that errors (no PR for this branch) or the branch maps to several candidates, **stop and
-ask which PR** before continuing. Then pull everything - `--paginate` so nothing is silently
-capped at 30 results on a big PR:
-
-```bash
-gh pr view "$PR" --comments                                    # top-level conversation
-gh api --paginate "repos/{owner}/{repo}/pulls/$PR/comments"    # inline review comments (per file/line)
-gh api --paginate "repos/{owner}/{repo}/pulls/$PR/reviews"     # full review bodies + verdicts
-```
-
-Read **every** comment before touching code - including resolved ones (they carry context
-for newer threads). For each, capture:
-
-- **File and line** it points at
-- **What's being asked** - change request, question, suggestion, nit, blocker
-- **Who said it** - and whether that reviewer commented elsewhere (their comments may
-  form one theme)
-
-Keep a running list keyed by thread id so nothing falls through the cracks in Phase 4.
-
-> **Optional - big PRs only.** If there are many comments spread across many files, spin
-> up **one** read-only triage agent with the host's delegation mechanism to bucket the threads into
-> the Phase 2 categories and hand back a table. Don't fan out further - one agent, one
-> pass, purely to save you the manual sort. For a normal PR, skip it and sort by hand.
-
----
-
-## Phase 2: Group by intent
-
-Bucket every comment. Different buckets earn different responses:
-
-- **Blocker** - must change before merge. Bug, security hole, broken test, wrong behaviour.
-- **Should-fix** - meaningful improvement. Clearer name, missing case, simpler structure.
-- **Nit / style** - preference. Line break, comment phrasing. Still gets a reply.
-- **Question** - reviewer wants context, not a code change. Answer clearly; only touch code
-  if the question exposed a real issue.
-- **Disagreement** - you think the reviewer is wrong. Push back with reasoning; don't
-  silently capitulate and don't silently ignore. Reviewers respect a well-argued case.
-
-**If two reviewers contradict each other, raise it explicitly before doing either:**
-
-> *"A wants X, B wants Y. I'd lean X because Z. Which way do we go?"*
-
-Guessing which reviewer to obey and silently overriding the other is how you earn a second
-round of comments.
-
----
-
-## Phase 3: Plan the fix order
-
-- **Blockers first** - until they're gone, merging is off the table.
-- **Group fixes by file** - fewer context switches, cleaner commits.
-- **Group fixes that touch the same code path** - so one fix doesn't quietly break the
-  assumption another fix depends on.
-- **One commit per logical concern, not per comment.** Three naming nits in one file → one
-  `chore:` commit. But keep concerns separate so the review trail stays legible.
-
----
-
-## Phase 4: Execute + reply to every thread
-
-Fix with **/ed-work discipline: one slice per concern, verify each before moving on.** No
-batching three unrelated fixes into one unverified push.
-
-For each fix:
-
-1. Make the change.
-2. Run the test that covers that area - or write one if it's missing (a blocker with no
-   test is a blocker waiting to come back).
-3. **Reply to the specific thread** - an inline review comment takes a _threaded_ reply
-   (not one blanket top-level comment), with the commit sha so the reviewer can trace it:
-   ```bash
-   gh api --method POST "repos/{owner}/{repo}/pulls/$PR/comments/<COMMENT_ID>/replies" \
-     -f body="Fixed in abc1234."
-   ```
-   - Fixed → *"Fixed in `abc1234`."*
-   - Fixed + hardened → *"Good catch - fixed in `abc1234`, added a regression test."*
-   - Nit you took → *"Done in `abc1234`."*
-   - Nit you're declining → acknowledge it, don't ignore it: *"Leaving as-is - `x` reads
-     fine here and matches the file. Shout if you feel strongly."*
-   - Disagreement → *"Disagree - [reasoning]. Keep as-is?"* Leave it **open**; the
-     reviewer decides, not you.
-   - Question → answer it plainly; change code only if the answer revealed a real bug.
-4. Resolve threads you've genuinely addressed; leave open the ones you pushed back on or
-   left unchanged by design. (Resolving a review conversation isn't a `gh` subcommand - it's
-   the GraphQL `resolveReviewThread` mutation on a thread id from `pullRequest.reviewThreads`;
-   if you don't want to script that, resolve by hand in the UI. The _reply_ is mandatory;
-   resolving is optional.)
-
-**Every single comment ends in one of three states:** fixed-and-replied,
-pushed-back-with-reasoning, or nit-acknowledged. None left silent.
-
----
-
-## Phase 5: Re-push, re-request review
-
-```bash
-git push
-gh pr comment --body "Addressed feedback - see per-thread replies. Ready for another look."
-```
-
-**Don't squash the fix commits into the originals.** Reviewers want to see exactly what
-changed since their last pass - squashing destroys that trail. Squash happens at merge
-time, never before.
-
-Then re-request review (`gh pr edit --add-reviewer <name>` if they were dropped) and wait.
-
----
+1. Resolve the exact repository/PR, base/head, current commit SHA and local work state. Read the
+   description, reviews, threads and checks, including pagination. Track resolved, outdated and
+   already-addressed feedback so a rerun does not send duplicate replies.
+2. Normalize conversations: keep the root review comment ID separate from the GraphQL thread
+   ID. GitHub review replies target the root comment, not another reply. Issue comments and
+   review threads are different channels. Use connected tools or `gh api` only when available
+   and authorized, with current API shapes.
+3. Group by intent and classify each actionable item: fix, already fixed, needs evidence,
+   disagreement, or out of scope. Resolve apparent reviewer conflicts against contracts and
+   source; ask only when a consequential decision remains genuinely ambiguous.
+4. Make logical changes, preserving unrelated staging/work. Run relevant tests and repository
+   gates; review substantive behavior changes. Preserve unsquashed fix commits when repository
+   review practice needs traceability, rather than rewriting public history by default.
+5. Prepare a response map: thread/root ID, disposition, exact change, commit/file evidence and
+   validation. A local-only request ends with local fixes and concrete reply drafts.
+6. When publishing is authorized, push and confirm the remote head contains the fix. Only then,
+   if replies/resolution are also authorized, post concise evidence-backed responses and resolve
+   fully addressed threads. Keep disagreement or missing evidence open. Check whether the action
+   already succeeded before retrying after an uncertain response.
+7. Re-fetch the PR state and confirm what is actually published, answered, resolved or still
+   pending. Assess checks on the latest head rather than trusting an earlier green commit.
 
 ## Anti-patterns
 
-- ❌ Fixing comments one at a time without reading them all first - you'll re-fix the same
-  code twice
-- ❌ Leaving any comment with no response - silently dismissing a nit reads as ignoring it
-- ❌ "Done." with no commit sha - reviewers can't tell what you actually changed
-- ❌ Force-pushing over existing commits before reviewers have re-checked
-- ❌ Squashing fix commits into the originals before merge - destroys the review trail
-- ❌ Closing a comment you disagreed with instead of arguing the case in the thread
-- ❌ Silently picking a side when two reviewers contradict each other
-- ❌ Batching three unrelated fixes into one unverified commit - fix per /ed-work slice,
-  verify each
-
----
+- Replying "fixed" with an unpublished commit SHA or resolving before a failed push.
+- Treating every historical thread as new work or replying to a reply ID.
+- Accepting every suggestion without checking the behavior contract.
+- Sending comments or reviewer notifications merely because code changes are authorized.
 
 ## Done when
 
-- Every comment has a response - fix-and-reply, push-back-with-reasoning, or
-  acknowledged-nit - and every "fixed" reply links a commit sha
-- All blockers are fixed and verified (test output, not "looks right")
-- Contradicting reviewers were surfaced and resolved, not silently overridden
-- Fix commits are pushed **unsquashed**; reviewers re-requested
+- Every thread with current actionable feedback has a clear disposition.
+- Requested fixes are verified and their publication status is accurate.
+- Authorized replies/resolutions refer to visible evidence and remaining disagreements stay open.
 
-Then: wait for re-review. Green → return to **`/ed-ship`** to merge or push the follow-up.
-More comments → run `/ed-pr-fix` again.
+Use /ed-review for affected behavior or /ed-ship for the remaining authorized delivery action.

@@ -1,118 +1,55 @@
 ---
 name: ed-brainstorm
-description: "Turn a vague idea into a clear, well-stress-tested design through dialogue before any code is written. Use when the user describes something new (\"I want to build...\", \"what if we...\", \"I have an idea...\"), when requirements are fuzzy, when the goal is exploring options, or when invoked as /ed-brainstorm. Has two modes - collaborative (default) and adversarial (can convene a small skeptic panel) - and hands off to /ed-plan once the design crystallises. Invoke as /ed-brainstorm in Claude Code or $ed-brainstorm in Codex."
+description: "Explore an unclear idea, expose important assumptions, compare useful alternatives and converge on a design sketch. Use before implementation when the outcome or approach still needs discovery. Invoke as /ed-brainstorm in Claude Code or $ed-brainstorm in Codex. Hands off to /ed-prototype for an experiment or /ed-plan for an executable design."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
 # Brainstorm
 
-The first step of every new initiative. Turn a fuzzy idea into a sharp design through
-structured dialogue. The one discipline: **think before you type - no code in this phase.**
-
-Output = a one-page design **sketch** (in chat, no file) the user can read tomorrow and
-still understand. Not a spec, not a plan on disk - that's `/ed-plan`.
-
----
-
-## Modes
-
-### Collaborative (default)
-
-Help the user discover what they actually want. Ask **one question at a time, with your
-recommended answer.** Walk the decision tree branch by branch - a wall of ten questions is
-overwhelming and hides which answer changes which branch.
-
-Open by surfacing your read of the idea in your own words, then ask the first
-dependency-blocking question:
-
-> *"My read of this: you want X so that Y. The thing I'm least sure about is Z. Should we
-> do A or B? I'd lean A because [reason]. Push back if you disagree."*
-
-Continue, one branch at a time, until the design is concrete.
-
-### Adversarial (when the user says "stress-test", "poke holes", "find flaws", "what could go wrong")
-
-Switch from collaborator to skeptic. Hunt for:
-
-- **Edge cases** - what happens at zero / null / empty / max?
-- **Failure modes** - what breaks when the network is slow, the user is hostile, the DB is down?
-- **Abuse scenarios** - how would a bad actor exploit, exhaust, or game this?
-- **Hidden assumptions** - what "obviously true" belief would, if wrong, sink the whole design?
-- **Scope-creep risks** - what's the smallest version that still delivers the value?
-
-Ask one adversarial question at a time. Don't soften them. End by summarising the
-strongest objections and asking whether they change the direction.
-
-> Brainstorm stress-tests an **idea** (no code exists yet). `/ed-adversarial-review`
-> red-teams actual **code**. Different target, different tool.
-
-#### Skeptic panel (optional - only for a substantial idea)
-
-When the idea is big or high-stakes and your own skepticism has blind spots, convene a
-small panel. **For a small or simple idea, skip this and play skeptic yourself** - spinning
-up agents to poke at a one-afternoon feature is over-engineering. Judgement call; default
-to single-threaded.
-
-When you do convene it, keep it light:
-
-1. **Brief** - one paragraph: the idea, its goal, its load-bearing assumptions. There's no
-   code to diff yet, so you're briefing the panel on the *design*.
-2. **Fan out** - launch **2-3 subagents in parallel** with the host's delegation
-   mechanism. Explicitly keep them read-only; if the host has no subagent support, run the
-   same lenses sequentially, and otherwise stay within the available concurrency. Give each the
-   brief plus one distinct attack angle:
-   - **Edge-cases & failure modes** - boundaries, degraded network, dead dependency, partial failure.
-   - **Abuse / hostile user** - exploitation, exhaustion, gaming the mechanics, cost amplification.
-   - **Hidden assumptions & scope-creep** - the "obviously true" belief that breaks it; the smallest version that still delivers.
-   If the idea touches an existing codebase, the agents can check assumptions and prior art
-   against the real code - that's what read-only buys you here.
-3. **Synthesize** - collect the objections, keep the sharpest, merge dupes, drop the vague.
-   An objection with no concrete scenario is a vibe, not a risk.
-4. **Decide with the user** - put the strongest 2-3 objections back to them, **one at a
-   time, each with your read**: does it change direction, or is it an acceptable known risk?
-
----
+Develop the idea with the user. Spend questions on uncertainty that changes the result, and
+keep exploration distinct from commitments to implement or operate a system.
 
 ## Process
 
-1. **Restate the idea in your own words.** If the user disagrees with your restatement, the
-   rest is wasted - get this right first.
-2. **Surface the 3 biggest uncertainties.** Rank them by how much they constrain everything
-   else, and resolve the most constraining one first.
-3. **Resolve uncertainties one at a time**, recommending an answer for each. Cite tradeoffs
-   with concrete cost ("this adds ~200ms latency", not "this might be slower").
-4. **Stress-test before committing** - at least play skeptic against the shape yourself
-   (edge cases, abuse, hidden assumptions); convene the panel above if the idea warrants it.
-5. **Stop when the design fits on one page.** If you're adding more detail, you're planning,
-   not brainstorming.
-6. **Write the design sketch** - 5-15 lines covering: goal, approach, key tradeoffs,
-   non-goals. Prose, no code, no file.
-7. **Suggest the next step:** `/ed-plan` to break it into tasks, `/ed-prototype` to throw
-   something disposable together and answer an open question, or stay in brainstorm if the
-   design is still moving.
+1. Restate the intended experience or outcome, existing constraints and non-goals. Read relevant
+   source or supplied artifacts before proposing incompatible stacks or architecture.
+2. Rank unknowns by dependency: resolve the choice that changes the others first. Ask one
+   question at a time when dialogue helps, with a recommendation and a real tradeoff. Do not
+   keep asking for agreement on details the user already decides.
+3. Offer meaningfully different approaches. Compare behavior, complexity, operating effort,
+   reversibility and cost where relevant. Label estimates and assumptions; do not invent
+   precise latency, budgets or adoption numbers without measurements or sources.
+4. Stress-test the strongest options with concrete user and failure scenarios. A skeptic panel
+   can help consequential independent questions when delegation is available and authorized;
+   otherwise apply the relevant lenses directly. Do not require a fixed number of objections.
+5. Choose the smallest experiment that resolves the next important uncertainty. Use
+   /ed-prototype for an experiential or technical question; use source-based research for a
+   factual one. Preserve creative exploration when the user is still looking for surprise.
+6. Produce a concise design sketch: outcome, non-goals, chosen direction, alternatives and
+   reasons, key boundaries, unresolved assumptions, and what evidence changes the decision.
 
----
+## Modes
+
+- **Collaborative:** expand and refine ideas with the user, following their response and taste.
+- **Adversarial:** on request or for a consequential decision, challenge assumptions with a
+  concrete counterexample. State uncertainty and update the design when evidence changes.
+
+Neither mode turns disagreement into a contest. A plausible objection is a hypothesis to
+investigate, not a reason to block all progress.
 
 ## Anti-patterns
 
-- ❌ Diving into implementation details ("we'd use Postgres with...") before the goal is sharp
-- ❌ Asking 10 questions at once - overwhelming, and you can't tell which answer changes which branch
-- ❌ Sycophantic acceptance ("great idea!") - your job is to push back when the idea has problems
-- ❌ Writing a spec or a plan file instead of a chat sketch - that's `/ed-plan`
-- ❌ Spinning up a skeptic panel for a trivial idea - playing skeptic yourself is faster and enough
-- ❌ Reporting a panel objection with no concrete scenario - that's a vibe, drop it
-- ❌ Letting the user wander - when they go off-thread, name it: *"That's a different question. Want to park it or pivot?"*
-
----
+- Ten superficially different versions of the same idea.
+- Fabricated precision or trend names in place of actual constraints.
+- Requiring total certainty before a cheap reversible experiment.
+- Ending with another permission question when planning or implementation is already requested.
 
 ## Done when
 
-- The user can describe the design in one sentence without checking the conversation
-- The 3 biggest risks/uncertainties are named and have answers
-- The idea survived a stress-test (your own, or the skeptic panel's)
-- Non-goals are explicit
-- You and the user disagree about nothing material
+- The user has a useful direction or a clear experiment, with assumptions exposed.
+- Tradeoffs connect to the intended outcome and existing constraints.
+- The next step is concrete without pretending open questions are settled.
 
-Then say: **"Design is sharp. Ready to `/ed-plan`?"** (or `/ed-prototype` first if an open
-question needs disposable code to settle it).
+Use /ed-prototype to resolve an open question or /ed-plan when the design is ready; continue
+into already authorized work without an artificial handoff pause.

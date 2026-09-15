@@ -1,186 +1,65 @@
 ---
 name: ed-git-fix
-description: "Resolve git merge/rebase conflicts, restack dependent branches until the chain is clean, and clean up stale worktrees and merged branches. Use when the user says \"fix the rebase\", \"fix conflicts\", \"resolve merge\", \"restack\", \"gt sr\", \"stack rebase\", \"clean up branches\", \"git is broken\", or when invoked as /ed-git-fix. Works with any stacking tool (Graphite, git-spice, Git Town) or plain git. Hands off to /ed-ship to continue once the tree is clean. Invoke as /ed-git-fix in Claude Code or $ed-git-fix in Codex."
+description: "Resolve a specific Git conflict, interrupted operation, stack issue or authorized cleanup while preserving unrelated work. Use for merge/rebase/cherry-pick failures and demonstrated history problems. Invoke as /ed-git-fix in Claude Code or $ed-git-fix in Codex. Hands back to /ed-work or /ed-ship after the requested repair."
 ---
 
-> Host syntax: invoke skills as `/skill-name` in Claude Code or `$skill-name` in Codex. Slash-form handoffs below use the Claude spelling; substitute `$` in Codex.
+> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
 
-# Git Fix
+# Repair Git state
 
-When git stops you mid-operation. The one discipline: **investigate before you touch
-anything, and never let a destructive command run on a state you don't understand.**
+Read the operation and ownership before changing history. Fix the requested problem without
+requiring unrelated user work to disappear from the worktree.
 
-Two common shapes:
+## Phase 1: Inspect and preserve
 
-1. **Conflicts** during rebase, merge, or restack - needs resolution
-2. **Cruft** - stale worktrees, branches for merged PRs, orphan refs
+Read status, branch/upstream, remotes, worktrees, staged/unstaged/untracked changes and the
+active merge, rebase, cherry-pick or revert state. Inspect recent history/reflog as needed.
+Preserve valuable local work before a destructive recovery. Do not reset, clean or delete an
+unfamiliar file/branch merely to make a command succeed.
 
-Different sections below for each. Single agent throughout - this is surgical, not
-parallelizable.
+## Phase 2: Resolve the actual operation
 
----
+Read conflict markers and index stages, the common base and both intended changes. The meaning
+of ours/theirs depends on merge versus rebase/cherry-pick; do not apply one side blindly.
+Resolve behavior and affected callers, run appropriate checks, stage only resolved paths and
+continue with the operation-specific command. Check remaining conflict markers and index state.
 
-## Conflicts
+If aborting is the chosen repair, inspect what it can preserve first. Abort is not a universal
+undo: Git may be unable to reconstruct pre-existing uncommitted changes. Verify the resulting
+state and retained work rather than promising "no harm done".
 
-### Step 1: Read the state
+## Phase 3: Handle stacks and publication deliberately
 
-```bash
-git status
-```
+Inspect the installed stack tool/version and its help before assuming command semantics.
+Graphite's canonical restack command is `gt restack`; account for branches skipped because
+another worktree owns them. Git Town `sync` may pull, push and delete obsolete branches; inspect
+its dry run and explicit scope, and use supported no-push behavior for a local-only repair.
+Do not treat stack synchronization as a purely local whole-stack rebase.
 
-Read the whole thing before you run anything else. Note:
+If rewriting published history is authorized and necessary, inspect and record the remote tip
+being replaced. Use an explicit destination and expected OID with `--force-with-lease`, for
+example `--force-with-lease=refs/heads/<branch>:<reviewed-remote-oid>`. A bare lease can be weakened
+by background fetches updating remote-tracking refs. A rejected lease requires reinspection,
+not a force-push retry. Avoid history rewriting when a simpler valid repair meets the request.
 
-- Are you mid-rebase? `git status` will say so. Look for "interactive rebase in progress" or "you are currently rebasing".
-- Which files are conflicted? The status lines starting with `both modified:` / `both added:` / etc.
-- What's the operation? Rebase, merge, cherry-pick, restack - each has different `--continue` and abort commands. Don't guess which one you're in.
+## Phase 4: Clean up only requested obsolete work
 
-### Step 2: For each conflicted file
-
-Open it. Find the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`).
-
-**Marker-less conflicts first** - binary files, or `deleted by us` / `deleted by them` /
-`both added` states, have no markers to edit. Never choose `--ours` or `--theirs` from the
-label alone; the sides depend on the operation:
-
-| Operation | Stage 2 / `--ours` | Stage 3 / `--theirs` |
-| --- | --- | --- |
-| merge | current `HEAD` branch | branch being merged |
-| rebase | branch being rebased **onto** | commit currently being replayed |
-| cherry-pick | current `HEAD` | commit being cherry-picked |
-
-During a rebase, this is the common trap: `--ours` is usually the base branch, not the
-feature branch being replayed. Inspect both blobs with `git show :2:<file>` and
-`git show :3:<file>` before choosing, or use `git rm <file>` only after confirming the
-intended deletion. Then `git add <file>`. For ordinary text conflicts, for each conflict:
-
-1. **Understand both sides.** What does each stage intend in the current operation?
-2. **Read git blame** on the surrounding lines if intent is unclear.
-3. **Choose:**
-	- Both changes apply (combine them)
-	- Stage 2 wins
-	- Stage 3 wins
-	- Neither - neither side captures the intent (rare, but possible - rewrite)
-4. **Delete the conflict markers.** All three of them per conflict.
-5. **Run any local checks** the change implies (type-check, the relevant test).
-
-**Never** just pick one side blindly. Conflicts usually mean both sides changed the same thing for different reasons - figure out both.
-
-### Step 3: Mark resolved and continue
-
-```bash
-git add <resolved-file>
-git rebase --continue          # if rebasing
-git merge --continue            # if merging
-git cherry-pick --continue      # if cherry-picking
-```
-
-For stacking tools:
-
-```bash
-gt continue                     # Graphite
-gs rebase continue              # git-spice (alias: gs rbc)
-git town continue               # Git Town
-```
-
-If more conflicts come, repeat Step 2 until clean.
-
-### Step 4: When restacking, keep going through the stack
-
-A stack has multiple branches dependent on each other. After resolving the first, the tool restacks the next - which may also conflict. Don't stop until the whole chain is clean.
-
-```bash
-gt sr           # restack everything (Graphite)
-gs stack restack
-git town sync   # Git Town
-```
-
-### Step 5: If you're lost - abort cleanly
-
-If the conflict resolution has gone sideways and you can't recover, **abort - don't keep hacking at a broken state.**
-
-```bash
-git rebase --abort
-git merge --abort
-git cherry-pick --abort
-gt abort            # Graphite (older versions: git rebase --abort)
-gs rebase abort     # git-spice (alias: gs rba)
-git town undo       # Git Town (reverts the last town command)
-```
-
-You'll be back where you started, no harm done. Try again with a clearer head, or with a different strategy (e.g. merge instead of rebase). This escape hatch is always available - reach for it before you make things worse.
-
----
-
-## Cruft (cleanup)
-
-**Investigate before deleting.** An unfamiliar branch, worktree, or untracked file might be the user's in-progress work. When unsure, ask - deletion here is not always recoverable.
-
-### Stale branches
-
-```bash
-# List local branches whose PR is merged or closed
-gh pr list --state merged --json headRefName --jq '.[].headRefName'
-
-# Delete them (after confirming none are checked out)
-git branch -d <branch>          # safe: refuses if unmerged
-git branch -D <branch>          # force: only after manual check
-```
-
-Prefer `-d` (safe) and only fall back to `-D` (force) once you've confirmed by hand the branch is truly merged and not someone's unpushed work.
-
-### Stale worktrees
-
-```bash
-git worktree list
-git worktree prune              # removes refs to deleted dirs
-git worktree remove <path>      # removes a specific worktree
-```
-
-### Untracked junk
-
-Don't `git clean -fd` blindly - it deletes anything not tracked, including your in-progress prototype.
-
-Always dry-run first:
-
-```bash
-git clean -dn                   # dry run first; shows what would go
-git clean -fd -e prototypes/    # then run, excluding folders you care about
-```
-
-Read the dry-run output line by line before running the real thing. If anything on that list looks like real work, stop and confirm with the user.
-
----
-
-## Rules
-
-- **Read the error before re-running.** If a `--continue`, restack, or clean failed, understand *why* before you run it again. Blindly re-running a destructive op on a confused state makes it worse.
-- **Never run a destructive op twice after the first failed.** Re-read the message; the state may not be what you assume.
-- **Never force-push to main / master.** Warn the user even if they ask.
-- **When a restacked feature branch must be pushed** (plain-git restack rewrites already-pushed history), use `git push --force-with-lease`, never a raw `--force` - the lease refuses if someone else pushed in the meantime.
-- **Never use `--no-verify`** to bypass hooks unless the user explicitly asks. Hooks fail for reasons - fix the cause, don't skip the check.
-- **Investigate before deleting.** Unfamiliar branches, worktrees, or files might be the user's in-progress work.
-- **Abort beats improvise.** A clean abort and a fresh attempt is better than digging a deeper hole.
-
----
+Match repository, branch identity and current tip to the merged work. Check subsequent commits,
+upstream, all worktrees and unpushed changes. A reused branch name or an old merged PR is not
+proof of obsolescence; `git branch -d` can consider its upstream rather than the default branch.
+Use dry-run discovery and bounded/paginated results where needed. Preserve uncertain items.
 
 ## Anti-patterns
 
-- ❌ Running `git rebase --continue` (or `gt continue` / `gs …`) without first reading `git status`
-- ❌ Picking one side of a conflict blindly instead of understanding both intents
-- ❌ Leaving a conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`) behind and committing it
-- ❌ `git clean -fd` with no `-dn` dry-run first
-- ❌ `git branch -D` on a branch you haven't confirmed is merged
-- ❌ Re-running a destructive command after it failed without reading the error
-- ❌ Force-pushing to main/master, or passing `--no-verify`, because it "unblocks" faster
-- ❌ Grinding on a wrecked rebase instead of `--abort` and starting clean
-
----
+- Blind ours/theirs resolution, `reset --hard`, or `clean -fd` as routine troubleshooting.
+- Replaying an interrupted external action before checking its outcome.
+- Overstating abort, branch deletion or bare force-with-lease guarantees.
+- Pushing while the user requests only local conflict resolution.
 
 ## Done when
 
-- `git status` is clean (no conflicts, no in-progress rebase/merge/cherry-pick)
-- The stack restacks all the way through (if applicable)
-- No surprise files left in untracked state
-- The branch is ready to push
+- The requested Git operation is resolved and the resulting graph/index state is inspected.
+- Intended behavior and unrelated local work are preserved with relevant checks.
+- Any authorized remote change is confirmed against the actual remote ref.
 
-Then say: **"Tree is clean. Back to `/ed-ship` to commit and push."**
+Resume /ed-work or /ed-ship at the stage the user originally requests.

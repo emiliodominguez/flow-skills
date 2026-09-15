@@ -49,7 +49,8 @@ export function doctorCommand(opts: { target?: string[]; scope?: "user" | "proje
 		const tc = config.targets[name];
 
 		if (!tc || !tc.enabled) {
-			if (!opts.json) log.warn(`target "${name}" is disabled or unknown - skipping`);
+			problems++;
+			reports.push({ target: name, dest: "", error: "Target is disabled or unknown", counts: {}, attention: [] });
 
 			continue;
 		}

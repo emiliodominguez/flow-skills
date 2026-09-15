@@ -1,78 +1,65 @@
 # Contributing
 
+Use Node.js 22.12 or newer and the pnpm version pinned in `package.json`. Install the locked
+versions with `pnpm install --frozen-lockfile`.
+
 ## Adding or changing a skill
 
-1. `pnpm skills new <name> -d "description"` - scaffolds `skills/<name>/SKILL.md`.
-2. Write it following [`docs/AUTHORING.md`](docs/AUTHORING.md) - shared anatomy, voice, and
-   the multi-agent pattern (only where it earns its keep).
-3. `pnpm skills validate` - must be clean (no errors).
-4. `pnpm skills install -t claude codex` and try it in real sessions on both hosts.
-5. `pnpm test` and `pnpm run format` before committing.
+1. Scaffold with `pnpm skills new <name> -d "description"`.
+2. Follow [authoring](docs/AUTHORING.md): clear discovery, a bounded workflow, evidence and a
+   checkable finish. Use independent delegation when the work warrants it and the host allows it.
+3. Update `evals/beats.json` and regenerate documentation with `pnpm docs:gen`.
+4. Try relevant scenarios in isolated sessions. Test native Claude Code and Codex installation
+   in a throwaway project with `pnpm skills install -t claude codex --scope project`. Use the
+   absolute source CLI path when invoking from outside this checkout. Report unavailable hosts
+   and unrun behavioral checks honestly.
+5. Run the full gate below, review the resulting diff, and add a changeset for user-facing work.
 
-## What validation enforces
+## Required gate
 
-- `SKILL.md` exists; frontmatter has `name` and a single-line `description`.
-- `name` is kebab-case and equals the directory name.
-- No `/skill-name` or `$skill-name` handoff points at a skill that doesn't exist (dangling reference).
-- Warnings (non-blocking): description over 1024 chars, suspiciously thin body.
+Run before every commit:
 
-Run with `--strict` to fail on warnings too (CI does not, by default).
+```sh
+pnpm run format
+pnpm run lint
+pnpm run typecheck
+pnpm run validate
+pnpm run test:coverage
+pnpm run build
+```
+
+After skill edits, inspect and commit `pnpm docs:gen` output and run `pnpm docs:check`.
+For CLI/package changes also run `pnpm smoke`, which packs and installs into a temporary project.
+Do not depend on hosted CI being enabled; inspect the actual run state.
+
+Validation rejects an empty corpus, malformed YAML, absent `SKILL.md`, a non-kebab-case or
+mismatched name, names over 64 characters, descriptions over 1024 characters, and dangling
+skill handoffs. Quality warnings, such as a suspiciously thin body, are non-blocking unless
+`--strict` is selected. Instruction-marker tests do not prove agent behavior; see [evals](evals/README.md).
 
 ## Adding a target adapter
 
-Implement the `Target` interface in `src/targets/<name>.ts`:
+Implement the `Target` interface in `src/targets/<name>.ts`, register it in
+`src/targets/index.ts`, add defaults to both `src/core/config.ts` and
+`agent-skills.config.json`, then test install, status, drift, uninstall and conflicts.
 
-```ts
-export const myTarget: Target = {
-	name: "mytool",
-	describe: "MyTool - where and what it emits",
-	supportsSymlink: false,
-	install(ctx) {
-		/* return Action[] */
-	},
-	uninstall(ctx) {
-		/* return Action[] */
-	},
-	status(ctx) {
-		/* return SkillStatus[] */
-	},
-};
-```
+Use current primary host documentation for format, activation and scope. A host supporting
+native skills does not mean this CLI's existing rules adapter installs them. State resource
+and activation limits. Reuse the filesystem helpers and managed markers; never overwrite
+unmanaged content by default. Test `--force` backups and non-mutating dry runs.
 
-Then register it in `src/targets/index.ts`, add a default path block to
-`agent-skills.config.json`, and add a case to `test/adapters.test.ts`. Reuse the helpers in
-`src/core/install-fs.ts` (`symlink`, `copyDir`, `writeFile`, `writeManagedBlock`) and the
-managed-file marker in `src/targets/render.ts` so `uninstall` stays safe.
+## Commits and releases
 
-## Commit style
+Use conventional commits, without `Co-Authored-By` trailers. Add a changeset with
+`pnpm changeset` for user-facing changes. New skills are normally a minor change; bug fixes
+are normally patch changes. Explicitly call out minimum-runtime or destination changes.
 
-Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`). No
-`Co-Authored-By` trailers.
-
-## Releasing (changesets)
-
-Releases use [changesets](https://github.com/changesets/changesets). GitHub Actions is currently
-disabled, so versioning and publishing are manual. When your change is user-facing, add a
-changeset in the same PR:
-
-```sh
-pnpm changeset          # pick patch/minor/major and write a one-line summary
-```
-
-When a version is ready, update the package metadata and changelog locally:
-
-```sh
-pnpm run version:packages
-git add package.json CHANGELOG.md .changeset
-git commit -m "chore(release): version packages"
-```
-
-Review the generated changes before committing. Run `pnpm run release` only when publishing is
-explicitly requested and npm authentication is configured.
-
-Changesets remain the source of release intent even while the automation is disabled.
+When release preparation is requested, run `pnpm run version:packages` and review the generated
+package metadata and changelog. Publishing with `pnpm run release` requires an explicit request
+and configured npm authentication. Changesets record release intent even when automation is disabled.
 
 ## Code style
 
-Function declarations over arrow functions, tabs (width 4), print width 150 (Prettier
-config is committed). JSDoc on exported functions.
+Prefer function declarations. Use tabs (width 4), print width 150, and the committed Prettier
+and ESLint configuration. Every function in `src/` needs JSDoc, with `@param` and non-void
+`@returns`. Keep the required blank-line discipline. Use ASCII hyphens instead of em or en dashes.

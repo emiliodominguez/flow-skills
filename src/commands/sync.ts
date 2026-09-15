@@ -36,7 +36,8 @@ export function syncCommand(opts: { target?: string[]; scope?: "user" | "project
 		const tc = config.targets[name];
 
 		if (!tc || !tc.enabled) {
-			log.warn(`target "${name}" is disabled or unknown - skipping`);
+			failures.push(name);
+			log.error(`target "${name}" is disabled or unknown`);
 			continue;
 		}
 

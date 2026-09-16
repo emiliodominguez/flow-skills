@@ -26,8 +26,12 @@ agent: use only delegation capabilities actually available and authorized in thi
    Resolve routine details from source; ask one targeted question only for a consequential
    missing decision. Use /ed-plan when the plan needs substantial repair.
 4. Inspect available specialists, tools, concurrency, and write isolation before delegation.
-   Prefer a relevant specialist; otherwise supply a bounded brief to a general worker. Skills
-   do not register agent types. Never invent names such as a custom coder that is not present.
+   - If the plan specifies a "Model / effort" column (e.g., `GPT-5.6 Terra / medium`), 
+     map that model and effort level directly to the execution payload or subagent parameters 
+     when invoking worker/verifier skills.
+   - Prefer a relevant specialist; otherwise supply a bounded brief to a general worker. 
+   - Never invent agent names, but ALWAYS preserve and enforce the target model/effort 
+     specified in the plan contract for each step.
 5. Set a finite budget before execution. Unless the plan supplies one, allow at most three
    execution attempts per task (the initial attempt plus two corrections), at most two active
    workers, and stop dispatching after 30 minutes of elapsed run time. These are visible defaults
@@ -62,7 +66,8 @@ a tool exiting zero, or a task checkbox changing is not acceptance.
 Send each worker only the goal, its task contract, relevant repository instructions and
 source paths, accepted dependency artifacts, and known constraints. The brief includes:
 
-- Task ID and attempt; deliverable and observable acceptance criteria.
+- Task ID, target Model, and Effort level (from the plan's Model/effort column if applicable).
+- Deliverable and observable acceptance criteria.
 - Allowed files and external actions; files owned by other workers; non-goals.
 - Applicable specialist instructions, exact verification commands and working directory.
 - Expected worker artifact: changed paths, revision/diff identity, checks with actual results,
@@ -70,7 +75,8 @@ source paths, accepted dependency artifacts, and known constraints. The brief in
 - Stop conditions: scope mismatch, missing capability, conflicting edits, budget reached,
   or a required action outside current authorization. Report evidence instead of guessing.
 
-Use /ed-work in delegated mode for implementation. Workers do not edit shared plan checkboxes,
+Use /ed-work in delegated mode for implementation, explicitly passing the model and effort 
+overrides assigned to the task (e.g., `/ed-work --model "GPT-5.6 Terra" --effort medium`). Workers do not edit shared plan checkboxes,
 run state, or acceptance criteria. Reviewers are read-only against deliverables; allow isolated
 test output in their own temporary directories.
 
@@ -82,8 +88,9 @@ task. Verify the combined result after integration, even if isolated task checks
 ## Phase 4: Execute, verify, correct
 
 1. On worker return, record the actual artifact and revision, increment the attempt, and
-   dispatch a different agent with /ed-verify. Give it the contract, raw outputs and source,
-   not an instruction to approve or the worker's conclusions as ground truth.
+   dispatch a different agent with /ed-verify using the task's assigned model and effort level.
+   Give it the contract, raw outputs and source, not an instruction to approve or the worker's
+   conclusions as ground truth.
 2. Require a verdict for every criterion: `ACCEPT`, `REJECT`, or `BLOCKED`, with reproducible
    evidence at the inspected revision. Missing or malformed verdicts do not pass.
 3. On **ACCEPT**, record the verifier identity, evidence and artifact revision, mark the

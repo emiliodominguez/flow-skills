@@ -1,16 +1,21 @@
 ---
 name: ed-work
-description: "Implement a bounded change in verified slices, directly from a request or plan, or as a delegated worker with explicit file ownership. Use for coding and implementation; use /ed-orchestrate when separate workers and independent gates are requested. Invoke as /ed-work in Claude Code or $ed-work in Codex. Hands off to /ed-review for completed direct work, or /ed-verify through the delegating coordinator."
+description: "Implement a bounded change in verified slices, directly from a request or plan, or as a delegated worker with explicit file ownership. Supports model and effort overrides from an orchestrator. Use for coding and implementation; use /ed-orchestrate when separate workers and independent gates are requested. Invoke as /ed-work in Claude Code or $ed-work in Codex. Hands off to /ed-review for completed direct work, or /ed-verify through the delegating coordinator."
 ---
 
-> Host syntax: `/skill-name` in Claude Code; `$skill-name` in Codex. Use the host spelling for handoffs.
+> Host syntax: `/skill-name --model <model_id> --effort <level>` in Claude Code; `$skill-name --model <model_id> --effort <level>` in Codex. Use the host spelling for handoffs.
 
 # Work
 
 Deliver one verified slice at a time. Match the repository's conventions and prove the
 requested behavior with evidence proportionate to the change.
 
-## Phase 1: Select the task
+## Phase 1: Select the task and execution profile
+
+- **Execution Profile Override:**
+  - If `--model` is supplied in the invocation or delegated task brief, configure or delegate execution to use that specified model engine for this task run.
+  - If `--effort` is supplied, set the reasoning effort / thinking budget accordingly.
+  - If the requested model is unavailable, log the fallback in the worker artifact and continue using the current active session model.
 
 - An explicit plan path selects that plan. Read it and its referenced source; do not choose a
   different plan when the path is missing.
@@ -55,9 +60,10 @@ In direct plan mode, mark a task complete only after its acceptance is evidenced
 concise evidence note and update Status to in-progress or done as appropriate. If a plan
 requires independent acceptance, route the output through /ed-verify before checking it off.
 
-In delegated mode, return: task/attempt, changed paths, revision/diff identity, checks and
-results, unresolved assumptions, and the expected downstream artifact. A successful worker
-report is not an ACCEPT verdict. Leave acceptance to the coordinator's independent verifier.
+In delegated mode, return: task/attempt, assigned/used model and effort level, changed paths,
+revision/diff identity, checks and results, unresolved assumptions, and the expected downstream
+artifact. A successful worker report is not an ACCEPT verdict. Leave acceptance to the coordinator's
+independent verifier.
 
 Keep changes within the owned scope. If unrelated work overlaps a required file, inspect and
 preserve it; stop only where ownership or intent cannot be resolved. Do not stage a shared
@@ -82,6 +88,6 @@ Do not weaken tests or acceptance to make a check pass.
 
 - The requested slice works at the inspected revision and required checks have real results.
 - Source follows the actual repository's conventions and scope.
-- Direct work has a clear outcome; delegated work has a reviewable artifact and known gaps.
+- Direct work has a clear outcome; delegated work has a reviewable artifact (including model/effort record) and known gaps.
 
 Continue to /ed-review when required by the task, or return to the coordinator for /ed-verify.

@@ -22,20 +22,33 @@ node -e 'const [major, minor] = process.versions.node.split(".").map(Number); pr
 	die "Node.js >= 22.12 required (found $(node -v))."
 
 if [ -f "$ROOT/src/index.ts" ]; then
-	if ! command -v pnpm >/dev/null 2>&1; then
-		say "pnpm not found - enabling it via corepack"
-		corepack enable >/dev/null 2>&1 || die "Could not enable the pinned pnpm version. Install Corepack or pnpm manually: https://pnpm.io/installation"
-	fi
-	command -v pnpm >/dev/null 2>&1 || die "pnpm is still unavailable after enabling Corepack. Install it manually: https://pnpm.io/installation"
 	EXPECTED_PNPM_VERSION="$(node -p 'require("./package.json").packageManager.split("@")[1].split("+")[0]')"
-	PNPM_VERSION="$(pnpm --version)"
+	if command -v pnpm >/dev/null 2>&1; then
+		PNPM_RUNNER="direct"
+	elif command -v corepack >/dev/null 2>&1; then
+		say "pnpm not found - using the pinned version through corepack"
+		PNPM_RUNNER="corepack"
+	elif command -v npx >/dev/null 2>&1; then
+		say "pnpm and corepack not found - using the pinned version through npx"
+		PNPM_RUNNER="npx"
+	else
+		die "Could not run pnpm $EXPECTED_PNPM_VERSION. Install pnpm, Corepack, or npm: https://pnpm.io/installation"
+	fi
+	run_pnpm() {
+		case "$PNPM_RUNNER" in
+			direct) pnpm "$@" ;;
+			corepack) corepack pnpm "$@" ;;
+			npx) npx --yes "pnpm@$EXPECTED_PNPM_VERSION" "$@" ;;
+		esac
+	}
+	PNPM_VERSION="$(run_pnpm --version)"
 	[ "$PNPM_VERSION" = "$EXPECTED_PNPM_VERSION" ] || die "pnpm $EXPECTED_PNPM_VERSION required (found $PNPM_VERSION)."
 
 	say "Installing dependencies"
-	pnpm install --silent
+	run_pnpm install --silent
 
 	say "Building the CLI"
-	pnpm run build >/dev/null
+	run_pnpm run build >/dev/null
 elif [ ! -f "$ROOT/dist/index.js" ]; then
 	die "Could not find the CLI bundle. Reinstall agent-skills and try again."
 fi

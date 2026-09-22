@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
-# Bootstrap installer for agent-skills.
+# Bootstrap uninstaller for agent-skills.
 # Uses the shipped bundle in packages; source checkouts install deps and build first.
 # Everything after `--` (or any extra args) is passed through to the CLI.
 #
-#   ./install.sh                      # install all skills into Claude Code + Codex (symlink)
-#   ./install.sh -- -t cursor codex   # install into Cursor + Codex
-#   ./install.sh -- --copy            # copy instead of symlink
+#   ./uninstall.sh                         # remove all managed Claude Code + Codex skills
+#   ./uninstall.sh -- -t cursor codex      # remove managed Cursor + Codex skills
+#   ./uninstall.sh -- --profile frontend   # remove one configured profile
+#   ./uninstall.sh -- --dry-run            # preview target changes without removing skills
 #
 set -eu
 
@@ -39,9 +40,9 @@ elif [ ! -f "$ROOT/dist/index.js" ]; then
 	die "Could not find the CLI bundle. Reinstall agent-skills and try again."
 fi
 
-say "Installing skills"
+say "Uninstalling skills"
 # Drop a leading `--` if present, then pass the rest to the CLI.
 if [ "${1:-}" = "--" ]; then shift; fi
-node "$ROOT/dist/index.js" install "$@"
+node "$ROOT/dist/index.js" uninstall "$@"
 
-printf '\033[32m✓\033[0m Done. Try: \033[1mnode "%s/dist/index.js" list --targets\033[0m\n' "$ROOT"
+printf '\033[32m✓\033[0m Done. Check remaining state with: \033[1mnode "%s/dist/index.js" doctor\033[0m\n' "$ROOT"

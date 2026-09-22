@@ -16,7 +16,7 @@ PACK_TARBALL="$1"
 cd "$PACK_TEMP"
 npm init -y >"$PACK_TEMP/init.log" 2>&1
 
-if ! npm install "$PACK_TARBALL" >"$PACK_TEMP/install.log" 2>&1; then
+if ! npm_config_allow_scripts= npm --userconfig /dev/null install --ignore-scripts "$PACK_TARBALL" >"$PACK_TEMP/install.log" 2>&1; then
 	cat "$PACK_TEMP/install.log"
 	exit 1
 fi
@@ -37,11 +37,21 @@ const listed = JSON.parse(fs.readFileSync(path.join(consumer, "list.json"), "utf
 assert(expected.length > 0, "Source corpus is empty");
 assert.deepEqual(listed.skills.map(skill => skill.name).sort(), expected);
 assert.deepEqual(listed.profiles, JSON.parse(fs.readFileSync(path.join(source, "agent-skills.config.json"), "utf8")).profiles);
+for (const script of ["install.sh", "uninstall.sh"]) {
+    assert.deepEqual(fs.readFileSync(path.join(shipped, script)), fs.readFileSync(path.join(source, script)));
+}
 for (const name of expected) {
     assert.deepEqual(fs.readFileSync(path.join(shipped, "skills", name, "SKILL.md")), fs.readFileSync(path.join(sourceSkills, name, "SKILL.md")));
 }
-console.log(`Packaged CLI lists all ${expected.length} skills with exact source bytes and profiles.`);
+console.log(`Packaged CLI lists all ${expected.length} skills with exact source bytes, profiles and bootstrap scripts.`);
 NODE
+
+mkdir "$PACK_TEMP/home"
+if ! HOME="$PACK_TEMP/home" sh "$PACK_TEMP/node_modules/@emiliodominguez/agent-skills/uninstall.sh" \
+	-- --dry-run --profile core -t claude codex >"$PACK_TEMP/uninstall-script.log" 2>&1; then
+	cat "$PACK_TEMP/uninstall-script.log"
+	exit 1
+fi
 
 for PACK_MODE in copy symlink; do
 	mkdir "$PACK_TEMP/$PACK_MODE"

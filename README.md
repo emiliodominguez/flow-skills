@@ -21,6 +21,10 @@ pnpm skills install --profile core -t claude codex
 This repository is private; cloning requires your existing GitHub authentication. Native
 Claude Code and Codex installations use live directory symlinks, or `--copy` for a snapshot.
 `./install.sh` remains the bootstrap entry point and installs the full suite by default.
+Run `./uninstall.sh -- --dry-run` to preview removal, then `./uninstall.sh` to remove the
+managed Claude Code and Codex installations. Both scripts forward additional CLI arguments.
+In a source checkout, the wrappers install dependencies and build the CLI first; `--dry-run`
+suppresses changes to managed target files, not this local bootstrap preparation.
 
 Prefer a profile to keep discovery focused:
 

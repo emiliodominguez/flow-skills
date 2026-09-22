@@ -116,4 +116,4 @@ Verify a bounded artifact against explicit downstream acceptance criteria and re
 
 ## [ed-work](skills/ed-work.md)
 
-Implement a bounded change in verified slices, directly from a request or plan, or as a delegated worker with explicit file ownership. Use for coding and implementation; use /ed-orchestrate when separate workers and independent gates are requested. Invoke as /ed-work in Claude Code or $ed-work in Codex. Hands off to /ed-review for completed direct work, or /ed-verify through the delegating coordinator.
+Implement a bounded change in verified slices, directly from a request or plan, or as a delegated worker with explicit file ownership and an assigned execution profile. Use for coding and implementation; use /ed-orchestrate when separate workers and independent gates are requested. Invoke as /ed-work in Claude Code or $ed-work in Codex. Hands off to /ed-review for completed direct work, or /ed-verify through the delegating coordinator.

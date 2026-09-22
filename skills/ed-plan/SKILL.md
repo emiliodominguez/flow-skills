@@ -48,6 +48,7 @@ tracking policy; an ignored file stays local unless explicitly shared. Do not mo
 **Execution:** direct | orchestrated
 **Revision:** <plan revision>
 **Repository:** <commit and relevant dirty/untracked state>
+**Limits:** <attempt, concurrency and elapsed-time bounds; user-approved profile budget if needed>
 
 ## Goal and non-goals
 <Observable user outcome, scope boundaries, authorized external actions.>
@@ -60,8 +61,10 @@ tracking policy; an ignored file stays local unless explicitly shared. Do not mo
       Depends on: none
       Touches: <owned files/areas>
       Artifact: <deliverable>
+      Worker execution: <optional required|preferred; model; effort; fallback or none>
+      Verifier execution: <optional required|preferred; model; effort; fallback or none>
       Acceptance: <observable expected behavior>
-      Verify: <profile, command + cwd / evidence, expected result>
+      Verify: <verification profile, command + cwd / evidence, expected result>
       Stop: <scope conflict, missing prerequisite, finite correction budget>
 
 ## Integrated acceptance
@@ -73,6 +76,12 @@ tracking policy; an ignored file stays local unless explicitly shared. Do not mo
 
 For orchestration, include the attempt, concurrency, and elapsed-time limits; define accepted
 dependency artifacts and worker ownership. /ed-orchestrate keeps per-attempt verdict records.
+Worker and verifier execution lines are optional. When present, mark each `required` or
+`preferred`, name the requested model and effort, and state a named fallback or `none`. Keep
+display labels portable; the active host resolves exact identifiers. These execution fields
+are separate from the pragmatic or production verification profile in `Verify`. A repository
+plan does not authorize higher spend, so cite an existing user-approved cost, token, or
+model-tier bound or leave that decision for the current user before dispatch.
 For direct work, /ed-work records actual evidence beside each completed task. Existing simple
 plans with Acceptance, Touches and Depends on remain usable; fill missing material criteria
 before execution instead of requiring a cosmetic schema migration.

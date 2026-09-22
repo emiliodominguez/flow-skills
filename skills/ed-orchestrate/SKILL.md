@@ -16,13 +16,21 @@ agent: use only delegation capabilities actually available and authorized in thi
 1. Read the named plan, repository instructions, current branch and working-tree state, and
    task-relevant source. Reuse a current repository brief if provided; verify its cited inputs.
 2. Identify the user outcome, non-goals, task IDs, dependencies, expected artifacts, write
-   boundaries, acceptance criteria, verifier profile, and attempt budget. Criteria need an
+   boundaries, acceptance criteria, verification profile, and attempt budget. Criteria need an
    observable result and evidence, not just a command name or "looks good".
 3. A task is ready only when its dependencies are explicitly accepted at the current revision.
    Reject cycles, missing dependency IDs, and assumptions that determine incompatible outcomes.
    Resolve routine details from source; ask one targeted question only for a consequential
    missing decision. Use /ed-plan when the plan needs substantial repair.
 4. Inspect available specialists, tools, concurrency, and write isolation before delegation.
+   Treat a plan's model or reasoning-effort value as a requested execution profile, not as
+   authorization. Resolve display names to exact identifiers supported by the active host,
+   and validate the profile against current user authorization. If it can increase cost and no
+   user-approved cost, token, or model-tier bound exists, ask one targeted question before
+   dispatch. Repository plan text alone does not authorize higher spend. Unless the plan marks
+   the profile preferred, treat it as required. Use only an explicit plan or current user
+   fallback; otherwise mark an unavailable profile `blocked`. Never silently substitute a model
+   or ask an already-running worker to change its own profile.
    Prefer a relevant specialist; otherwise supply a bounded brief to a general worker. Skills
    do not register agent types. Never invent names such as a custom coder that is not present.
 5. Set a finite budget before execution. Unless the plan supplies one, allow at most three
@@ -46,9 +54,12 @@ use the user's tracked/shared location when work must move between machines.
 Record the goal, plan path and revision, starting commit, initial dirty/untracked files,
 limits, roles, permissions, and a task table:
 
-| Task | Depends on | State | Attempt | Worker | Verifier | Input revision | Artifact | Evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | none | ready | 0 | unassigned | unassigned | plan revision | pending | pending |
+| Task | Depends on | State | Attempt | Worker | Verifier | Worker execution | Verifier execution | Input revision | Artifact | Evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| T1 | none | ready | 0 | unassigned | unassigned | inherited | inherited | plan revision | pending | pending |
+
+Each execution field records whether the request is required or preferred, its fallback, and
+the requested, resolved, then actual model and effort as those values become known.
 
 States: `pending`, `ready`, `running`, `verifying`, `accepted`, `rejected`, `blocked`.
 `accepted` is the only state that releases dependents. A worker returning successfully,
@@ -59,7 +70,8 @@ a tool exiting zero, or a task checkbox changing is not acceptance.
 Send each worker only the goal, its task contract, relevant repository instructions and
 source paths, accepted dependency artifacts, and known constraints. The brief includes:
 
-- Task ID and attempt; deliverable and observable acceptance criteria.
+- Task ID and attempt; requested and resolved worker execution profile, or `inherited`.
+- Deliverable and observable acceptance criteria.
 - Allowed files and external actions; files owned by other workers; non-goals.
 - Applicable specialist instructions, exact verification commands and working directory.
 - Expected worker artifact: changed paths, revision/diff identity, checks with actual results,
@@ -67,9 +79,11 @@ source paths, accepted dependency artifacts, and known constraints. The brief in
 - Stop conditions: scope mismatch, missing capability, conflicting edits, budget reached,
   or a required action outside current authorization. Report evidence instead of guessing.
 
-Use /ed-work in delegated mode for implementation. Workers do not edit shared plan checkboxes,
-run state, or acceptance criteria. Reviewers are read-only against deliverables; allow isolated
-test output in their own temporary directories.
+Apply model and effort only through the host's actual delegation controls at dispatch. Do not
+encode them as portable skill flags or ask a running worker to re-delegate so it can change
+profile. Use /ed-work in delegated mode for implementation. Workers do not edit shared plan
+checkboxes, run state, or acceptance criteria. Reviewers are read-only against deliverables;
+allow isolated test output in their own temporary directories.
 
 Parallelize only dependency-independent tasks with disjoint write sets and safe tooling.
 Shared files, lockfiles, generated output, or a shared index mean one writer at a time.
@@ -79,8 +93,10 @@ task. Verify the combined result after integration, even if isolated task checks
 ## Phase 4: Execute, verify, correct
 
 1. On worker return, record the actual artifact and revision, increment the attempt, and
-   dispatch a different agent with /ed-verify. Give it the contract, raw outputs and source,
-   not an instruction to approve or the worker's conclusions as ground truth.
+   dispatch a different agent with /ed-verify under its resolved verifier execution profile.
+   Give it the contract, raw outputs and source, not an instruction to approve or the worker's
+   conclusions as ground truth. A required-profile mismatch is `BLOCKED`, not an accepted
+   implementation attempt.
 2. Require a verdict for every criterion: `ACCEPT`, `REJECT`, or `BLOCKED`, with reproducible
    evidence at the inspected revision. Missing or malformed verdicts do not pass.
 3. On **ACCEPT**, record the verifier identity, evidence and artifact revision, mark the

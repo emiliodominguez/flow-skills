@@ -16,11 +16,14 @@ Create a plan with `ed-plan`. A minimal meaningful contract looks like this:
 Goal: a user can export only their own records as JSON.
 Non-goals: new authentication, UI redesign, production deployment.
 Limits: three execution attempts per task; two active workers; 30 minute dispatch budget.
+Profile budget: inherit the current session; higher-cost profiles require current-user approval.
 
 - [ ] T1 - implement the export use case
       Depends on: none
       Touches: export domain/application modules and their tests
       Artifact: implementation diff
+      Worker execution: preferred; model=current; effort=medium; fallback=inherited
+      Verifier execution: required; model=current; effort=medium; fallback=none
       Acceptance: own records export; another account's records are excluded
       Verify: production; repository test command; positive and negative account fixtures
       Stop: scope conflict, missing account contract, exhausted attempts
@@ -40,6 +43,10 @@ Integrated acceptance: UI through route to data respects ownership and produces 
 
 Replace example paths, commands and acceptance details with actual repository evidence before
 execution. This sketch is explanatory; it is not an executable plan for every repository.
+Execution fields are optional. Mark them required or preferred and name any fallback
+explicitly. They are separate from the pragmatic or production verification profile. The
+orchestrator resolves portable display labels to host identifiers; repository text alone does
+not authorize a higher-cost profile.
 
 ## Run and resume
 

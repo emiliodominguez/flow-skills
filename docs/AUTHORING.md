@@ -22,10 +22,13 @@ workflow stage (`explore`, `understand`, `plan`, `build`, `verify`, `deliver` or
 The description is always loaded, and it's how the agent decides to use the skill. Aim for about
 200 characters:
 
-1. What the skill does, in plain words.
-2. When to use it, with the words a user would actually say.
+1. What the skill is, as a short noun phrase.
+2. `Use when` plus the words and symptoms a user would actually say.
 3. A boundary only when a neighboring skill could be confused with it.
 4. A handoff clause naming the next skills in backticks. The skill graph draws its edges from it.
+
+Don't summarize the procedure. An agent that reads the steps in the description may follow them
+and skip the body. Avoid trigger words a neighbor also claims; `pnpm eval:triggers` finds them.
 
 ## 3. Write the body
 
@@ -35,6 +38,12 @@ The description is always loaded, and it's how the agent decides to use the skil
 - **`## Anti-patterns`:** concrete failures this skill prevents.
 - **`## Done when`:** observable results and the evidence needed to claim them.
 - **Last line:** the next skill by backticked name, or the terminal result.
+- **`## Red flags`** (discipline skills): the excuses agents give for skipping a step, each with
+  the correct response. Write them from observed runs, not imagination.
+
+Match the form to the failure: a firm rule plus red flags when agents skip a step under pressure,
+a template when output has the wrong shape, a required slot when an element keeps going missing.
+Explain why rather than stacking capitalized MUSTs.
 
 Use terse imperative sentences and bullets. If a sentence isn't a distinct rule, threshold or
 decision, cut it. Move material that only some runs need into `references/<topic>.md`, one level
@@ -61,11 +70,15 @@ deep, and say when to read it.
 
 ## 6. Evaluate
 
+- Before writing, run the task without the skill and record what goes wrong. No observed gap, no skill.
 - Add 3-5 short markers to `evals/beats.json`. They must appear in `SKILL.md`, and they catch
   accidental wording loss, not behavior.
+- Add four should prompts and three near misses to `evals/triggers.json`, and run
+  `pnpm eval:triggers` when you have model access.
+- Add an `evals/ab.json` case for behavior the skill claims to change. `pnpm eval:ab` flags
+  assertions that pass without the skill; those measure nothing.
 - For a complex skill, run representative requests in isolated fixtures with a fresh agent, and
   give the expected outcome only to the assessor.
-- Test requests that should trigger the skill and nearby ones that shouldn't.
 
 See [evaluations](../evals/README.md). Then run `pnpm check`, commit the `pnpm docs:gen` output,
 and try an install with `./install.sh --local --project` in a throwaway project.

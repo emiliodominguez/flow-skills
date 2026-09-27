@@ -35,8 +35,10 @@ manifest changes. Check actual hosted CI status; local evidence is required even
   handoff clause (`Hands off to`, `Hands back to`, `Routes to`, or `Feeds`) naming skills in backticks.
   The docs skill map is parsed from it. The corpus must stay under 8,000 description characters.
 - Move situational material to `references/<topic>.md` and say when to read it.
-- Every skill needs an entry in `evals/beats.json` (3-5 lowercase substrings from `SKILL.md`). These
-  check text presence, not behavior. See `evals/README.md`.
+- Every skill needs an entry in `evals/beats.json` (3-5 lowercase substrings from `SKILL.md`, text
+  presence only) and in `evals/triggers.json` (4 should prompts, 3 near misses). Model evals
+  (`eval:triggers`, `eval:ab`) need API configuration and never run in CI. See `evals/README.md`.
+- Descriptions lead with what the skill is, then `Use when` triggers; never summarize the procedure.
 - Test installs in a throwaway project with `./install.sh --local --project`. Distinguish install
   checks from real agent sessions.
 

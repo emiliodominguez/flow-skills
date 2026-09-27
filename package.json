@@ -22,6 +22,8 @@
 		"validate": "node --import tsx src/index.ts validate",
 		"docs:gen": "node --import tsx scripts/gen-skill-docs.ts",
 		"eval:llm": "node --import tsx scripts/eval-llm.ts",
+		"eval:triggers": "node --import tsx scripts/eval-triggers.ts",
+		"eval:ab": "node --import tsx scripts/eval-ab.ts",
 		"changeset": "changeset",
 		"version:packages": "changeset version && node --import tsx scripts/sync-plugin-version.ts",
 		"test": "vitest run",

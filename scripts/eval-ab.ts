@@ -1,0 +1,100 @@
+import fs from "node:fs";
+import path from "node:path";
+import { findRepoRoot, SKILLS_DIR } from "../src/core/repo.js";
+import { discoverSkills } from "../src/core/registry.js";
+import { type AbCase, type AbRun, judgePrompt, summarizeAb, validateAbCases } from "./lib/ab-eval.js";
+import { complete, numberFlag, requireModel } from "./lib/anthropic.js";
+import { parseVerdicts } from "./lib/eval-verdict.js";
+
+/**
+ * Optional with/without comparison: answer each case with and without the skill loaded, grade both
+ * against the same assertions, and flag assertions that do not discriminate. It compares written
+ * answers, not tool-using agent sessions; use the behavioral scenarios for those.
+ * Usage: pnpm eval:ab [case-id|skill-name] [--runs 3] [--out path]; requires ANTHROPIC_API_KEY and ANTHROPIC_MODEL.
+ */
+const INSTRUCTION =
+	"You cannot run tools here. Say exactly what you would do, in order, what you would run, and produce any artifact the request asks for.";
+
+const root = findRepoRoot();
+const skills = discoverSkills(path.join(root, SKILLS_DIR));
+const cases = JSON.parse(fs.readFileSync(path.join(root, "evals", "ab.json"), "utf8")) as AbCase[];
+const problems = validateAbCases(
+	cases,
+	skills.map((s) => s.name),
+);
+
+if (problems.length > 0) {
+	for (const problem of problems) console.error(`✗ ${problem}`);
+
+	process.exit(1);
+}
+
+const config = requireModel("A/B eval");
+const argv = process.argv.slice(2);
+const filter = argv.find((arg, i) => !arg.startsWith("--") && argv[i - 1] !== "--out" && argv[i - 1] !== "--runs");
+const selected = filter ? cases.filter((c) => c.id === filter || c.skill === filter) : cases;
+const runs = numberFlag(argv, "runs", 3);
+const outIndex = argv.indexOf("--out");
+const out = outIndex === -1 ? undefined : argv[outIndex + 1];
+const graded: AbRun[] = [];
+
+if (selected.length === 0) {
+	console.error(`No case or skill named "${filter}".`);
+	process.exit(1);
+}
+
+for (const item of selected) {
+	const skill = skills.find((s) => s.name === item.skill);
+	const system = `Follow this skill for the request.\n\n${skill?.body ?? ""}\n\n${skill?.supporting ?? ""}`;
+
+	for (const variant of ["with", "without"] as const) {
+		for (let i = 0; i < runs; i++) {
+			try {
+				const answer = await complete(config, `${item.prompt}\n\n${INSTRUCTION}`, {
+					system: variant === "with" ? system : undefined,
+					maxTokens: 3000,
+				});
+				const judged = await complete(config, judgePrompt(item.prompt, answer.text, item.assertions));
+
+				graded.push({ id: item.id, variant, verdicts: parseVerdicts(judged.text, item.assertions), outputTokens: answer.outputTokens });
+			} catch (err) {
+				console.error(`! ${item.id} ${variant}: ${err instanceof Error ? err.message : String(err)}`);
+			}
+		}
+	}
+}
+
+/**
+ * Format a fraction as a percentage.
+ *
+ * @param value - A fraction from 0 to 1.
+ * @returns The rounded percentage.
+ */
+function pct(value: number): string {
+	return `${Math.round(value * 100)}%`;
+}
+
+const lines = [`# A/B eval (${new Date().toISOString().slice(0, 10)}, model ${config.model}, ${runs} run(s) per variant)`, ""];
+let flagged = 0;
+
+for (const summary of summarizeAb(selected, graded)) {
+	lines.push(`## ${summary.id}`, "", `Pass rate with skill ${pct(summary.with)}, without ${pct(summary.without)}.`);
+	lines.push(`Mean output tokens with ${Math.round(summary.tokensWith)}, without ${Math.round(summary.tokensWithout)}.`, "");
+	lines.push("| Assertion | With | Without | Flag |", "| --- | --- | --- | --- |");
+
+	for (const a of summary.assertions) {
+		if (a.flag !== "ok") flagged++;
+
+		lines.push(`| ${a.assertion} | ${pct(a.with)} | ${pct(a.without)} | ${a.flag} |`);
+	}
+
+	lines.push("");
+}
+
+const report = lines.join("\n");
+
+console.log(report);
+
+if (out) fs.writeFileSync(path.resolve(out), `${report}\n`);
+
+if (flagged > 0) console.log(`${flagged} assertion(s) flagged: revise the assertion or the skill.`);

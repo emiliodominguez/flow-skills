@@ -1,0 +1,118 @@
+[
+	{
+		"id": "verify-worker-claim",
+		"skill": "flow-verify",
+		"prompt": "Verify task T1 before we merge. Contract: C1 total(lines) sums priceCents times quantity; C2 empty input returns 0; C3 `node --test total.test.mjs` passes. The worker reported: \"T1 done, tests pass.\" Source: `export function total(lines) { return lines.reduce((s, l) => s + l.priceCents, 0); }`. The tests only cover one item with quantity 1 and the empty case.",
+		"assertions": [
+			"Gives a verdict for each criterion C1, C2 and C3 separately",
+			"Rejects C1 because quantity is ignored, with a concrete counterexample such as quantity 2",
+			"Does not accept the worker's claim that tests pass without running or inspecting them",
+			"Gives an overall verdict of REJECT rather than a conditional or partial approval",
+			"Does not rewrite or fix the implementation itself"
+		]
+	},
+	{
+		"id": "review-staged-layer",
+		"skill": "flow-review",
+		"prompt": "Review my change before I commit. `git diff --cached` shows access.mjs changed to `return true;` in mayRead(actor, document). `git diff` (unstaged) shows it restored to `return actor.id === document.ownerId;`. README says documents are private to their owner.",
+		"assertions": [
+			"Identifies that the staged version is what a commit would publish",
+			"Reports the staged `return true` as a blocking authorization defect with a concrete scenario",
+			"Distinguishes the staged and unstaged layers rather than reviewing only the working tree",
+			"Does not pad the report with style or preference findings"
+		]
+	},
+	{
+		"id": "diagnose-intermittent",
+		"skill": "flow-diagnose",
+		"prompt": "Our checkout API returns a stale cart total about 1 in 50 requests since Tuesday's deploy. It never reproduces locally. We run two read replicas and a Redis cache in front of Postgres. Fix it.",
+		"assertions": [
+			"Lists more than one competing hypothesis, such as replica lag and cache invalidation",
+			"Proposes an experiment or observation that discriminates between the hypotheses",
+			"Proposes collecting telemetry or traces rather than blocking on a local reproduction",
+			"Does not apply a speculative fix before the cause is supported by evidence",
+			"Mentions a regression test or check that fails on the defect once the cause is known"
+		]
+	},
+	{
+		"id": "test-flaky",
+		"skill": "flow-test",
+		"prompt": "The test `shows toast after save` fails maybe 1 in 10 runs in CI and always passes locally. Can you just make it stable? I need green builds today.",
+		"assertions": [
+			"Identifies or asks about the likely source of nondeterminism before changing the test",
+			"Replaces any fixed delay with waiting on an observable condition",
+			"Rejects adding a retry or rerun policy as the fix",
+			"States how many repeated runs will be used to show the fix works, rather than one green run",
+			"Mentions that a quarantine, if used, needs an owner and stays visible as missing coverage"
+		]
+	},
+	{
+		"id": "work-done-claim",
+		"skill": "flow-work",
+		"prompt": "Add a `--json` flag to our `report` CLI command so it prints the same data as JSON. The command lives in src/commands/report.ts and tests are in test/report.test.ts. Tell me when it's done.",
+		"assertions": [
+			"Says it would run the real CLI command with --json and inspect the output",
+			"Adds or updates a test for the new flag",
+			"Ties any completion claim to specific checks that were run rather than asserting it works",
+			"Keeps scope to the requested flag without unrelated refactors"
+		]
+	},
+	{
+		"id": "pr-feedback-wrong-suggestion",
+		"skill": "flow-pr-fix",
+		"prompt": "Reviewer comments on my PR: (1) \"Remove the null check in parseConfig, the type is Config so it can't be null.\" (2) \"Why not zod?\" (3) \"Rename cfg to config.\" Please address all the feedback and push.",
+		"assertions": [
+			"Checks where parseConfig's input comes from before removing the null check",
+			"Collects the unclear item (zod) and asks about it before implementing changes, rather than guessing",
+			"Gives a per-comment disposition such as fix, push back, or needs clarification",
+			"Confirms the push reached the remote before replying or resolving threads",
+			"Does not resolve the thread for a comment it disagreed with or left open"
+		]
+	},
+	{
+		"id": "api-breaking-change",
+		"skill": "flow-api",
+		"prompt": "Mobile clients call GET /orders which returns all of a user's orders as an array. Some users now have 20k orders. Change the endpoint so it paginates. Old app versions stay in use for about a year.",
+		"assertions": [
+			"Identifies that changing the response shape breaks existing clients",
+			"Proposes a compatible path such as a new version, a new endpoint, or an opt-in parameter with a deprecation window",
+			"Specifies pagination with a default and maximum page size",
+			"Uses keyset or opaque-token pagination, or explains why offset pagination is acceptable for this data",
+			"Writes the contract in a schema or with example requests and responses"
+		]
+	},
+	{
+		"id": "observe-silent-job",
+		"skill": "flow-observe",
+		"prompt": "Our nightly invoice export job failed silently for four days last month and nobody noticed until customers complained. Add monitoring so this can't happen again.",
+		"assertions": [
+			"Adds a heartbeat, last-success timestamp or similar signal that detects the job not running or not succeeding",
+			"Defines an alert with a threshold, routing and a runbook or first diagnostic step",
+			"Uses structured logs with identifiers such as a run ID and avoids logging personal or invoice data",
+			"Proposes triggering a failure to confirm the alert fires"
+		]
+	},
+	{
+		"id": "write-skill-gap",
+		"skill": "flow-write-skill",
+		"prompt": "Write a skill that makes our agents always run database migrations in a transaction and check for a down migration. They keep forgetting.",
+		"assertions": [
+			"Proposes checking the agent's behavior without the skill first to confirm the failure",
+			"Writes a description that states when to use the skill with concrete triggers rather than summarizing the steps",
+			"Keeps the body short and includes a red-flags list or firm rule addressing the forgetting",
+			"Proposes a test of triggering with near-miss prompts or a with and without behavior comparison"
+		]
+	},
+	{
+		"id": "commit-message-only",
+		"skill": "flow-commit",
+		"prompt": "Commit message for my staged changes please. Staged: src/auth/session.ts shortens the session TTL from 30 days to 7 days and adds a refresh on activity. Unstaged: an unrelated README typo fix.",
+		"assertions": [
+			"Returns a message and does not stage, commit or change Git state",
+			"Uses a conventional type and imperative subject that describes the effect, not the file",
+			"States the user-visible consequence that inactive users are signed out sooner",
+			"Leaves the unstaged README change out of the message",
+			"Does not claim tests or checks were run"
+		]
+	}
+]

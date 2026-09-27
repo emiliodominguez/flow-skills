@@ -1,0 +1,772 @@
+{
+	"flow-a11y": {
+		"should": [
+			"can you check if this checkout form works with only a keyboard and a screen reader",
+			"our gray text on the dashboard looks too faint, audit the contrast against AA",
+			"VoiceOver users say the modal traps them and never announces the error messages",
+			"before we release the settings page, make sure it holds up at 200 percent zoom and without a mouse"
+		],
+		"near": [
+			{
+				"prompt": "build a new dropdown component that matches this mockup",
+				"expect": "flow-ui"
+			},
+			{
+				"prompt": "the dark theme toggle leaves some cards with the light background color, fix the stylesheet",
+				"expect": "flow-styles"
+			},
+			{
+				"prompt": "what does WCAG stand for and who publishes it",
+				"expect": null
+			}
+		]
+	},
+	"flow-adversarial-review": {
+		"should": [
+			"can someone abuse the new invite link flow to join an org they were never invited to",
+			"this PR accepts file uploads from users, check whether it opens a way to read other tenants' data",
+			"look at how we handle API keys in the webhook handler and tell me what an attacker could reach",
+			"does the password reset endpoint let me take over an account if I tamper with the token"
+		],
+		"near": [
+			{
+				"prompt": "review this PR for bugs and readability before I merge",
+				"expect": "flow-review"
+			},
+			{
+				"prompt": "bump jsonwebtoken, there is a security advisory on our version",
+				"expect": "flow-deps"
+			},
+			{
+				"prompt": "what is the difference between authentication and authorization",
+				"expect": null
+			}
+		]
+	},
+	"flow-animate": {
+		"should": [
+			"the sidebar slide-in feels sluggish and a bit janky, can you tune the easing",
+			"add a subtle transition when a card moves from the todo column to done",
+			"the toast just pops in with no motion at all, give it some feedback when it appears",
+			"the page transitions feel slow and decorative, cut them down so they actually help navigation"
+		],
+		"near": [
+			{
+				"prompt": "the modal is off center on mobile and overflows the viewport",
+				"expect": "flow-styles"
+			},
+			{
+				"prompt": "run an accessibility audit on the onboarding flow before launch",
+				"expect": "flow-a11y"
+			},
+			{
+				"prompt": "what is the difference between CSS transitions and keyframe animations",
+				"expect": null
+			}
+		]
+	},
+	"flow-api": {
+		"should": [
+			"we need an endpoint for bulk updating invoices, help me shape the request and the errors",
+			"how should the orders service expose refunds over gRPC so mobile and web can both use it",
+			"design the event payload we publish when a subscription is canceled",
+			"our error responses are all over the place, define one consistent error model for the public API"
+		],
+		"near": [
+			{
+				"prompt": "write reference docs for the existing /users endpoints in the README",
+				"expect": "flow-docs"
+			},
+			{
+				"prompt": "rename getUser to fetchUser across all 80 call sites in the monorepo",
+				"expect": "flow-migrate"
+			},
+			{
+				"prompt": "what is the difference between PUT and PATCH",
+				"expect": null
+			}
+		]
+	},
+	"flow-benchmark": {
+		"should": [
+			"is the new JSON parser actually faster than the old one, give me real numbers",
+			"search feels slow since last week, measure p95 latency before we touch anything",
+			"compare throughput of the Redis cache versus the in-memory map under the same load",
+			"I want a reproducible baseline for the CLI's cold start time before we try to optimize it"
+		],
+		"near": [
+			{
+				"prompt": "the api started returning 500s intermittently after the deploy and nobody knows why",
+				"expect": "flow-triage"
+			},
+			{
+				"prompt": "the jest suite fails randomly on CI about one run in five",
+				"expect": "flow-test"
+			},
+			{
+				"prompt": "what is the worst case big O of quicksort",
+				"expect": null
+			}
+		]
+	},
+	"flow-brainstorm": {
+		"should": [
+			"I want to add some kind of offline mode but I'm not sure what that should even mean for us",
+			"we could do notifications by email, push or an in-app inbox, help me think through the options",
+			"rough idea: let teams share dashboards publicly, what assumptions are we making",
+			"the requirements for the reporting feature are vague, help me figure out what we should actually build"
+		],
+		"near": [
+			{
+				"prompt": "spin up a quick throwaway script to see if the pdf library can handle our fonts",
+				"expect": "flow-prototype"
+			},
+			{
+				"prompt": "we picked push notifications, now break the rollout into ordered tasks with acceptance criteria",
+				"expect": "flow-plan"
+			},
+			{
+				"prompt": "give me a visual direction and design tokens for the new marketing site",
+				"expect": "flow-design"
+			}
+		]
+	},
+	"flow-commit": {
+		"should": [
+			"write me a commit message for what's staged, don't actually commit it",
+			"commit these changes, but split the refactor and the bugfix into separate commits",
+			"give me a conventional message for this diff",
+			"stage just the parser fix and commit it with a good message"
+		],
+		"near": [
+			{
+				"prompt": "commit this and open a PR against main",
+				"expect": "flow-ship"
+			},
+			{
+				"prompt": "I committed to the wrong branch and need to move the last two commits over",
+				"expect": "flow-git-fix"
+			},
+			{
+				"prompt": "what does the feat prefix mean in conventional commits",
+				"expect": null
+			}
+		]
+	},
+	"flow-deps": {
+		"should": [
+			"dependabot opened twelve PRs, can you get these upgrades in without breaking the build",
+			"npm audit flags a high severity issue in lodash, patch it",
+			"we're three majors behind on React, upgrade us and make sure everything still installs",
+			"update all the outdated packages and make sure install and tests still pass"
+		],
+		"near": [
+			{
+				"prompt": "replace every moment.js call in the codebase with date-fns",
+				"expect": "flow-migrate"
+			},
+			{
+				"prompt": "the lockfile has conflict markers after rebasing onto main",
+				"expect": "flow-git-fix"
+			},
+			{
+				"prompt": "what is the difference between dependencies and devDependencies",
+				"expect": null
+			}
+		]
+	},
+	"flow-design": {
+		"should": [
+			"we're starting a new product and need a visual direction: colors, type scale, spacing tokens",
+			"every screen in our app looks like a generic template, give us a real design system",
+			"set up design tokens and a DESIGN.md before we start building the landing page",
+			"we're rebranding next quarter, define the palette and typography we'll build against"
+		],
+		"near": [
+			{
+				"prompt": "build the pricing page from this Figma screenshot",
+				"expect": "flow-ui"
+			},
+			{
+				"prompt": "the shipped settings page looks dated, modernize it without breaking any urls",
+				"expect": "flow-redesign"
+			},
+			{
+				"prompt": "button padding differs between the header and footer, fix the css",
+				"expect": "flow-styles"
+			}
+		]
+	},
+	"flow-diagnose": {
+		"should": [
+			"checkout crashes for maybe 2 percent of users and I can't reproduce it locally",
+			"I patched the race condition yesterday but the duplicate orders are back",
+			"since the node upgrade the worker segfaults on startup and I have no idea why",
+			"the report job silently writes empty files on some nights, figure out what's really going on"
+		],
+		"near": [
+			{
+				"prompt": "prod is down for EU customers, how bad is it and what do we do first",
+				"expect": "flow-triage"
+			},
+			{
+				"prompt": "the date formatter has an off by one on line 42, just fix it",
+				"expect": "flow-work"
+			},
+			{
+				"prompt": "the integration test passes locally but fails randomly on CI, make it reliable",
+				"expect": "flow-test"
+			}
+		]
+	},
+	"flow-docs": {
+		"should": [
+			"the README setup steps are out of date, rewrite them against what the scripts actually do",
+			"write a guide for new contributors on how our plugin system works",
+			"document the public functions in the sdk package with examples that actually run",
+			"we changed the auth flow, find and fix any docs that still describe the old one"
+		],
+		"near": [
+			{
+				"prompt": "design the request and response schema for a new webhooks endpoint",
+				"expect": "flow-api"
+			},
+			{
+				"prompt": "give me a tour of this repo, I just joined and don't know where anything is",
+				"expect": "flow-onboard"
+			},
+			{
+				"prompt": "write a handoff note so tomorrow's session can pick up where I stopped",
+				"expect": "flow-handoff"
+			}
+		]
+	},
+	"flow-git-fix": {
+		"should": [
+			"rebase stopped halfway with conflicts in three files and I'm scared to lose my changes",
+			"I did a hard reset and lost a commit from this morning, can we get it back",
+			"my stacked branches are a mess after the base PR got squash merged",
+			"a cherry-pick got interrupted and git status says I'm in the middle of something"
+		],
+		"near": [
+			{
+				"prompt": "push my branch and open a draft PR",
+				"expect": "flow-ship"
+			},
+			{
+				"prompt": "write a commit message for these staged changes",
+				"expect": "flow-commit"
+			},
+			{
+				"prompt": "what is the difference between git merge and git rebase",
+				"expect": null
+			}
+		]
+	},
+	"flow-handoff": {
+		"should": [
+			"I'm stopping for the day, save where we are so a fresh session can continue",
+			"context is getting long, write down the decisions and the next step before we lose them",
+			"switching to another ticket, record the state of this work so I can resume it later",
+			"the orchestration run got interrupted, capture what passed and what's still left"
+		],
+		"near": [
+			{
+				"prompt": "write a README section explaining how to run the project locally",
+				"expect": "flow-docs"
+			},
+			{
+				"prompt": "build a cited knowledge brief of the billing subsystem conventions that agents keep missing",
+				"expect": "flow-repo-brief"
+			},
+			{
+				"prompt": "clean up my agent's memory files, they are full of stale instructions",
+				"expect": "flow-prune-agent-setup"
+			}
+		]
+	},
+	"flow-migrate": {
+		"should": [
+			"we deprecated the old logger, swap every call to the new one across all packages",
+			"write a codemod to change our fetch wrapper signature in the 150 places it's used",
+			"rename the userId field to accountId in every service and test in the repo",
+			"move every usage of the legacy config reader over to the new settings API, repo wide"
+		],
+		"near": [
+			{
+				"prompt": "bump typescript to the latest major and fix the install errors",
+				"expect": "flow-deps"
+			},
+			{
+				"prompt": "split this 2000 line service into smaller modules without changing behavior",
+				"expect": "flow-refactor"
+			},
+			{
+				"prompt": "remove the unused feature flag helpers that nothing imports anymore",
+				"expect": "flow-simplify"
+			}
+		]
+	},
+	"flow-observe": {
+		"should": [
+			"we had an outage last week and no logs to tell us what happened, fix that for the payments service",
+			"add metrics and tracing to the new export feature before it launches",
+			"set up alerts that fire when users actually can't check out, not on cpu spikes",
+			"our logs are unstructured print strings, make them queryable with request ids"
+		],
+		"near": [
+			{
+				"prompt": "the pager just fired for a high error rate on checkout, how bad is it",
+				"expect": "flow-triage"
+			},
+			{
+				"prompt": "the api got slower this week, measure latency before and after my change",
+				"expect": "flow-benchmark"
+			},
+			{
+				"prompt": "the worker leaks memory only in production and nobody knows why",
+				"expect": "flow-diagnose"
+			}
+		]
+	},
+	"flow-onboard": {
+		"should": [
+			"I just joined this team, how does this repo fit together and how do I run it",
+			"walk me through what happens when a request hits the api in this codebase",
+			"new to this project, what are the main commands and where do things live",
+			"explain how this monorepo is organized and who owns which parts"
+		],
+		"near": [
+			{
+				"prompt": "we keep re-explaining the payments conventions to agents, write a cited brief we can refresh",
+				"expect": "flow-repo-brief"
+			},
+			{
+				"prompt": "write a contributing guide for the repo",
+				"expect": "flow-docs"
+			},
+			{
+				"prompt": "plan how to add multi-currency support across billing and invoices",
+				"expect": "flow-plan"
+			}
+		]
+	},
+	"flow-orchestrate": {
+		"should": [
+			"execute this plan with separate workers per phase and gate each phase before moving on",
+			"the feature spans the api, the mobile app and the data pipeline, run it end to end with checks between steps",
+			"run this six phase refactor plan and have an independent check accept each phase",
+			"spread the plan across workers but don't start phase 3 until phase 2 is verified"
+		],
+		"near": [
+			{
+				"prompt": "fix the typo in the signup error message",
+				"expect": "flow-work"
+			},
+			{
+				"prompt": "break the search rewrite into ordered tasks with acceptance criteria",
+				"expect": "flow-plan"
+			},
+			{
+				"prompt": "check whether phase 2 actually meets its acceptance criteria and give a verdict",
+				"expect": "flow-verify"
+			}
+		]
+	},
+	"flow-plan": {
+		"should": [
+			"before we touch the billing schema, lay out the steps and how we'll know each one worked",
+			"this will take a few sessions, break adding SSO into ordered tasks we can check off",
+			"we're about to swap the queue system, write an implementation plan grounded in the current code",
+			"map out the changes needed for multi tenant support in the order they need to land"
+		],
+		"near": [
+			{
+				"prompt": "we don't know yet whether we even want multi tenancy, help me explore the options",
+				"expect": "flow-brainstorm"
+			},
+			{
+				"prompt": "add a null check to the parseDate function",
+				"expect": "flow-work"
+			},
+			{
+				"prompt": "run the approved plan with workers and gates between phases",
+				"expect": "flow-orchestrate"
+			}
+		]
+	},
+	"flow-pr-fix": {
+		"should": [
+			"reviewers left 14 comments on my PR, work through them",
+			"CI is red on my pull request, lint and one unit test are failing, get it green",
+			"address the requested changes on PR 482 but don't push until I say so",
+			"reply to the review threads with what changed and fix the ones that are valid"
+		],
+		"near": [
+			{
+				"prompt": "review my PR for correctness before I request reviewers",
+				"expect": "flow-review"
+			},
+			{
+				"prompt": "open a PR for this branch",
+				"expect": "flow-ship"
+			},
+			{
+				"prompt": "my rebase onto main stopped with conflicts in three files",
+				"expect": "flow-git-fix"
+			}
+		]
+	},
+	"flow-prototype": {
+		"should": [
+			"quick spike: can we stream a 2GB CSV through the browser without crashing the tab",
+			"throw together three rough versions of the empty state so we can pick one",
+			"hack up a proof of concept that the payment SDK works in our edge runtime",
+			"just a scratch script to see if the OCR library can read our scanned invoices"
+		],
+		"near": [
+			{
+				"prompt": "build the production onboarding screens from the approved mockup",
+				"expect": "flow-ui"
+			},
+			{
+				"prompt": "we're not sure what onboarding should even do, explore some approaches with me",
+				"expect": "flow-brainstorm"
+			},
+			{
+				"prompt": "compare the speed of the two CSV parsers against a reproducible baseline",
+				"expect": "flow-benchmark"
+			}
+		]
+	},
+	"flow-prune-agent-setup": {
+		"should": [
+			"my coding agent keeps following contradictory instructions, audit my global rules and memory",
+			"I have way too many MCP servers and plugins installed, figure out which ones to drop",
+			"the agent runs some hook I don't remember adding, clean up my agent settings",
+			"old memory entries keep steering the agent wrong, prune whatever is stale"
+		],
+		"near": [
+			{
+				"prompt": "write a new skill that teaches the agent our release process",
+				"expect": "flow-write-skill"
+			},
+			{
+				"prompt": "delete the local git branches that are already merged",
+				"expect": "flow-git-fix"
+			},
+			{
+				"prompt": "write down where I stopped so another session can continue",
+				"expect": "flow-handoff"
+			}
+		]
+	},
+	"flow-redesign": {
+		"should": [
+			"our admin dashboard looks like it's from 2014, modernize it without changing the routes",
+			"polish the existing marketing site, it feels inconsistent, but keep all the copy and urls",
+			"give the shipped settings screens a visual refresh without breaking anything users rely on",
+			"the app works fine but looks dated, upgrade the look incrementally"
+		],
+		"near": [
+			{
+				"prompt": "define a brand palette and type scale for a brand new product",
+				"expect": "flow-design"
+			},
+			{
+				"prompt": "build a new billing page matching this screenshot",
+				"expect": "flow-ui"
+			},
+			{
+				"prompt": "the grid collapses wrong at tablet width on the pricing page",
+				"expect": "flow-styles"
+			}
+		]
+	},
+	"flow-refactor": {
+		"should": [
+			"this controller does validation, db access and email sending, pull those apart without changing behavior",
+			"the orders and inventory modules import each other everywhere, untangle them",
+			"restructure the auth code so ownership is clear, but the public API must stay identical",
+			"extract the pricing logic out of the React component into its own module, same behavior"
+		],
+		"near": [
+			{
+				"prompt": "delete the dead code paths left over from the old checkout",
+				"expect": "flow-simplify"
+			},
+			{
+				"prompt": "change the discount calculation to round up instead of down",
+				"expect": "flow-work"
+			},
+			{
+				"prompt": "apply the new import path to all 300 files that use the old one",
+				"expect": "flow-migrate"
+			}
+		]
+	},
+	"flow-repo-brief": {
+		"should": [
+			"agents keep rediscovering how our event sourcing works, write a cited brief they can reuse",
+			"the notes on the billing subsystem are probably stale, refresh them against the source",
+			"this work will span several sessions, capture the sync engine's conventions with file references",
+			"build a compact knowledge base of the permissions module so future sessions stop guessing"
+		],
+		"near": [
+			{
+				"prompt": "I just cloned this, give me the lay of the land",
+				"expect": "flow-onboard"
+			},
+			{
+				"prompt": "write a worker brief and a verifier brief for adding endpoints to this service",
+				"expect": "flow-specialize"
+			},
+			{
+				"prompt": "write a user guide for the permissions feature",
+				"expect": "flow-docs"
+			}
+		]
+	},
+	"flow-review": {
+		"should": [
+			"look over my diff before I merge, is anything wrong",
+			"can you review PR 311 for bugs and maintainability issues",
+			"give me a second pair of eyes on the caching changes before I ship",
+			"go through the retry logic changes on this branch and flag anything incorrect"
+		],
+		"near": [
+			{
+				"prompt": "is there any way an attacker can abuse the new admin impersonation endpoint",
+				"expect": "flow-adversarial-review"
+			},
+			{
+				"prompt": "reviewers left comments on my PR, go fix them",
+				"expect": "flow-pr-fix"
+			},
+			{
+				"prompt": "check that the migration task meets these acceptance criteria and give a verdict",
+				"expect": "flow-verify"
+			}
+		]
+	},
+	"flow-ship": {
+		"should": [
+			"push this branch and open a draft pull request",
+			"everything passes, mark the PR ready and merge it once CI is green",
+			"get this change pushed up and ready for review",
+			"commit, push and open a PR against develop"
+		],
+		"near": [
+			{
+				"prompt": "just give me a commit message, don't do anything in git",
+				"expect": "flow-commit"
+			},
+			{
+				"prompt": "CI failed on my open PR, fix the failing checks",
+				"expect": "flow-pr-fix"
+			},
+			{
+				"prompt": "my push is rejected as non fast forward after someone rewrote main",
+				"expect": "flow-git-fix"
+			}
+		]
+	},
+	"flow-simplify": {
+		"should": [
+			"there's a lot of generated slop in utils, trim it down without changing what it does",
+			"this function goes through four wrapper layers to call one thing, remove the needless indirection",
+			"find and remove exports that nothing imports anymore",
+			"the old v1 code paths are dead since the flag was removed, clean them out"
+		],
+		"near": [
+			{
+				"prompt": "restructure the module boundaries so billing no longer depends on users",
+				"expect": "flow-refactor"
+			},
+			{
+				"prompt": "review this cleanup diff for mistakes before I merge",
+				"expect": "flow-review"
+			},
+			{
+				"prompt": "what is the difference between dead code and unreachable code",
+				"expect": null
+			}
+		]
+	},
+	"flow-specialize": {
+		"should": [
+			"generic agents keep ignoring our hexagonal architecture, write a repo specific worker brief and a checker brief",
+			"workers keep breaking our custom lint rules, produce task briefs that bake them in",
+			"give me a worker and verifier brief for adding ledger entries that respects our domain rules",
+			"our agents don't know the local conventions for db changes, write task briefs tailored to this repo"
+		],
+		"near": [
+			{
+				"prompt": "write a new reusable skill file for our deployment steps",
+				"expect": "flow-write-skill"
+			},
+			{
+				"prompt": "refresh the cited knowledge brief of the ledger subsystem",
+				"expect": "flow-repo-brief"
+			},
+			{
+				"prompt": "run the plan with workers and acceptance gates",
+				"expect": "flow-orchestrate"
+			}
+		]
+	},
+	"flow-styles": {
+		"should": [
+			"the sidebar overlaps the main content at tablet widths",
+			"dark mode colors leak into light mode on the settings page, fix the css",
+			"our button styles get overridden by some global rule and I can't figure out the cascade",
+			"the page jumps when fonts load, stop the layout shift"
+		],
+		"near": [
+			{
+				"prompt": "the dropdown open animation stutters, tune the motion",
+				"expect": "flow-animate"
+			},
+			{
+				"prompt": "build a new profile page from this mockup",
+				"expect": "flow-ui"
+			},
+			{
+				"prompt": "check our text contrast and keyboard focus order against WCAG",
+				"expect": "flow-a11y"
+			}
+		]
+	},
+	"flow-test": {
+		"should": [
+			"add tests for the discount calculator covering the edge cases",
+			"this checkout test fails randomly on CI, make it reliable",
+			"write a failing regression test for the timezone bug before anyone fixes it",
+			"we have zero coverage on the webhook integration boundary, add some"
+		],
+		"near": [
+			{
+				"prompt": "the worker claims the endpoints are done, check them against the acceptance criteria and give a verdict",
+				"expect": "flow-verify"
+			},
+			{
+				"prompt": "implement the discount calculator the tests describe",
+				"expect": "flow-work"
+			},
+			{
+				"prompt": "what is the difference between a mock and a stub",
+				"expect": null
+			}
+		]
+	},
+	"flow-triage": {
+		"should": [
+			"prod alert: checkout error rate just tripled, how bad is it and what should we do right now",
+			"a customer says the app is broken, figure out what's affected and where this should go",
+			"we're getting paged for the EU region, assess severity and whether we should roll back",
+			"a vague bug report came in about missing invoices, how widespread is it"
+		],
+		"near": [
+			{
+				"prompt": "the crash has been happening for weeks and nobody knows why, find the root cause",
+				"expect": "flow-diagnose"
+			},
+			{
+				"prompt": "add structured logs and alerts to checkout so next time we notice sooner",
+				"expect": "flow-observe"
+			},
+			{
+				"prompt": "what does SEV1 usually mean",
+				"expect": null
+			}
+		]
+	},
+	"flow-ui": {
+		"should": [
+			"build the new onboarding screen from this Figma screenshot",
+			"create a reusable pricing card component and check it renders like the mockup",
+			"make the order history page, here's a screenshot of what it should look like",
+			"implement the account settings screen, render it and compare against the design"
+		],
+		"near": [
+			{
+				"prompt": "our existing dashboard looks dated, polish it without changing urls",
+				"expect": "flow-redesign"
+			},
+			{
+				"prompt": "pick colors, fonts and tokens for the new app before we build anything",
+				"expect": "flow-design"
+			},
+			{
+				"prompt": "audit the new dropdown for screen reader and keyboard support",
+				"expect": "flow-a11y"
+			}
+		]
+	},
+	"flow-verify": {
+		"should": [
+			"here are the acceptance criteria for phase 2, tell me accept or reject with evidence",
+			"the worker says the migration is done, independently check whether that's true",
+			"gate this task: does the output actually meet the three criteria in the plan",
+			"the agent claims all endpoints now return 404 for missing ids, verify that claim"
+		],
+		"near": [
+			{
+				"prompt": "review this diff for bugs",
+				"expect": "flow-review"
+			},
+			{
+				"prompt": "write tests for the new endpoints",
+				"expect": "flow-test"
+			},
+			{
+				"prompt": "run the whole plan with workers and gates",
+				"expect": "flow-orchestrate"
+			}
+		]
+	},
+	"flow-work": {
+		"should": [
+			"add a --dry-run flag to the deploy script",
+			"the date picker allows past dates, it shouldn't, fix it",
+			"implement task 3 from the plan, the caching layer for product lookups",
+			"change the signup form to require a phone number"
+		],
+		"near": [
+			{
+				"prompt": "design the error model for the new public REST API",
+				"expect": "flow-api"
+			},
+			{
+				"prompt": "execute the full plan with multiple workers and phase gates",
+				"expect": "flow-orchestrate"
+			},
+			{
+				"prompt": "the search bug keeps coming back after two fixes, find the real cause",
+				"expect": "flow-diagnose"
+			}
+		]
+	},
+	"flow-write-skill": {
+		"should": [
+			"create a SKILL.md that teaches the agent our release checklist",
+			"my deploy skill never triggers when I ask to deploy, fix its description",
+			"the agent keeps ignoring the testing skill and I end up correcting it by hand every time",
+			"write a lean body and evals for a new skill that drafts changelog entries"
+		],
+		"near": [
+			{
+				"prompt": "my agent setup has too many skills and plugins, prune the stale ones",
+				"expect": "flow-prune-agent-setup"
+			},
+			{
+				"prompt": "write a repo specific worker brief for adding endpoints",
+				"expect": "flow-specialize"
+			},
+			{
+				"prompt": "document the cli flags in the README",
+				"expect": "flow-docs"
+			}
+		]
+	}
+}

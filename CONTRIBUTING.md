@@ -12,8 +12,10 @@ passes, what's left is judgment:
 
 - Start new skills with `pnpm skills new flow-<name>`, and read [authoring](docs/AUTHORING.md) for
   what makes a skill good. Tooling can't check that.
-- Add its markers to `evals/beats.json`, add it to `profiles.json` if it belongs to a profile, and
-  commit the `pnpm docs:gen` output.
+- Add its markers to `evals/beats.json` and its routing prompts to `evals/triggers.json`, add it to
+  `profiles.json` if it belongs to a profile, and commit the `pnpm docs:gen` output.
+- If you have model access, run `pnpm eval:triggers` after description changes and `pnpm eval:ab`
+  for behavior you claim the skill changes.
 - Try it for real: `./install.sh --local --project` in a throwaway project, then use it in an agent
   session. Say which agents you tried and what you didn't check; marker tests don't prove behavior
   ([evals](evals/README.md)).

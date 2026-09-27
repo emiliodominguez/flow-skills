@@ -37,7 +37,8 @@ lives in `references/` and loads on demand.
 - **Models stay with the runtime.** Skills never name a model. The optional instruction audit
   needs an explicitly configured model rather than a hardcoded alias.
 - **Tooling moves in compatible groups.** TypeScript 7 waits until `typescript-eslint` supports
-  it, and Vitest moves together with its coverage provider (Node 22.12+).
+  it, and Vitest moves together with its coverage provider.
+- **Node.js tracks the active LTS** (24, pinned in `.nvmrc`). `@types/node` stays on the same major so code cannot use APIs the runtime lacks.
 
 ## Sources
 

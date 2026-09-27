@@ -27,7 +27,7 @@ need a reachable path or an explicit evidence gap; a clean report is allowed.
 
 ## Phase 1: Bound the target
 
-Review the named target (diff, PR, branch or paths); a fresh reviewer context may lack the
+Review the named target (diff, change request, branch or paths); a fresh reviewer context may lack the
 conversation. If none is given, state the target inferred from the working tree, or ask when
 inference is unsafe.
 

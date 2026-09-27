@@ -17,7 +17,7 @@
 	"flow-onboard": ["trace one real flow", "subsystem", "landmines", "distil", "breadth-first"],
 	"flow-orchestrate": ["independent", "accepted", "attempt", "revision", "stop conditions"],
 	"flow-plan": ["read-only", "blast radius", "fresh session", "vertical slice", "acceptance"],
-	"flow-pr-fix": ["every thread", "commit sha", "group by intent", "root review comment", "gh api"],
+	"flow-pr-fix": ["every thread", "commit sha", "group by intent", "type annotation does not validate", "hosting platform"],
 	"flow-prototype": ["throwaway", "one question", "terminal app", "archive"],
 	"flow-prune-agent-setup": ["punch list", "auto-delete", "settings.json", "false positives", "enabledplugins"],
 	"flow-redesign": ["contracts to preserve", "baseline", "punch list", "polish", "before-and-after"],

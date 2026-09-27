@@ -1,6 +1,6 @@
 ---
 name: flow-review
-description: "Code review with evidence-backed correctness and maintainability findings. Use before shipping, on a PR or diff, or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`."
+description: "Code review with evidence-backed correctness and maintainability findings. Use before shipping, on a PR, MR or diff, or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`."
 metadata:
   stage: verify
 ---
@@ -12,7 +12,7 @@ plausible risks and refuted claims.
 
 ## Phase 1: Pin the change
 
-- Use the supplied PR, base or commit. Otherwise resolve the default branch and merge base from
+- Use the supplied change request, base or commit. Otherwise resolve the default branch and merge base from
   repository metadata; do not assume `main` or a remote name.
 - Review committed, staged, unstaged and relevant untracked changes as separate layers. When
   staged and unstaged versions diverge, inspect both: the staged one is what a commit publishes.

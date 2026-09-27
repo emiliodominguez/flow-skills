@@ -32,11 +32,11 @@ Collaborative idea exploration that ends in a design sketch. Use when the outcom
 
 ## [flow-commit](skills/flow-commit.md)
 
-Conventional commit messages and atomic commits. Use when asked only for a commit message or a commit; message-only requests never touch Git. Hands off to `flow-ship` when a push or PR was requested.
+Conventional commit messages and atomic commits. Use when asked only for a commit message or a commit; message-only requests never touch Git. Hands off to `flow-ship` when a push or review request was asked for.
 
 ## [flow-deps](skills/flow-deps.md)
 
-Dependency updates with verified installs. Use for version bumps, security advisories, outdated packages, update PRs or a framework version upgrade. Hands off to `flow-review` or `flow-migrate`.
+Dependency updates with verified installs. Use for version bumps, security advisories, outdated packages, automated update requests or a framework version upgrade. Hands off to `flow-review` or `flow-migrate`.
 
 ## [flow-design](skills/flow-design.md)
 
@@ -80,7 +80,7 @@ Source-grounded implementation plan with acceptance criteria. Use to sequence mu
 
 ## [flow-pr-fix](skills/flow-pr-fix.md)
 
-Pull-request review feedback and failing checks. Use when a PR has review comments or red CI; push, replies and thread resolution stay within what the user authorized. Hands back to `flow-review` or `flow-ship`.
+Review feedback and failing checks on a pull or merge request. Use when a PR or MR has review comments or red CI; push, replies and thread resolution stay within what the user authorized. Hands back to `flow-review` or `flow-ship`.
 
 ## [flow-prototype](skills/flow-prototype.md)
 
@@ -104,11 +104,11 @@ Maintained, source-cited brief for a subsystem that agents reuse across sessions
 
 ## [flow-review](skills/flow-review.md)
 
-Code review with evidence-backed correctness and maintainability findings. Use before shipping, on a PR or diff, or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`.
+Code review with evidence-backed correctness and maintainability findings. Use before shipping, on a PR, MR or diff, or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`.
 
 ## [flow-ship](skills/flow-ship.md)
 
-Delivery through the requested Git or PR stage: commit, push, PR, ready or merge. Use when asked to push, commit and push, open or update a PR, or merge. Routes to `flow-commit`, `flow-pr-fix` or `flow-git-fix`.
+Delivery through the requested Git or review stage: commit, push, pull or merge request, ready or merge. Use when asked to push, commit and push, open or update a PR or MR, or merge. Routes to `flow-commit`, `flow-pr-fix` or `flow-git-fix`.
 
 ## [flow-simplify](skills/flow-simplify.md)
 

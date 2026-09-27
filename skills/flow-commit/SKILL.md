@@ -1,6 +1,6 @@
 ---
 name: flow-commit
-description: "Conventional commit messages and atomic commits. Use when asked only for a commit message or a commit; message-only requests never touch Git. Hands off to `flow-ship` when a push or PR was requested."
+description: "Conventional commit messages and atomic commits. Use when asked only for a commit message or a commit; message-only requests never touch Git. Hands off to `flow-ship` when a push or review request was asked for."
 metadata:
   stage: deliver
 ---
@@ -8,7 +8,7 @@ metadata:
 # Commit
 
 Make one logical change understandable from history. A message draft, permission to commit,
-and pushing or opening a PR are separate outcomes.
+and pushing or opening a pull or merge request are separate outcomes.
 
 ## Process
 

@@ -44,10 +44,10 @@ without making unrelated user work disappear.
 ## Phase 3: Handle stacks and publication deliberately
 
 - Check the installed stack tool, version and help before assuming semantics.
-- Graphite restacks with `gt restack`; account for branches skipped because another worktree
-  owns them.
-- Git Town `sync` may pull, push and delete branches. Inspect its dry run and scope, and use
-  its no-push behavior for local-only repairs. Stack sync is not a local whole-stack rebase.
+- Stack tools differ: some restack locally, others sync by pulling, pushing and deleting
+  branches. Read the dry run and scope first, use a local-only mode for local repairs, and
+  account for branches skipped because another worktree owns them. Syncing a stack is not a
+  local whole-stack rebase.
 - Rewrite published history only when authorized and necessary. Record the remote tip being
   replaced and use an explicit lease: `--force-with-lease=refs/heads/<branch>:<reviewed-remote-oid>`.
   A bare lease can be weakened by background fetches. A rejected lease means reinspect, never
@@ -56,7 +56,7 @@ without making unrelated user work disappear.
 ## Phase 4: Clean up only requested obsolete work
 
 Match repository, branch identity and current tip to the merged work. Check later commits,
-upstream, all worktrees and unpushed changes. A reused branch name or old merged PR is not proof
+upstream, all worktrees and unpushed changes. A reused branch name or old merged change request is not proof
 of obsolescence, and `git branch -d` may compare against upstream instead of the default
 branch. Use dry-run discovery and paginated results; keep uncertain items.
 

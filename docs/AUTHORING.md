@@ -52,6 +52,8 @@ deep, and say when to read it.
 ## 4. Keep it agent-agnostic
 
 - Name no product, tool or model, and use no invocation syntax such as `/name` or `$name`.
+- Stay platform-neutral: no code-hosting, CI or stack-tool specifics. Say "change request (pull or
+  merge request)" and "the platform's CLI or API", and describe tool behavior by category.
 - Describe capabilities, not products: "a separate agent or fresh context", "the settings layers",
   "available delegation".
 - Check what the environment actually provides at run time. Skills, agents, tools and models are

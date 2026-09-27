@@ -68,6 +68,7 @@ describe("skills corpus", () => {
 			const text = `${skill.frontmatter.description}\n${skill.body}\n${skill.supporting}`;
 
 			expect(text, skill.name).not.toMatch(/claude|codex|cursor|copilot|windsurf/i);
+			expect(text, skill.name).not.toMatch(/github|gitlab|bitbucket|\bgh (api|pr)\b|graphql thread|ready_for_review|graphite|git town/i);
 			expect(text, skill.name).not.toMatch(/[/$]flow-[a-z]/);
 		}
 	});

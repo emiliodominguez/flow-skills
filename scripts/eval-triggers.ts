@@ -2,12 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { findRepoRoot, SKILLS_DIR } from "../src/core/repo.js";
 import { discoverSkills } from "../src/core/registry.js";
-import { complete, numberFlag, requireModel } from "./lib/anthropic.js";
+import { complete, mapPool, numberFlag, requireModel } from "./lib/model.js";
 import { parsePick, routerPrompt, scoreTriggers, validateTriggers, type TriggerCases, type TriggerResult } from "./lib/trigger-eval.js";
 
 /**
  * Optional routing eval: does the description index send each request to the right skill, or to none?
- * Usage: pnpm eval:triggers [skill-name] [--runs 3] [--min 0.9]; requires ANTHROPIC_API_KEY and ANTHROPIC_MODEL.
+ * Usage: pnpm eval:triggers [skill-name] [--runs 3] [--min 0.9] [--concurrency 4]. See scripts/lib/model.ts for backends.
  */
 const root = findRepoRoot();
 const skills = discoverSkills(path.join(root, SKILLS_DIR));
@@ -27,33 +27,26 @@ const only = argv.find((arg) => !arg.startsWith("--") && names.includes(arg));
 const runs = numberFlag(argv, "runs", 1);
 const min = numberFlag(argv, "min", 0.9);
 const index = skills.map((s) => ({ name: s.name, description: s.frontmatter.description }));
-const results: TriggerResult[] = [];
+const concurrency = numberFlag(argv, "concurrency", 4);
+const queue = Object.entries(set)
+	.filter(([owner]) => !only || owner === only)
+	.flatMap(([owner, cases]) => [
+		...cases.should.map((prompt) => ({ owner, kind: "should" as const, prompt, expect: owner as string | null })),
+		...cases.near.map((near) => ({ owner, kind: "near" as const, prompt: near.prompt, expect: near.expect })),
+	]);
+const calls = queue.flatMap((item, caseIndex) => Array.from({ length: runs }, () => ({ item, caseIndex })));
+const picks = await mapPool(calls, concurrency, async ({ item }) => {
+	try {
+		const { text } = await complete(config, routerPrompt(index, item.prompt), { maxTokens: 64 });
 
-for (const [owner, cases] of Object.entries(set)) {
-	if (only && owner !== only) continue;
+		return parsePick(text, names);
+	} catch (err) {
+		console.error(`! ${item.owner}: ${err instanceof Error ? err.message : String(err)}`);
 
-	const queue = [
-		...cases.should.map((prompt) => ({ kind: "should" as const, prompt, expect: owner })),
-		...cases.near.map((near) => ({ kind: "near" as const, prompt: near.prompt, expect: near.expect })),
-	];
-
-	for (const item of queue) {
-		const picks: (string | null)[] = [];
-
-		for (let i = 0; i < runs; i++) {
-			try {
-				const { text } = await complete(config, routerPrompt(index, item.prompt), { maxTokens: 64 });
-
-				picks.push(parsePick(text, names));
-			} catch (err) {
-				console.error(`! ${owner}: ${err instanceof Error ? err.message : String(err)}`);
-				picks.push("error");
-			}
-		}
-
-		results.push({ owner, ...item, picks });
+		return "error";
 	}
-}
+});
+const results: TriggerResult[] = queue.map((item, caseIndex) => ({ ...item, picks: picks.filter((_, i) => calls[i]?.caseIndex === caseIndex) }));
 
 let passed = 0;
 let total = 0;
@@ -73,6 +66,8 @@ for (const miss of misses)
 
 const accuracy = total === 0 ? 0 : passed / total;
 
-console.log(`\nRouting accuracy ${(accuracy * 100).toFixed(1)}% (${passed}/${total}, ${runs} run(s) per prompt, model ${config.model})`);
+console.log(
+	`\nRouting accuracy ${(accuracy * 100).toFixed(1)}% (${passed}/${total}, ${runs} run(s) per prompt, ${config.backend} ${config.model ?? "default model"})`,
+);
 
 if (accuracy < min) process.exit(1);

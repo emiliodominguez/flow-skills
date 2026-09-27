@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { findRepoRoot, SKILLS_DIR } from "../src/core/repo.js";
 import { discoverSkills } from "../src/core/registry.js";
 import { type AbCase, judgePrompt, summarizeAb, validateAbCases } from "../scripts/lib/ab-eval.js";
+import { claudeArgs, mapPool, parseClaudeOutput, requireModel } from "../scripts/lib/model.js";
 import { parsePick, routerPrompt, scoreTriggers, validateTriggers, type TriggerCases } from "../scripts/lib/trigger-eval.js";
 
 const root = findRepoRoot();
@@ -54,6 +55,7 @@ describe("trigger evals", () => {
 	it("parse picks and fail closed on unknown skills", () => {
 		expect(parsePick('```json\n{"skill": "flow-a"}\n```', ["flow-a"])).toBe("flow-a");
 		expect(parsePick('{"skill": null}', ["flow-a"])).toBeNull();
+		expect(parsePick('{"skill": "flow-a"}\n{"note": "extra"}', ["flow-a"])).toBe("flow-a");
 		expect(() => parsePick('{"skill": "flow-x"}', ["flow-a"])).toThrow(/unknown/);
 		expect(() => parsePick("no idea", ["flow-a"])).toThrow(/no JSON/);
 	});
@@ -128,5 +130,50 @@ describe("A/B evals", () => {
 		expect(summary?.with).toBe(0.5);
 		expect(summary?.tokensWithout).toBe(300);
 		expect(summary?.assertions.map((a) => a.flag)).toEqual(["ok", "passes either way", "worse with skill", "fails either way"]);
+	});
+});
+
+describe("model backends", () => {
+	it("isolate the headless CLI from settings, skills and tools", () => {
+		const args = claudeArgs("sys");
+
+		expect(args).toEqual([
+			"-p",
+			"--output-format",
+			"json",
+			"--tools",
+			"",
+			"--disable-slash-commands",
+			"--setting-sources",
+			"",
+			"--system-prompt",
+			"sys",
+		]);
+		expect(claudeArgs("sys", "haiku").slice(-2)).toEqual(["--model", "haiku"]);
+	});
+
+	it("parse CLI results and fail on error results", () => {
+		expect(parseClaudeOutput('{"result":"ok","usage":{"output_tokens":3}}')).toEqual({ text: "ok", outputTokens: 3 });
+		expect(() => parseClaudeOutput('{"result":"quota","is_error":true}')).toThrow(/quota/);
+	});
+
+	it("resolve the CLI backend without an API key", () => {
+		expect(requireModel("t", { EVAL_BACKEND: "claude", EVAL_MODEL: "haiku" })).toEqual({ backend: "claude", model: "haiku", apiKey: undefined });
+	});
+
+	it("map with bounded concurrency in input order", async () => {
+		let active = 0;
+		let peak = 0;
+		const out = await mapPool([30, 10, 20, 5], 2, async (ms, i) => {
+			active++;
+			peak = Math.max(peak, active);
+			await new Promise((resolve) => setTimeout(resolve, ms));
+			active--;
+
+			return i;
+		});
+
+		expect(out).toEqual([0, 1, 2, 3]);
+		expect(peak).toBe(2);
 	});
 });

@@ -16,9 +16,28 @@ an agent will follow it.
 `beats.json` holds short, case-insensitive, whitespace-normalized substrings. They prevent
 accidental textual omissions; they do not validate runtime behavior or quality.
 
-The optional model audit calls the Anthropic API and requires both `ANTHROPIC_API_KEY` and an available `ANTHROPIC_MODEL`.
-Missing configuration exits 2 and means **not run**. It never selects an invented or stale
-model identifier. Model calls can incur provider charges and do not run in CI.
+## Model backends
+
+The model evals (`eval:llm`, `eval:triggers`, `eval:ab`) share one client with two backends:
+
+| `EVAL_BACKEND` | Auth                                  | Notes                                                                    |
+| -------------- | ------------------------------------- | ------------------------------------------------------------------------ |
+| `api`          | `ANTHROPIC_API_KEY` plus `EVAL_MODEL` | Default. Provider charges apply.                                         |
+| `claude`       | A signed-in Claude Code CLI           | Uses your plan's limits. `EVAL_MODEL` is optional (for example `haiku`). |
+
+The `claude` backend runs the CLI headless with its default system prompt replaced and tools,
+skills and every settings source disabled, so memory files and locally installed skills cannot
+leak into a baseline. `EVAL_JUDGE_MODEL` sets a separate judge for `eval:ab`, and `--concurrency`
+bounds parallel calls. Missing configuration exits 2 and means **not run**; nothing selects an
+invented model identifier, and none of this runs in CI.
+
+```sh
+EVAL_BACKEND=claude EVAL_MODEL=haiku pnpm eval:triggers --runs 2
+EVAL_BACKEND=claude EVAL_MODEL=haiku EVAL_JUDGE_MODEL=sonnet pnpm eval:ab --runs 3 --save .eval-runs
+```
+
+Other agent CLIs are not supported yet: their skill discovery also reads the shared install
+directory with no switch to turn it off, which would contaminate the without-skill baseline.
 
 The audit requires a complete JSON array with one unique verdict per marker, a boolean
 `present`, and a nonempty reason. Empty, partial, duplicated, unknown, malformed or truncated

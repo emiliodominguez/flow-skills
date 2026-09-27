@@ -3,14 +3,14 @@ import path from "node:path";
 import { findRepoRoot, SKILLS_DIR } from "../src/core/repo.js";
 import { discoverSkills } from "../src/core/registry.js";
 import { type AbCase, type AbRun, judgePrompt, summarizeAb, validateAbCases } from "./lib/ab-eval.js";
-import { complete, numberFlag, requireModel } from "./lib/anthropic.js";
-import { parseVerdicts } from "./lib/eval-verdict.js";
+import { complete, mapPool, numberFlag, requireModel } from "./lib/model.js";
+import { parseVerdicts, type Verdict } from "./lib/eval-verdict.js";
 
 /**
  * Optional with/without comparison: answer each case with and without the skill loaded, grade both
  * against the same assertions, and flag assertions that do not discriminate. It compares written
  * answers, not tool-using agent sessions; use the behavioral scenarios for those.
- * Usage: pnpm eval:ab [case-id|skill-name] [--runs 3] [--out path]; requires ANTHROPIC_API_KEY and ANTHROPIC_MODEL.
+ * Usage: pnpm eval:ab [case-id|skill-name] [--runs 3] [--out path] [--save dir] [--concurrency 4]. EVAL_JUDGE_MODEL optionally sets a separate judge.
  */
 const INSTRUCTION =
 	"You cannot run tools here. Say exactly what you would do, in order, what you would run, and produce any artifact the request asks for.";
@@ -31,38 +31,73 @@ if (problems.length > 0) {
 
 const config = requireModel("A/B eval");
 const argv = process.argv.slice(2);
-const filter = argv.find((arg, i) => !arg.startsWith("--") && argv[i - 1] !== "--out" && argv[i - 1] !== "--runs");
+const filter = argv.find((arg, i) => !arg.startsWith("--") && !["--out", "--save", "--runs", "--concurrency"].includes(argv[i - 1] ?? ""));
 const selected = filter ? cases.filter((c) => c.id === filter || c.skill === filter) : cases;
 const runs = numberFlag(argv, "runs", 3);
 const outIndex = argv.indexOf("--out");
 const out = outIndex === -1 ? undefined : argv[outIndex + 1];
-const graded: AbRun[] = [];
+const saveIndex = argv.indexOf("--save");
+const save = saveIndex === -1 ? undefined : argv[saveIndex + 1];
+const judge = { ...config, model: process.env.EVAL_JUDGE_MODEL ?? config.model };
+const concurrency = numberFlag(argv, "concurrency", 4);
 
 if (selected.length === 0) {
 	console.error(`No case or skill named "${filter}".`);
 	process.exit(1);
 }
 
-for (const item of selected) {
-	const skill = skills.find((s) => s.name === item.skill);
-	const system = `Follow this skill for the request.\n\n${skill?.body ?? ""}\n\n${skill?.supporting ?? ""}`;
+/**
+ * Grade one answer, asking the judge once more if its first response is not a complete verdict set.
+ * A second malformed response still fails; nothing is recovered from partial output.
+ *
+ * @param item - The case being graded.
+ * @param answer - The answer text.
+ * @returns One verdict per assertion.
+ */
+async function gradeAnswer(item: AbCase, answer: string): Promise<Verdict[]> {
+	const prompt = judgePrompt(item.prompt, answer, item.assertions);
 
-	for (const variant of ["with", "without"] as const) {
-		for (let i = 0; i < runs; i++) {
-			try {
-				const answer = await complete(config, `${item.prompt}\n\n${INSTRUCTION}`, {
-					system: variant === "with" ? system : undefined,
-					maxTokens: 3000,
-				});
-				const judged = await complete(config, judgePrompt(item.prompt, answer.text, item.assertions));
-
-				graded.push({ id: item.id, variant, verdicts: parseVerdicts(judged.text, item.assertions), outputTokens: answer.outputTokens });
-			} catch (err) {
-				console.error(`! ${item.id} ${variant}: ${err instanceof Error ? err.message : String(err)}`);
-			}
-		}
+	try {
+		return parseVerdicts((await complete(judge, prompt)).text, item.assertions);
+	} catch {
+		return parseVerdicts(
+			(await complete(judge, `${prompt}\n\nYour previous reply was not valid. Output only the JSON array, nothing else.`)).text,
+			item.assertions,
+		);
 	}
 }
+
+const calls = selected.flatMap((item) =>
+	(["with", "without"] as const).flatMap((variant) => Array.from({ length: runs }, () => ({ item, variant }))),
+);
+const graded = (
+	await mapPool(calls, concurrency, async ({ item, variant }, index): Promise<AbRun | undefined> => {
+		const skill = skills.find((s) => s.name === item.skill);
+		const system = `Follow this skill for the request.\n\n${skill?.body ?? ""}\n\n${skill?.supporting ?? ""}`;
+
+		try {
+			const answer = await complete(config, `${item.prompt}\n\n${INSTRUCTION}`, {
+				system: variant === "with" ? system : undefined,
+				maxTokens: 3000,
+			});
+			const verdicts = await gradeAnswer(item, answer.text);
+
+			if (save) {
+				fs.mkdirSync(save, { recursive: true });
+				fs.writeFileSync(
+					path.join(save, `${item.id}-${variant}-${index}.json`),
+					JSON.stringify({ answer: answer.text, verdicts }, null, "\t"),
+				);
+			}
+
+			return { id: item.id, variant, verdicts, outputTokens: answer.outputTokens };
+		} catch (err) {
+			console.error(`! ${item.id} ${variant}: ${err instanceof Error ? err.message : String(err)}`);
+
+			return undefined;
+		}
+	})
+).filter((run): run is AbRun => run !== undefined);
 
 /**
  * Format a fraction as a percentage.
@@ -74,7 +109,10 @@ function pct(value: number): string {
 	return `${Math.round(value * 100)}%`;
 }
 
-const lines = [`# A/B eval (${new Date().toISOString().slice(0, 10)}, model ${config.model}, ${runs} run(s) per variant)`, ""];
+const lines = [
+	`# A/B eval (${new Date().toISOString().slice(0, 10)}, ${config.backend} ${config.model ?? "default model"}, judge ${judge.model ?? "default"}, ${runs} run(s) per variant)`,
+	"",
+];
 let flagged = 0;
 
 for (const summary of summarizeAb(selected, graded)) {

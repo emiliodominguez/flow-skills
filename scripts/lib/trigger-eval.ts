@@ -82,7 +82,7 @@ export function routerPrompt(skills: { name: string; description: string }[], re
 		"",
 		`User request: ${request}`,
 		"",
-		'Which single skill would you load first? Answer ONLY with JSON: {"skill": "<name>"} or {"skill": null}.',
+		'Which single skill best fits this request? Choose null when none fits. Answer ONLY with JSON: {"skill": "<name>"} or {"skill": null}.',
 	].join("\n");
 }
 
@@ -94,7 +94,7 @@ export function routerPrompt(skills: { name: string; description: string }[], re
  * @returns The picked skill, or null for no skill.
  */
 export function parsePick(text: string, names: string[]): string | null {
-	const match = /\{[\s\S]*\}/.exec(text);
+	const match = /\{[^{}]*\}/.exec(text);
 
 	if (!match) throw new Error("Router returned no JSON object.");
 

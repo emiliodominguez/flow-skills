@@ -2,11 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { findRepoRoot, SKILLS_DIR } from "../src/core/repo.js";
 import { discoverSkills } from "../src/core/registry.js";
-import { complete, type ModelConfig, requireModel } from "./lib/anthropic.js";
+import { complete, type ModelConfig, requireModel } from "./lib/model.js";
 import { parseVerdicts, type Verdict } from "./lib/eval-verdict.js";
 
 // Optional model audit of instruction coverage. It does not execute an agent task.
-// Usage: pnpm eval:llm [skill-name]; requires ANTHROPIC_API_KEY and ANTHROPIC_MODEL.
+// Usage: pnpm eval:llm [skill-name]; see scripts/lib/model.ts for backends.
 
 /**
  * Ask the judge model which beats a skill's instructions would exhibit.

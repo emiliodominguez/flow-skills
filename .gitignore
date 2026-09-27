@@ -9,3 +9,6 @@ coverage/
 # Build output of the retired installer CLI; remove any local copy.
 dist/
 .pnpm-store/
+
+# local eval run output
+.eval-runs/

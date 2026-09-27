@@ -74,7 +74,8 @@ export function validateAbCases(cases: AbCase[], names: string[]): string[] {
  */
 export function judgePrompt(prompt: string, response: string, assertions: string[]): string {
 	return [
-		"Grade a coding agent's answer. Judge only what the answer actually says it does or produces, strictly and literally.",
+		"Grade a coding agent's answer. The agent had no tools, so it could not execute anything: count a concrete step it says it",
+		"would take, or an artifact it wrote, as meeting an assertion. Judge strictly and literally; vague or generic mentions do not count.",
 		"",
 		"SITUATION:",
 		prompt,

@@ -1,50 +1,51 @@
 # The workflow
 
-Choose the smallest workflow that has a checkable outcome. The suite separates exploration,
-execution and verification without forcing a new session or a fixed agent panel.
+Pick the smallest flow that still ends in something you can check. The suite keeps exploring,
+building and verifying separate, but it never forces a new session or a fixed panel of agents.
 
-| Situation                                | Flow                                                          |
-| ---------------------------------------- | ------------------------------------------------------------- |
-| Small understood change                  | `ed-work` with relevant evidence                              |
-| Unclear outcome                          | `ed-brainstorm`, optionally `ed-prototype`, then `ed-plan`    |
-| Unfamiliar repository                    | `ed-onboard`, then a task-specific `ed-repo-brief` if useful  |
-| Multi-step direct work                   | `ed-plan` then `ed-work`                                      |
-| Dependent work needing independent gates | `ed-plan` then `ed-orchestrate` with `ed-verify`              |
-| Repeated mismatch with local conventions | `ed-repo-brief` then `ed-specialize`                          |
-| Review-only request                      | `ed-review` or `ed-adversarial-review`, ending with findings  |
-| Already authorized delivery              | `ed-commit` / `ed-ship` through the requested terminal action |
+## Choose a flow
+
+| Situation                                   | Flow                                                             |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| Small, well-understood change               | `flow-work`, with evidence that fits the change                  |
+| The outcome is still unclear                | `flow-brainstorm`, optionally `flow-prototype`, then `flow-plan` |
+| Unfamiliar repository                       | `flow-onboard`, then a task-specific `flow-repo-brief` if useful |
+| Several steps, one executor                 | `flow-plan`, then `flow-work`                                    |
+| Dependent steps that need independent gates | `flow-plan`, then `flow-orchestrate` with `flow-verify`          |
+| Agents keep missing local conventions       | `flow-repo-brief`, then `flow-specialize`                        |
+| Review only                                 | `flow-review` or `flow-adversarial-review`, ending with findings |
+| Delivery the user already asked for         | `flow-commit` or `flow-ship`, up to the requested stage          |
 
 ## Contracts and evidence
 
-A task defines its outcome, owned files, dependencies, acceptance criteria, evidence and stop
-conditions. Workers return artifacts. An independent verifier decides whether a required gate
-accepts the current artifact. Pragmatic verification is appropriate for decision artifacts;
-production code uses production criteria and required repository checks.
+Every task states its outcome, the files it owns, its dependencies, acceptance criteria, the
+evidence required and when to stop. Workers produce artifacts; a verifier decides whether the
+current artifact meets the gate.
 
 ```mermaid
 flowchart TD
   A["Ready task"] --> B["Worker artifact"]
   B --> C["Independent verification"]
-  C -->|ACCEPT| D["Release dependents"]
-  C -->|REJECT| E["Correction within budget"]
+  C -->|ACCEPT| D["Release dependent tasks"]
+  C -->|REJECT| E["Correct within the attempt budget"]
   E --> B
-  C -->|BLOCKED| F["Record prerequisite"]
+  C -->|BLOCKED| F["Record the missing prerequisite"]
 ```
 
-An available subagent capability and applicable authorization are prerequisites for claiming
-independent verification. Running two personas in one context is still one reviewer. Parallel
-workers need independent tasks, disjoint writes and integrated verification afterward.
+- **Pragmatic** verification suits decision artifacts such as research or a design choice.
+- **Production** verification applies to shipped code: behavior, repository checks and runtime evidence.
+- **Independence** needs a separate agent or a fresh context. Two personas in one context are still one reviewer.
+- **Parallel work** needs independent tasks, disjoint files, and a combined check afterward.
 
 ## Continuity
 
-A plan can be used in the same session or a fresh session. Current user steering remains
-binding. Handoffs preserve source revisions, evidence, decisions, pending work and attempts
-already consumed. Changed inputs invalidate affected acceptance, not every unrelated result.
-An ignored artifact stays local unless it is actually shared.
+- A plan works in the same session or a new one; the user's latest instructions always win.
+- Handoffs keep source revisions, evidence, decisions, pending work and attempts already used.
+- A changed input invalidates only the acceptance that depended on it.
+- A git-ignored artifact stays on the machine that wrote it unless someone shares it.
 
-## Keep adoption selective
+## Keep the install small
 
-Use profiles to limit the discovery surface. The original 24 skills retain their names;
-four added workflows provide orchestration, verification, repository briefs and specialization.
-See [the catalog](SKILLS.md), [handoff table](SKILL-MAP.md), [worked orchestration example](ORCHESTRATION.md)
-and [current-practices notes](PRACTICES.md).
+Every installed skill's description sits in the agent's context. Install a
+[profile](../profiles.json) when you only need part of the workflow. See the
+[catalog](SKILLS.md), the [handoff map](SKILL-MAP.md) and the [orchestration example](ORCHESTRATION.md).

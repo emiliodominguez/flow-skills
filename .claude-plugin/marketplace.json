@@ -1,0 +1,15 @@
+{
+	"name": "flow-skills",
+	"description": "Portable, agent-agnostic workflow skills for AI coding agents.",
+	"owner": {
+		"name": "Emilio Dominguez"
+	},
+	"plugins": [
+		{
+			"name": "flow-skills",
+			"description": "Portable, agent-agnostic workflow skills: plan, build, test, review, verify, orchestrate and ship.",
+			"source": "./",
+			"category": "development"
+		}
+	]
+}

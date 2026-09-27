@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { findRepoRoot } from "../src/core/config.js";
+import { findRepoRoot } from "../src/core/repo.js";
 
 interface Scenario {
 	id: string;

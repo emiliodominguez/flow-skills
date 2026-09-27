@@ -1,0 +1,25 @@
+{
+	"name": "flow-skills",
+	"displayName": "Flow Skills",
+	"description": "Portable, agent-agnostic workflow skills: plan, build, test, review, verify, orchestrate and ship.",
+	"version": "0.6.0",
+	"author": {
+		"name": "Emilio Dominguez"
+	},
+	"homepage": "https://github.com/emiliodominguez/flow-skills",
+	"repository": "https://github.com/emiliodominguez/flow-skills",
+	"license": "MIT",
+	"keywords": [
+		"agent-skills",
+		"skills",
+		"ai-agents",
+		"coding-agents",
+		"agentic-workflows",
+		"developer-workflow",
+		"planning",
+		"code-review",
+		"verification",
+		"orchestration",
+		"llm"
+	]
+}

@@ -1,11 +1,11 @@
 node_modules/
-dist/
 coverage/
 *.log
 .DS_Store
 
-# ed-plan writes working plans here; keep them local
+# flow-plan writes working plans here; keep them local
 .plans/
 
-# local prefs override (the committed default is agent-skills.config.json)
-.agent-skills.local.json
+# Build output of the retired installer CLI; remove any local copy.
+dist/
+.pnpm-store/

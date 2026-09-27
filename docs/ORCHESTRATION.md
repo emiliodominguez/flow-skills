@@ -1,11 +1,11 @@
 # A verified run
 
-Use `ed-orchestrate` when a defined plan has dependencies whose mistakes would propagate.
-It supplies a coordination protocol, not a scheduler or a background service.
+Use `flow-orchestrate` when a plan has dependent steps and a mistake in one would spread to the
+next. It gives the agent a coordination protocol; it is not a scheduler or a background service.
 
-## Example: add an export capability
+## 1. Write the contract
 
-Create a plan with `ed-plan`. A minimal meaningful contract looks like this:
+Create the plan with `flow-plan`. A small but complete contract for an export feature:
 
 ```markdown
 # Plan - account export
@@ -16,7 +16,7 @@ Create a plan with `ed-plan`. A minimal meaningful contract looks like this:
 Goal: a user can export only their own records as JSON.
 Non-goals: new authentication, UI redesign, production deployment.
 Limits: three execution attempts per task; two active workers; 30 minute dispatch budget.
-Profile budget: inherit the current session; higher-cost profiles require current-user approval.
+Profile budget: inherit the current session; higher-cost profiles need the user's approval.
 
 - [ ] T1 - implement the export use case
       Depends on: none
@@ -36,38 +36,39 @@ Profile budget: inherit the current session; higher-cost profiles require curren
       Depends on: T2
       Touches: export control and browser tests
       Acceptance: download, failure and busy states work in supported browsers
-      Verify: production; actual browser interaction and required checks
+      Verify: production; real browser interaction and required checks
 
 Integrated acceptance: UI through route to data respects ownership and produces valid JSON.
 ```
 
-Replace example paths, commands and acceptance details with actual repository evidence before
-execution. This sketch is explanatory; it is not an executable plan for every repository.
-Execution fields are optional. Mark them required or preferred and name any fallback
-explicitly. They are separate from the pragmatic or production verification profile. The
-orchestrator resolves portable display labels to host identifiers; repository text alone does
-not authorize a higher-cost profile.
+This is an illustration. Replace paths, commands and acceptance details with your repository's
+real ones before running it.
 
-## Run and resume
+The execution lines are optional. Mark each one `required` or `preferred` and name a fallback.
+They choose how a worker or verifier runs, which is separate from the pragmatic or production
+verification profile. The orchestrator maps the labels to whatever the current agent supports,
+and plan text alone never authorizes a more expensive profile.
 
-```text
-/ed-orchestrate .plans/account-export.md
-```
+## 2. Run it
 
-Use `$ed-orchestrate` in Codex. Supply a repository brief and specialist briefs when they reduce
-repeated discovery. An explicit invocation never creates a missing agent type or permission.
+Invoke `flow-orchestrate` with the plan path, for example `.plans/account-export.md`. A
+repository brief (`flow-repo-brief`) and specialist briefs (`flow-specialize`) help when agents
+would otherwise repeat the same discovery. Invoking the skill never creates an agent type or
+grants a permission the environment doesn't already have.
 
-The run records each worker artifact, verifier verdict and inspected revision. A worker reports
-what it changes and checks; it cannot mark its own dependent phase accepted. A rejected task
-receives the exact failed criterion and reproduction, with the same acceptance contract.
+- Each worker returns an artifact, and a separate verifier issues a verdict for the inspected revision.
+- A worker cannot accept its own task or release the tasks that depend on it.
+- A rejected task goes back with the exact failed criterion and a reproduction. The contract stays the same.
 
-A restart reads the existing run directory. It preserves retry counts, reconciles in-flight
-operations and invalidates evidence only where relevant inputs change. A missing required tool
-or exhausted budget produces a concrete blocked state instead of an endless correction loop.
+## 3. Resume
 
-## Completion
+A restart reads the existing run records. Attempt counts carry over, in-flight operations are
+reconciled, and only evidence whose inputs changed is invalidated. A missing tool or an
+exhausted budget ends in a clear `BLOCKED` state, not an endless correction loop.
 
-The run completes when all requested tasks and integrated acceptance pass. Its report names
+## 4. Finish
+
+The run finishes when every requested task and the integrated acceptance pass. The report lists
 accepted work, evidence, remaining gaps and the actual delivery state. Review, merge, publish
-and deploy keep the user's existing authorization boundaries. Direct execution is available
-when independent delegation is unavailable, but must be labeled as self-verified.
+and deploy still need the user's authorization. When independent delegation isn't available,
+direct execution is fine, but it must be labeled self-verified.

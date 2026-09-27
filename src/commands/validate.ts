@@ -1,26 +1,19 @@
 import path from "node:path";
 import pc from "picocolors";
-import { findRepoRoot, loadConfig } from "../core/config.js";
+import { findRepoRoot, SKILLS_DIR } from "../core/repo.js";
 import { discoverSkills } from "../core/registry.js";
-import { validateReferences, validateSkill, type Issue, type Skill } from "../core/skill.js";
+import { validateCorpus, validateReferences, validateSkill, type Issue, type Skill } from "../core/skill.js";
+import { validateDistribution } from "../core/distribution.js";
 import { log, sym, sanitize } from "../core/logger.js";
 
 /**
- * Run all validations over an already-loaded skill set.
+ * Run all skill validations over an already-loaded skill set.
  *
  * @param skills - The loaded skills.
  * @returns All issues (errors + warnings) across every skill.
  */
 export function collectIssuesFor(skills: Skill[]): Issue[] {
-	const issues = skills.flatMap((skill) => validateSkill(skill));
-
-	if (skills.length === 0) {
-		issues.push({ skill: "corpus", level: "error", rule: "corpus.empty", message: "No skills found; check skillsDir and the source checkout." });
-	}
-
-	issues.push(...validateReferences(skills));
-
-	return issues;
+	return [...skills.flatMap((skill) => validateSkill(skill)), ...validateCorpus(skills), ...validateReferences(skills)];
 }
 
 /**
@@ -37,14 +30,16 @@ export function validateAll(skillsDir: string): { skills: Skill[]; issues: Issue
 }
 
 /**
- * `validate` - structural checks on every skill; exits non-zero on any error.
+ * `validate` - structural checks on every skill and the distribution manifests; exits
+ * non-zero on any error.
  *
  * @param opts - `strict` to also fail on warnings.
  */
 export function validateCommand(opts: { strict?: boolean }): void {
 	const root = findRepoRoot();
-	const config = loadConfig(root);
-	const { skills, issues } = validateAll(path.join(root, config.skillsDir));
+	const { skills, issues } = validateAll(path.join(root, SKILLS_DIR));
+
+	issues.push(...validateDistribution(root, skills));
 
 	const errors = issues.filter((i) => i.level === "error");
 	const warns = issues.filter((i) => i.level === "warn");
@@ -58,7 +53,9 @@ export function validateCommand(opts: { strict?: boolean }): void {
 		console.log(`  ${tag}  ${pc.bold(sanitize(issue.skill).padEnd(width))}  ${pc.dim(issue.rule)} ${pc.dim(sym.dot)} ${sanitize(issue.message)}`);
 	}
 
-	log.heading(`Checked ${skills.length} skill${skills.length === 1 ? "" : "s"}`);
+	const descriptionChars = skills.reduce((sum, skill) => sum + String(skill.frontmatter.description ?? "").length, 0);
+
+	log.heading(`Checked ${skills.length} skill${skills.length === 1 ? "" : "s"} ${sym.dot} ${descriptionChars} description chars`);
 
 	if (errors.length === 0 && warns.length === 0) log.ok("all clean");
 	else log.info(`${errors.length} error${errors.length === 1 ? "" : "s"} ${sym.dot} ${warns.length} warning${warns.length === 1 ? "" : "s"}`);

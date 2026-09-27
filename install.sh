@@ -1,60 +1,50 @@
 #!/usr/bin/env sh
-# Bootstrap installer for agent-skills.
-# Uses the shipped bundle in packages; source checkouts install deps and build first.
-# Everything after `--` (or any extra args) is passed through to the CLI.
+# Install flow-skills with the open skills CLI (https://skills.sh), for any supported agent.
+# A thin wrapper over "npx skills add" that adds profiles and removes installs left by the
+# retired agent-skills CLI. Arguments after "--" go to "npx skills add" unchanged.
 #
-#   ./install.sh                      # install all skills into Claude Code + Codex (symlink)
-#   ./install.sh -- -t cursor codex   # install into Cursor + Codex
-#   ./install.sh -- --copy            # copy instead of symlink
+#   ./install.sh                           # all skills, user scope; the CLI asks which agents
+#   ./install.sh --profile core            # one profile from profiles.json (repeatable)
+#   ./install.sh --project                 # into the current project instead of user scope
+#   ./install.sh --local                   # from this checkout instead of GitHub
+#   ./install.sh -- -a <agent>... -y       # specific agents, no prompts
+#   ./install.sh --dry-run                 # print the command without running it
 #
 set -eu
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-cd "$ROOT"
+. "$ROOT/scripts/common.sh"
 
-say() { printf '\033[36m›\033[0m %s\n' "$1"; }
-die() { printf '\033[31m✗\033[0m %s\n' "$1" >&2; exit 1; }
+SOURCE="$REPO_SOURCE"
+SCOPE="-g"
+SKILLS=""
+DRY_RUN=0
 
-command -v node >/dev/null 2>&1 || die "Node.js >= 22.12 is required. Install it from https://nodejs.org and re-run."
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--profile)
+			[ $# -ge 2 ] || die "--profile needs a name"
+			SKILLS="$SKILLS $(profile_skills "$2")" || exit 1
+			shift 2
+			;;
+		--project) SCOPE="" && shift ;;
+		--local) SOURCE="$ROOT" && shift ;;
+		--dry-run) DRY_RUN=1 && shift ;;
+		--) shift && break ;;
+		-h | --help) sed -n '2,13p' "$0" && exit 0 ;;
+		*) die "Unknown option $1 (pass skills CLI flags after --)" ;;
+	esac
+done
 
-node -e 'const [major, minor] = process.versions.node.split(".").map(Number); process.exit(major > 22 || (major === 22 && minor >= 12) ? 0 : 1)' ||
-	die "Node.js >= 22.12 required (found $(node -v))."
+require_node
+remove_legacy
 
-if [ -f "$ROOT/src/index.ts" ]; then
-	EXPECTED_PNPM_VERSION="$(node -p 'require("./package.json").packageManager.split("@")[1].split("+")[0]')"
-	if command -v pnpm >/dev/null 2>&1; then
-		PNPM_RUNNER="direct"
-	elif command -v corepack >/dev/null 2>&1; then
-		say "pnpm not found - using the pinned version through corepack"
-		PNPM_RUNNER="corepack"
-	elif command -v npx >/dev/null 2>&1; then
-		say "pnpm and corepack not found - using the pinned version through npx"
-		PNPM_RUNNER="npx"
-	else
-		die "Could not run pnpm $EXPECTED_PNPM_VERSION. Install pnpm, Corepack, or npm: https://pnpm.io/installation"
-	fi
-	run_pnpm() {
-		case "$PNPM_RUNNER" in
-			direct) pnpm "$@" ;;
-			corepack) corepack pnpm "$@" ;;
-			npx) npx --yes "pnpm@$EXPECTED_PNPM_VERSION" "$@" ;;
-		esac
-	}
-	PNPM_VERSION="$(run_pnpm --version)"
-	[ "$PNPM_VERSION" = "$EXPECTED_PNPM_VERSION" ] || die "pnpm $EXPECTED_PNPM_VERSION required (found $PNPM_VERSION)."
-
-	say "Installing dependencies"
-	run_pnpm install --silent
-
-	say "Building the CLI"
-	run_pnpm run build >/dev/null
-elif [ ! -f "$ROOT/dist/index.js" ]; then
-	die "Could not find the CLI bundle. Reinstall agent-skills and try again."
+set -- add "$SOURCE" $SCOPE "$@"
+if [ -n "$SKILLS" ]; then
+	# Profiles overlap; install each skill once.
+	set -- "$@" --skill $(printf '%s\n' $SKILLS | sort -u)
 fi
 
-say "Installing skills"
-# Drop a leading `--` if present, then pass the rest to the CLI.
-if [ "${1:-}" = "--" ]; then shift; fi
-node "$ROOT/dist/index.js" install "$@"
-
-printf '\033[32m✓\033[0m Done. Try: \033[1mnode "%s/dist/index.js" list --targets\033[0m\n' "$ROOT"
+say "npx $SKILLS_CLI $*"
+[ "$DRY_RUN" = 1 ] && exit 0
+npx -y "$SKILLS_CLI" "$@"

@@ -4,9 +4,11 @@
 
 ## Checklist
 
-- [ ] `pnpm typecheck` and `pnpm lint` pass
-- [ ] `pnpm validate` is clean (or new warnings are intentional)
-- [ ] `pnpm test` is green (added a regression test for any bug fix)
-- [ ] `pnpm run format:check` passes
-- [ ] If skills changed: ran `pnpm docs:gen` and committed `docs/SKILLS.md`
-- [ ] If a target adapter changed: ran `pnpm smoke`
+- [ ] `pnpm check` passes
+- [ ] Skill changes: `pnpm docs:gen` output committed, and the skill tried in at least one agent (name it below)
+- [ ] Install script or manifest changes: `pnpm smoke` passes
+- [ ] User-facing change: changeset added
+
+## Tested with
+
+<!-- Agents and scenarios you tried, and what you didn't check. -->

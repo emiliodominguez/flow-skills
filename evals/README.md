@@ -14,7 +14,7 @@ an agent will follow it.
 `beats.json` holds short, case-insensitive, whitespace-normalized substrings. They prevent
 accidental textual omissions; they do not validate runtime behavior or quality.
 
-The optional model audit requires both `ANTHROPIC_API_KEY` and an available `ANTHROPIC_MODEL`.
+The optional model audit calls the Anthropic API and requires both `ANTHROPIC_API_KEY` and an available `ANTHROPIC_MODEL`.
 Missing configuration exits 2 and means **not run**. It never selects an invented or stale
 model identifier. Model calls can incur provider charges and do not run in CI.
 
@@ -29,9 +29,9 @@ evidence from becoming a passing score; it does not turn the audit into behavior
 directory; the preparer refuses to replace an existing path and makes no network calls:
 
 ```sh
-pnpm eval:prepare staged-review /tmp/agent-skills-review-example
-pnpm eval:prepare contract-verification /tmp/agent-skills-verifier-example
-pnpm eval:prepare resume-budget /tmp/agent-skills-resume-example
+pnpm eval:prepare staged-review /tmp/flow-skills-review-example
+pnpm eval:prepare contract-verification /tmp/flow-skills-verifier-example
+pnpm eval:prepare resume-budget /tmp/flow-skills-resume-example
 ```
 
 Use a fresh agent with only the printed prompt, named `SKILL.md`, fixture path and relevant

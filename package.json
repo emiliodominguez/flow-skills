@@ -1,58 +1,42 @@
 {
-	"name": "@emiliodominguez/agent-skills",
+	"name": "flow-skills",
 	"version": "0.6.0",
-	"description": "Author agent skills once and install them into Claude Code, Codex, Cursor, Windsurf, Copilot, Zed, aider, Cline and Continue with a tested CLI.",
-	"type": "module",
-	"publishConfig": {
-		"access": "public"
-	},
+	"private": true,
+	"description": "Portable, agent-agnostic workflow skills for AI coding agents: plan, build, test, review, verify and ship. Install with npx skills.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/emiliodominguez/agent-skills.git"
+		"url": "git+https://github.com/emiliodominguez/flow-skills.git"
 	},
-	"homepage": "https://github.com/emiliodominguez/agent-skills#readme",
+	"homepage": "https://github.com/emiliodominguez/flow-skills#readme",
 	"bugs": {
-		"url": "https://github.com/emiliodominguez/agent-skills/issues"
+		"url": "https://github.com/emiliodominguez/flow-skills/issues"
 	},
-	"bin": {
-		"agent-skills": "./dist/index.js"
-	},
-	"files": [
-		"dist",
-		"skills",
-		"templates",
-		"install.sh",
-		"uninstall.sh",
-		"agent-skills.config.json",
-		"agent-skills.schema.json"
-	],
+	"type": "module",
 	"engines": {
 		"node": ">=22.12.0"
 	},
 	"packageManager": "pnpm@11.22.0+sha512.1ff870c4c6133dfd88fb2afc46dd13d47f09c9794b438c6fdb47ca98caf3bc16381ee0be93a091b8e3824cf01f889f46d7d9e20910fb0be1ab0fb5baa80dd621",
 	"scripts": {
 		"skills": "node --import tsx src/index.ts",
-		"build": "tsup",
 		"dev": "node --import tsx src/index.ts",
 		"validate": "node --import tsx src/index.ts validate",
 		"docs:gen": "node --import tsx scripts/gen-skill-docs.ts",
 		"eval:llm": "node --import tsx scripts/eval-llm.ts",
 		"changeset": "changeset",
-		"version:packages": "changeset version",
-		"release": "changeset publish",
+		"version:packages": "changeset version && node --import tsx scripts/sync-plugin-version.ts",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
-		"smoke": "sh scripts/smoke-pack.sh",
 		"typecheck": "tsc -p tsconfig.check.json",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepack": "pnpm run build",
+		"check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run validate && pnpm run test:coverage && pnpm run docs:check",
 		"prepare": "husky",
 		"docs:check": "node --import tsx scripts/gen-skill-docs.ts --check",
-		"eval:prepare": "node --import tsx scripts/prepare-eval.ts"
+		"eval:prepare": "node --import tsx scripts/prepare-eval.ts",
+		"smoke": "sh scripts/smoke-install.sh"
 	},
 	"lint-staged": {
 		"*.{ts,js}": [
@@ -62,7 +46,6 @@
 		"*.{json,md,yml,yaml}": "prettier --write"
 	},
 	"dependencies": {
-		"@clack/prompts": "^1.8.1",
 		"commander": "^15.0.0",
 		"js-yaml": "^5.4.2",
 		"picocolors": "^1.1.1"
@@ -78,7 +61,6 @@
 		"husky": "^9.1.7",
 		"lint-staged": "^17.5.1",
 		"prettier": "^3.9.7",
-		"tsup": "^8.5.1",
 		"tsx": "^4.23.13",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.70.0",
@@ -86,14 +68,17 @@
 		"vitest": "^5.0.1"
 	},
 	"keywords": [
-		"claude-code",
 		"agent-skills",
-		"cursor",
-		"codex",
-		"windsurf",
-		"ai-agents",
 		"skills",
-		"cli"
+		"ai-agents",
+		"coding-agents",
+		"agentic-workflows",
+		"developer-workflow",
+		"planning",
+		"code-review",
+		"verification",
+		"orchestration",
+		"llm"
 	],
 	"license": "MIT"
 }

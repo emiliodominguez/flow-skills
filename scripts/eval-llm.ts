@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { findRepoRoot, loadConfig } from "../src/core/config.js";
+import { findRepoRoot, SKILLS_DIR } from "../src/core/repo.js";
 import { discoverSkills } from "../src/core/registry.js";
 import { parseVerdicts, type Verdict } from "./lib/eval-verdict.js";
 
@@ -67,7 +67,7 @@ if (!apiKey || !MODEL) {
 }
 
 const root = findRepoRoot();
-const skills = discoverSkills(path.join(root, loadConfig(root).skillsDir));
+const skills = discoverSkills(path.join(root, SKILLS_DIR));
 const beats = JSON.parse(fs.readFileSync(path.join(root, "evals", "beats.json"), "utf8")) as Record<string, string[]>;
 const only = process.argv[2];
 const targets = only ? skills.filter((s) => s.name === only) : skills;

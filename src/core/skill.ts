@@ -25,6 +25,8 @@ export interface Skill {
 	raw: string;
 	/** YAML parse failure captured so validation can report it without aborting the corpus scan. */
 	parseError?: string;
+	/** Concatenated Markdown of supporting files under `references/`, scanned for skill references. */
+	supporting: string;
 }
 
 /** A validation finding against a skill. `error` fails CI; `warn` is advisory. */
@@ -35,11 +37,32 @@ export interface Issue {
 	message: string;
 }
 
-/** Max description length before we warn - long descriptions bloat the model's skill index. */
-export const DESCRIPTION_WARN_LIMIT = 1024;
+/** Hard limit from the Agent Skills spec; hosts truncate or reject beyond it. */
+export const DESCRIPTION_MAX_LENGTH = 1024;
+
+/** Descriptions stay in every session's context, so each one should stay near this size. */
+export const DESCRIPTION_TARGET_LENGTH = 280;
 
 /** Below this, a description gives the model too little to match the skill on. */
 export const DESCRIPTION_MIN_LENGTH = 80;
+
+/**
+ * Combined description budget for the whole corpus. Hosts cap the always-loaded skill index
+ * (some at about 8,000 characters) and shorten or drop skills beyond it.
+ */
+export const DESCRIPTION_CORPUS_BUDGET = 8000;
+
+/** The spec recommends keeping SKILL.md under 500 lines and roughly 5,000 tokens. */
+export const BODY_MAX_LINES = 500;
+
+/** A conservative 4-characters-per-token estimate of the 5,000-token body guidance. */
+export const BODY_MAX_CHARS = 20000;
+
+/** The only frontmatter fields allowed: the Agent Skills specification, so every host reads skills the same way. */
+export const SPEC_FIELDS = ["name", "description", "license", "compatibility", "metadata", "allowed-tools"];
+
+/** Verbs that introduce a description's handoff clause; the docs skill map is parsed from it. */
+export const HANDOFF_VERB = /\b(hands? (?:off|back) to|routes? to|feeds?)\b/i;
 
 /** Low-value filler that weakens instructions; flagged so skills stay crisp. */
 export const WEASEL_WORDS = ["simply", "basically", "effortlessly", "trivially", "needless to say", "as you can see", "it goes without saying"];
@@ -48,8 +71,8 @@ export const WEASEL_WORDS = ["simply", "basically", "effortlessly", "trivially",
 export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
- * Parse a SKILL.md's leading `---` frontmatter as YAML, matching the shared agent
- * skills format consumed by Claude Code and Codex.
+ * Parse a SKILL.md's leading `---` frontmatter as YAML, matching the shared Agent
+ * Skills format.
  *
  * @param raw - Full SKILL.md contents.
  * @returns The parsed key/value data and the body with frontmatter stripped.
@@ -91,6 +114,15 @@ export function loadSkill(dir: string): Skill {
 
 	const raw = fs.readFileSync(file, "utf8");
 	const { data, body, error } = parseFrontmatter(raw);
+	const referencesDir = path.join(dir, "references");
+	const supporting = fs.existsSync(referencesDir)
+		? fs
+				.readdirSync(referencesDir)
+				.filter((entry) => entry.endsWith(".md"))
+				.sort()
+				.map((entry) => fs.readFileSync(path.join(referencesDir, entry), "utf8"))
+				.join("\n")
+		: "";
 
 	return {
 		name: path.basename(dir),
@@ -100,12 +132,14 @@ export function loadSkill(dir: string): Skill {
 		body,
 		raw,
 		parseError: error,
+		supporting,
 	};
 }
 
 /**
- * Structural validation of one skill (frontmatter shape, naming, description).
- * Cross-skill checks (dangling references) live in {@link validateReferences}.
+ * Structural validation of one skill (frontmatter shape, naming, description, body size,
+ * supporting-file links). Cross-skill checks live in
+ * {@link validateReferences} and {@link validateCorpus}.
  *
  * @param skill - A loaded skill.
  * @returns Any issues found (empty array = clean).
@@ -134,8 +168,14 @@ export function validateSkill(skill: Skill): Issue[] {
 	} else {
 		if (description.includes("\n")) add("error", "description.single-line", "description must be a single line");
 
-		if (description.length > DESCRIPTION_WARN_LIMIT) {
-			add("error", "description.length", `description is ${description.length} chars (> ${DESCRIPTION_WARN_LIMIT}); consider trimming`);
+		if (description.length > DESCRIPTION_MAX_LENGTH) {
+			add("error", "description.length", `description is ${description.length} chars (> ${DESCRIPTION_MAX_LENGTH})`);
+		} else if (description.length > DESCRIPTION_TARGET_LENGTH) {
+			add(
+				"warn",
+				"description.budget",
+				`description is ${description.length} chars (> ${DESCRIPTION_TARGET_LENGTH}); it is loaded in every session`,
+			);
 		}
 
 		if (description.length < DESCRIPTION_MIN_LENGTH) {
@@ -146,17 +186,27 @@ export function validateSkill(skill: Skill): Issue[] {
 			);
 		}
 
-		// Name both hosts' explicit invocation syntax so users can discover and invoke the skill.
-		if (name && !description.toLowerCase().includes(`/${name.toLowerCase()}`)) {
-			add("warn", "description.trigger.claude", `description should name /${skill.name} for Claude Code invocation`);
-		}
+		if (!HANDOFF_VERB.test(description))
+			add("warn", "description.handoff", "description has no handoff clause (hands off to / routes to / feeds)");
+	}
 
-		if (name && !description.toLowerCase().includes(`$${name.toLowerCase()}`)) {
-			add("warn", "description.trigger.codex", `description should name $${skill.name} for Codex invocation`);
-		}
+	// Host-specific extensions make a skill behave differently per agent; keep the corpus portable.
+	for (const key of Object.keys(fm)) {
+		if (!SPEC_FIELDS.includes(key))
+			add("error", "frontmatter.portable", `\`${key}\` is not an Agent Skills spec field; skills must stay host-agnostic`);
+	}
+
+	const lines = skill.body.split("\n").length;
+
+	if (lines > BODY_MAX_LINES || skill.body.length > BODY_MAX_CHARS) {
+		add("warn", "body.size", `body is ${lines} lines / ${skill.body.length} chars; move situational material to references/`);
 	}
 
 	if (skill.body.length < 40) add("warn", "body.thin", "body is very short - is this skill complete?");
+
+	for (const link of localLinks(skill.body)) {
+		if (skill.dir && !fs.existsSync(path.join(skill.dir, link))) add("error", "link.missing", `links to ${link}, which does not exist`);
+	}
 
 	const weasel = WEASEL_WORDS.filter((w) => new RegExp(`\\b${w}\\b`, "i").test(skill.body));
 
@@ -171,19 +221,59 @@ export function validateSkill(skill: Skill): Issue[] {
 }
 
 /**
- * Extract `/skill-ref` and `$skill-ref` tokens (without the sigil) from prose - the one
- * grammar for "what looks like a skill reference", shared by the dangling-reference
- * lint here and the docs handoff-map generator so they never disagree.
+ * Relative Markdown link targets in a body, ignoring URLs, anchors and absolute paths.
  *
- * @param text - Prose that may mention Claude Code or Codex skill references.
- * @returns The referenced tokens, in order (with duplicates).
+ * @param body - Skill Markdown body.
+ * @returns Link paths relative to the skill directory, without fragments.
  */
-export function extractSkillRefs(text: string): string[] {
-	return [...text.matchAll(/(?:\/|\$)([a-z][a-z0-9-]{2,})/g)].map((m) => m[1]!);
+export function localLinks(body: string): string[] {
+	return [...body.matchAll(/\]\(([^)\s]+)\)/g)]
+		.map((m) => m[1]!.split("#")[0]!)
+		.filter((link) => link !== "" && !/^[a-z][a-z0-9+.-]*:/i.test(link) && !link.startsWith("/"));
 }
 
 /**
- * Cross-skill reference check: flags `/name` mentions that look like a skill in
+ * Corpus-wide checks: an empty corpus, and the combined description budget.
+ *
+ * @param skills - The full set of loaded skills.
+ * @returns Corpus issues.
+ */
+export function validateCorpus(skills: Skill[]): Issue[] {
+	if (skills.length === 0) {
+		return [{ skill: "corpus", level: "error", rule: "corpus.empty", message: "No skills found; check the skills directory." }];
+	}
+
+	const total = skills.reduce((sum, skill) => sum + String(skill.frontmatter.description ?? "").length, 0);
+
+	if (total > DESCRIPTION_CORPUS_BUDGET) {
+		return [
+			{
+				skill: "corpus",
+				level: "error",
+				rule: "corpus.description-budget",
+				message: `model-invocable descriptions total ${total} chars (> ${DESCRIPTION_CORPUS_BUDGET}); hosts will truncate or drop skills`,
+			},
+		];
+	}
+
+	return [];
+}
+
+/**
+ * Extract backticked skill references (`` `flow-plan` ``) from prose - the one grammar for
+ * "what looks like a skill reference", shared by the dangling-reference lint here and the
+ * docs handoff-map generator so they never disagree. Plain names keep skills host-agnostic;
+ * each host has its own invocation syntax.
+ *
+ * @param text - Prose that may mention skills.
+ * @returns The referenced tokens, in order (with duplicates).
+ */
+export function extractSkillRefs(text: string): string[] {
+	return [...text.matchAll(/`([a-z][a-z0-9]*-[a-z0-9-]+)`/g)].map((m) => m[1]!);
+}
+
+/**
+ * Cross-skill reference check: flags backticked names that look like a skill in
  * the same family (share a `prefix-`) but don't exist in the set. Catches a
  * handoff that points at a removed or misspelled skill.
  *
@@ -197,8 +287,8 @@ export function validateReferences(skills: Skill[]): Issue[] {
 
 	for (const skill of skills) {
 		const seen = new Set<string>();
-		// Scan the description too - the handoff clause lives there and is load-bearing.
-		const haystack = `${skill.body}\n${skill.frontmatter.description}`;
+		// Scan the description (the handoff clause is load-bearing) and supporting references.
+		const haystack = `${skill.body}\n${skill.frontmatter.description}\n${skill.supporting}`;
 
 		for (const token of extractSkillRefs(haystack)) {
 			if (seen.has(token) || names.has(token)) continue;
@@ -211,7 +301,7 @@ export function validateReferences(skills: Skill[]): Issue[] {
 					skill: skill.name,
 					level: "error",
 					rule: "reference.dangling",
-					message: `references /${token} which is not a known skill (removed or misspelled?)`,
+					message: `references ${token}, which is not a known skill (removed or misspelled?)`,
 				});
 			}
 		}

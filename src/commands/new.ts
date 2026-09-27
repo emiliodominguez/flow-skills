@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { findRepoRoot, loadConfig } from "../core/config.js";
+import { findRepoRoot, SKILLS_DIR } from "../core/repo.js";
 import { KEBAB } from "../core/skill.js";
 import { log } from "../core/logger.js";
 
 /**
- * Turn a kebab-case id into a Title Case heading (`ed-plan` → `Ed Plan`).
+ * Turn a kebab-case id into a Title Case heading (`flow-plan` → `Flow Plan`).
  *
  * @param name - Kebab-case skill id.
  * @returns A human title.
@@ -32,8 +32,7 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	}
 
 	const root = findRepoRoot();
-	const config = loadConfig(root);
-	const dir = path.join(root, config.skillsDir, name);
+	const dir = path.join(root, SKILLS_DIR, name);
 
 	if (fs.existsSync(dir)) {
 		log.error(`Skill "${name}" already exists at ${dir}`);
@@ -43,8 +42,7 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	}
 
 	const template = fs.readFileSync(path.join(root, "templates", "SKILL.md.tmpl"), "utf8");
-	const baseDescription = opts.description ?? `<one line: what it does - when to use / trigger phrases - handoff>.`;
-	const description = `${baseDescription} Invoke as /${name} in Claude Code or $${name} in Codex.`;
+	const description = opts.description ?? "<What it does. Use when <triggers>. Hands off to `<next-skill>`.>";
 	const content = template
 		.replaceAll("{{name}}", name)
 		.replaceAll("{{description}}", JSON.stringify(description))
@@ -53,5 +51,5 @@ export function newCommand(name: string, opts: { description?: string }): void {
 	fs.mkdirSync(dir, { recursive: true });
 	fs.writeFileSync(path.join(dir, "SKILL.md"), content, "utf8");
 	log.ok(`Created ${path.relative(root, path.join(dir, "SKILL.md"))}`);
-	log.muted("Edit it, then run `agent-skills validate` and `agent-skills install`.");
+	log.muted("Edit it, add an evals/beats.json entry, then run `pnpm validate` and `pnpm docs:gen`.");
 }

@@ -1,5 +1,5 @@
 ---
-"@emiliodominguez/agent-skills": minor
+"flow-skills": minor
 ---
 
 Refactor all 24 existing workflow skills and add ed-orchestrate, ed-verify, ed-repo-brief and ed-specialize. Add focused install profiles, bounded independent acceptance gates, resumable evidence, current repository-specific development practices, and updated authoring and evaluation guidance.

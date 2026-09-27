@@ -1,0 +1,29 @@
+{
+	"profiles": {
+		"core": ["flow-plan", "flow-work", "flow-test", "flow-review", "flow-commit", "flow-ship", "flow-handoff"],
+		"orchestration": [
+			"flow-plan",
+			"flow-orchestrate",
+			"flow-verify",
+			"flow-repo-brief",
+			"flow-specialize",
+			"flow-work",
+			"flow-review",
+			"flow-handoff"
+		],
+		"frontend": ["flow-styles", "flow-animate", "flow-prototype"],
+		"review": ["flow-review", "flow-adversarial-review", "flow-simplify", "flow-refactor"],
+		"maintenance": [
+			"flow-deps",
+			"flow-diagnose",
+			"flow-triage",
+			"flow-benchmark",
+			"flow-refactor",
+			"flow-simplify",
+			"flow-migrate",
+			"flow-git-fix",
+			"flow-pr-fix",
+			"flow-prune-agent-setup"
+		]
+	}
+}

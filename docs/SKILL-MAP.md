@@ -8,31 +8,31 @@ How the skills hand off to one another. Edges come from each skill's handoff cla
 
 | Skill | Next skills |
 | --- | --- |
-| ed-adversarial-review | `ed-work`, `ed-review` |
-| ed-animate | `ed-styles`, `ed-review` |
-| ed-benchmark | `ed-work`, `ed-refactor` |
-| ed-brainstorm | `ed-prototype`, `ed-plan` |
-| ed-commit | `ed-ship` |
-| ed-deps | `ed-review`, `ed-migrate` |
-| ed-diagnose | `ed-work`, `ed-triage` |
-| ed-docs | `ed-review`, `ed-ship` |
-| ed-git-fix | `ed-work`, `ed-ship` |
-| ed-handoff | `ed-orchestrate`, `ed-work` |
-| ed-migrate | `ed-review`, `ed-orchestrate` |
-| ed-onboard | `ed-plan`, `ed-diagnose`, `ed-repo-brief` |
-| ed-orchestrate | `ed-plan`, `ed-verify`, `ed-review`, `ed-handoff` |
-| ed-plan | `ed-work`, `ed-orchestrate` |
-| ed-pr-fix | `ed-review`, `ed-ship` |
-| ed-prototype | `ed-brainstorm`, `ed-plan` |
-| ed-prune-claude-setup | `ed-handoff` |
-| ed-refactor | `ed-review`, `ed-migrate` |
-| ed-repo-brief | `ed-plan`, `ed-specialize` |
-| ed-review | `ed-work`, `ed-adversarial-review`, `ed-ship` |
-| ed-ship | `ed-commit`, `ed-pr-fix`, `ed-git-fix` |
-| ed-simplify | `ed-review`, `ed-refactor` |
-| ed-specialize | `ed-orchestrate`, `ed-work` |
-| ed-styles | `ed-animate`, `ed-review` |
-| ed-test | `ed-work`, `ed-verify` |
-| ed-triage | `ed-diagnose`, `ed-work`, `ed-plan` |
-| ed-verify | `ed-orchestrate` |
-| ed-work | `ed-review`, `ed-verify` |
+| flow-adversarial-review | `flow-work`, `flow-review` |
+| flow-animate | `flow-styles`, `flow-review` |
+| flow-benchmark | `flow-work`, `flow-refactor` |
+| flow-brainstorm | `flow-prototype`, `flow-plan` |
+| flow-commit | `flow-ship` |
+| flow-deps | `flow-review`, `flow-migrate` |
+| flow-diagnose | `flow-work`, `flow-triage` |
+| flow-docs | `flow-review`, `flow-ship` |
+| flow-git-fix | `flow-work`, `flow-ship` |
+| flow-handoff | `flow-orchestrate`, `flow-work` |
+| flow-migrate | `flow-review`, `flow-orchestrate` |
+| flow-onboard | `flow-plan`, `flow-diagnose`, `flow-repo-brief` |
+| flow-orchestrate | `flow-plan`, `flow-verify`, `flow-review`, `flow-handoff` |
+| flow-plan | `flow-work`, `flow-orchestrate` |
+| flow-pr-fix | `flow-review`, `flow-ship` |
+| flow-prototype | `flow-brainstorm`, `flow-plan` |
+| flow-prune-agent-setup | `flow-handoff` |
+| flow-refactor | `flow-review`, `flow-migrate` |
+| flow-repo-brief | `flow-plan`, `flow-specialize` |
+| flow-review | `flow-work`, `flow-adversarial-review`, `flow-ship` |
+| flow-ship | `flow-commit`, `flow-pr-fix`, `flow-git-fix` |
+| flow-simplify | `flow-review`, `flow-refactor` |
+| flow-specialize | `flow-orchestrate`, `flow-work` |
+| flow-styles | `flow-animate`, `flow-review` |
+| flow-test | `flow-work`, `flow-verify` |
+| flow-triage | `flow-diagnose`, `flow-work`, `flow-plan` |
+| flow-verify | `flow-orchestrate` |
+| flow-work | `flow-review`, `flow-verify` |

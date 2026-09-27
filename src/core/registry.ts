@@ -23,27 +23,3 @@ export function discoverSkills(skillsDir: string): Skill[] {
 
 	return skills.sort((a, b) => a.name.localeCompare(b.name));
 }
-
-/**
- * Resolve a caller-supplied list of skill names to loaded skills, or return all.
- *
- * @param skillsDir - Absolute path to the skills directory.
- * @param names - Specific skill names, or empty/undefined for all.
- * @returns The matching skills.
- * @throws If a requested name is not found.
- */
-export function selectSkills(skillsDir: string, names?: string[]): Skill[] {
-	const all = discoverSkills(skillsDir);
-
-	if (!names || names.length === 0) return all;
-
-	const byName = new Map(all.map((s) => [s.name, s]));
-
-	return names.map((n) => {
-		const skill = byName.get(n);
-
-		if (!skill) throw new Error(`Unknown skill "${n}". Run \`agent-skills list\` to see available skills.`);
-
-		return skill;
-	});
-}

@@ -1,5 +1,5 @@
 # pnpm 11 reads settings from here (not the package.json "pnpm" field).
-# Allow esbuild - used by tsup/tsx/vitest - to run its install script.
+# Allow esbuild (used by tsx and vitest) to run its install script.
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:

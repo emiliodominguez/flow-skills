@@ -1,12 +1,11 @@
 import path from "node:path";
 import pc from "picocolors";
-import { findRepoRoot, loadConfig } from "../core/config.js";
+import { findRepoRoot, loadProfiles, readJson, SKILLS_DIR } from "../core/repo.js";
 import { discoverSkills } from "../core/registry.js";
 import { log, sanitize } from "../core/logger.js";
-import { TARGETS } from "../targets/index.js";
 
 /**
- * Build a compact list summary while accepting current and legacy separators.
+ * Build a compact list summary: the description's first sentence, capped.
  *
  * @param description - Full skill description.
  * @returns Sanitized summary text.
@@ -14,31 +13,42 @@ import { TARGETS } from "../targets/index.js";
 export function summarizeSkillDescription(description: string): string {
 	return sanitize(
 		description
-			.split(/\.| - |\u2013|\u2014/)[0]!
+			.split(/\.| - /)[0]!
 			.trim()
 			.slice(0, 90),
 	);
 }
 
 /**
- * `list` - show every skill in the repo and the available targets.
+ * The `owner/repo` source for `npx skills add`, read from package.json `repository`.
  *
- * @param opts - `targets` to also print the target adapters; `profiles` to print
- *   the configured install sets; `json` for a machine-readable dump.
+ * @param root - The repo root.
+ * @returns The GitHub shorthand, or "." when the repository URL is not a GitHub URL.
  */
-export function listCommand(opts: { targets?: boolean; profiles?: boolean; json?: boolean }): void {
+export function installSource(root: string): string {
+	const pkg = readJson<{ repository?: string | { url?: string } }>(path.join(root, "package.json"));
+	const url = typeof pkg?.repository === "string" ? pkg.repository : (pkg?.repository?.url ?? "");
+	const match = /github\.com[/:]([^/]+\/[^/.]+)/.exec(url);
+
+	return match ? match[1]! : ".";
+}
+
+/**
+ * `list` - show every skill in the repo, and optionally the install profiles as
+ * ready-to-run `npx skills add` commands.
+ *
+ * @param opts - `profiles` to print the install sets; `json` for a machine-readable dump.
+ */
+export function listCommand(opts: { profiles?: boolean; json?: boolean }): void {
 	const root = findRepoRoot();
-	const config = loadConfig(root);
-	const skills = discoverSkills(path.join(root, config.skillsDir));
+	const skills = discoverSkills(path.join(root, SKILLS_DIR));
+	const profiles = loadProfiles(root);
+	const source = installSource(root);
 
 	if (opts.json) {
 		const payload = {
-			skills: skills.map((s) => ({
-				name: s.name,
-				description: s.frontmatter.description,
-			})),
-			targets: Object.values(TARGETS).map((t) => ({ name: t.name, describe: t.describe })),
-			profiles: config.profiles,
+			skills: skills.map((s) => ({ name: s.name, description: s.frontmatter.description })),
+			profiles,
 		};
 
 		console.log(JSON.stringify(payload, null, 2));
@@ -50,34 +60,15 @@ export function listCommand(opts: { targets?: boolean; profiles?: boolean; json?
 	const width = Math.max(...skills.map((s) => sanitize(s.name).length), 0);
 
 	for (const skill of skills) {
-		const summary = summarizeSkillDescription(skill.frontmatter.description);
-
-		console.log(`  ${pc.bold(sanitize(skill.name).padEnd(width))}  ${pc.dim(summary)}`);
-	}
-
-	if (opts.targets) {
-		log.heading("Targets");
-		const targets = Object.values(TARGETS);
-		const targetWidth = Math.max(...targets.map((t) => t.name.length), 0);
-
-		for (const target of targets) {
-			console.log(`  ${pc.bold(target.name.padEnd(targetWidth))}  ${pc.dim(target.describe)}`);
-		}
+		console.log(`  ${pc.bold(sanitize(skill.name).padEnd(width))}  ${pc.dim(summarizeSkillDescription(skill.frontmatter.description))}`);
 	}
 
 	if (opts.profiles) {
-		const names = Object.keys(config.profiles);
+		log.heading(`Profiles (${Object.keys(profiles).length})`);
 
-		log.heading(`Profiles (${names.length})`);
-
-		if (names.length === 0) {
-			console.log(pc.dim("  (none configured - add a `profiles` map to agent-skills.config.json)"));
-		} else {
-			const profileWidth = Math.max(...names.map((n) => n.length), 0);
-
-			for (const name of names) {
-				console.log(`  ${pc.bold(name.padEnd(profileWidth))}  ${pc.dim(config.profiles[name]!.join(", "))}`);
-			}
+		for (const [name, members] of Object.entries(profiles)) {
+			console.log(`  ${pc.bold(name)}`);
+			console.log(`    ${pc.dim(`npx skills add ${source} --skill ${members.join(" ")}`)}`);
 		}
 	}
 }

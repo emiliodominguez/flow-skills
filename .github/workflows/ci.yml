@@ -5,65 +5,47 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   HUSKY: "0"
 
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm run lint
-      - name: Format check
-        run: pnpm run format:check
-      - name: Docs are up to date
-        run: pnpm run docs:check
-      - name: Audit production dependencies
-        run: pnpm audit --prod --audit-level=high
-
-  test:
-    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         node: [22, 24]
-        # Windows has no unprivileged symlinks, so the native target falls back to
-        # copy there - one Windows job exercises that path.
-        include:
-          - os: windows-latest
-            node: 22
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Typecheck
-        run: pnpm run typecheck
-      - name: Validate skills
-        run: pnpm run validate
-      - name: Test + coverage
-        run: pnpm run test:coverage
+      - name: Check (format, lint, types, skills, tests, docs)
+        run: pnpm check
+      - name: Audit production dependencies
+        if: matrix.node == 22
+        run: pnpm audit --prod --audit-level=high
 
-  pack:
+  smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Packaging smoke test
-        run: pnpm run smoke
+      - name: Install and remove with the skills CLI
+        run: sh scripts/smoke-install.sh

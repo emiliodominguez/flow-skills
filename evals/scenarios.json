@@ -1,7 +1,7 @@
 [
 	{
 		"id": "staged-review",
-		"skill": "ed-review",
+		"skill": "flow-review",
 		"prompt": "Review the changes in this fixture before commit. Explain any concrete correctness issue and identify the Git layer you inspected. This is a review-only task; do not change the source or index.",
 		"files": {
 			"README.md": "Documents are private to their owner. Review changes before commit.\n",
@@ -17,7 +17,7 @@
 	},
 	{
 		"id": "contract-verification",
-		"skill": "ed-verify",
+		"skill": "flow-verify",
 		"prompt": "Independently verify worker.md against contract.md and the current source. Report a verdict for every criterion with evidence. Do not fix or rewrite the deliverable.",
 		"files": {
 			"contract.md": "Task T1. Production profile. Independent verification required.\nArtifact: total.mjs in this directory. Current file bytes are the target revision.\nC1: total(lines) returns the sum of priceCents multiplied by quantity for each line.\nC2: Empty input returns zero.\nC3: The existing tests run successfully with node --test total.test.mjs.\nDownstream: use total in an order preview. No external calls or deployment.\n",
@@ -28,7 +28,7 @@
 	},
 	{
 		"id": "resume-budget",
-		"skill": "ed-orchestrate",
+		"skill": "flow-orchestrate",
 		"prompt": "Resume plan.md using the existing run records. Reconcile current artifacts and determine what can proceed within the recorded contract. Keep work local to this fixture; no network actions.",
 		"files": {
 			"extract.csv": "sku\nA02\n",

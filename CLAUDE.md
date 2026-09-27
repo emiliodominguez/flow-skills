@@ -1,66 +1,57 @@
-# CLAUDE.md - agent-skills
+# CLAUDE.md - flow-skills
 
-Project guidance for Claude Code sessions working in this repo. The user's global
-`~/.claude/CLAUDE.md` still applies; this file adds the repo-specific rules that bite.
+Project guidance for agent sessions working in this repository. Global user instructions still apply.
 
 ## What this is
 
-A **private** source-of-truth repo for the `ed-*` skill suite plus a tested CLI that installs
-the skills into Claude Code, Codex, and other assistants. Not published to npm; distributed by
-cloning this repo. Native Claude Code and Codex installs use **live symlinks** or explicit copy mode.
+The source-of-truth repository for the host-agnostic `flow-*` skill suite. It is distributed
+from GitHub through the open skills CLI (`npx skills add emiliodominguez/flow-skills`), which installs
+into any supported agent. `.claude-plugin/` manifests are an optional plugin-marketplace channel.
+Nothing is published to npm.
 
-## Architecture (one paragraph)
+## Architecture
 
-`skills/<name>/SKILL.md` is the source of truth. **Target adapters** in `src/targets/` transform
-each skill into a tool's native format on install (claude/codex = symlink/copy the dir; cursor/
-windsurf/cline/continue = one generated file per skill; copilot/zed/aider = all skills in one
-managed block). `src/commands/` holds the CLI verbs; `src/cli.ts` builds the commander program and
-`src/index.ts` runs it. `src/core/` holds config, skill parsing/validation, path + install-fs
-helpers, and the logger. The installer only ever touches entries it created (markers / managed
-blocks); `--force` backs up, never deletes.
+`skills/<name>/SKILL.md` is the source of truth, with optional `references/*.md` loaded on demand.
+`profiles.json` holds install profiles. `install.sh` / `uninstall.sh` wrap `npx skills add/remove`,
+adding profiles and legacy `ed-*` cleanup. `src/` is an authoring CLI only (`pnpm skills list|validate|new`):
+`src/core/skill.ts` parses and validates skills, `src/core/distribution.ts` checks profiles and manifests.
 
-## The gate - run before every commit
+## Required gate
 
-```sh
-pnpm run format      # prettier
-pnpm run lint        # eslint (padding + jsdoc rules are enforced, not optional)
-pnpm run typecheck   # tsc over src + test + scripts
-pnpm run validate    # skill frontmatter / naming / refs / quality lints
-pnpm run test:coverage  # vitest with the required 70% branch threshold
-pnpm run build       # tsup bundle
-```
+Run `pnpm check` before committing (format check, lint, typecheck, validate, tests with coverage, docs check).
 
-**Whenever a skill changes (body, description, or a new/removed skill), run `pnpm docs:gen`** and
-inspect and commit the generated result, then run `pnpm docs:check`. Use `pnpm smoke` for CLI/package
-changes. Check actual hosted CI status; local evidence is required even when Actions is disabled.
+Whenever a skill changes (body, description, or a new or removed skill), run `pnpm docs:gen`, inspect
+and commit the generated docs, and run `pnpm docs:check`. Run `pnpm smoke` for install script or
+manifest changes. Check actual hosted CI status; local evidence is required even when Actions is disabled.
 
-## Authoring a skill
+## Skill authoring
 
-- Scaffold with `pnpm skills new <name>`; keep the shared anatomy: frontmatter (`name`,
-  `description`) → phased body → `## Anti-patterns` → `## Done when` → a final handoff
-  line naming the next skill.
-- The **description** must name its own `/<skill>` (Claude Code) and `$<skill>` (Codex) triggers, stay under 1024 chars, and end with a
-  handoff clause (`hands off to /ed-x`, `routes to`, or `feeds`) - the skill map is parsed from it.
-- Every skill needs an entry in **`evals/beats.json`** (3-5 lowercase substrings that appear in the
-  body); `pnpm test` checks text presence, not actual behavior. See `evals/README.md`.
-- Test native installation in a throwaway project using `--scope project`. Source edits are live for symlinks;
-  `pnpm skills sync` refreshes copies and generated targets. Distinguish installation tests from real host sessions.
-- Keep shared skills self-contained for rendered targets. Native agent definitions are a separate capability.
+- Scaffold with `pnpm skills new flow-<name>`. Keep the anatomy: frontmatter, phased body,
+  `## Anti-patterns`, `## Done when`, and a final line naming the next skill.
+- Keep skills host-agnostic: frontmatter holds only Agent Skills spec fields (normally `name` and
+  `description`); bodies name no host, tool or model and use no host invocation syntax. Refer to other
+  skills by backticked name, for example `` `flow-verify` ``.
+- Descriptions are always in context: aim for about 200 characters, stay under 280, and end with a
+  handoff clause (`Hands off to`, `Hands back to`, `Routes to`, or `Feeds`) naming skills in backticks.
+  The docs skill map is parsed from it. The corpus must stay under 8,000 description characters.
+- Move situational material to `references/<topic>.md` and say when to read it.
+- Every skill needs an entry in `evals/beats.json` (3-5 lowercase substrings from `SKILL.md`). These
+  check text presence, not behavior. See `evals/README.md`.
+- Test installs in a throwaway project with `./install.sh --local --project`. Distinguish install
+  checks from real agent sessions.
 
-## Releasing (changesets)
+## Versions (changesets)
 
-Do not assume a release workflow ran. Inspect actual Actions status and keep publishing within the user request.
-
-- Add a changeset for each user-facing change (new skills = `minor`, fixes = `patch`).
-- When a version is ready, run `pnpm run version:packages`, review the version and changelog changes, and commit them.
-- Run `pnpm run release` only when publishing is explicitly requested and npm authentication is configured.
+- Add a changeset for each user-facing change (new skills = minor, fixes = patch, renames = major).
+- When a version is ready, run `pnpm run version:packages` (it also syncs `.claude-plugin/plugin.json`),
+  review the version and changelog, and commit them.
 
 ## Conventions
 
-- **Conventional commits** (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `build:`,
-  `ci:`). **No `Co-Authored-By` trailers.**
-- **Function declarations over arrow functions.** Tabs (width 4), print width 150. **JSDoc on every
-  `src/` function** (`@param`, `@returns` where non-void) - eslint enforces it.
-- Do not use em or en dashes in prose, comments, metadata, or user-facing text. Rewrite the sentence or use an ASCII hyphen.
-- Prefer the dedicated skills over ad-hoc work: `/ed-plan` → `/ed-work` → `/ed-review` → `/ed-ship`;
-  `/ed-deps` for dependency bumps; `/ed-commit` for commit authoring.
+- Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `build:`, `ci:`).
+  No `Co-Authored-By` trailers.
+- Function declarations over arrow functions. Tabs (width 4), print width 150. JSDoc on every `src/`
+  function (`@param`, `@returns` where non-void); eslint enforces it.
+- Do not use em or en dashes in prose, comments, metadata, or user-facing text. Use an ASCII hyphen.
+- Prefer the suite's own skills: `flow-plan` → `flow-work` → `flow-review` → `flow-ship`; `flow-deps`
+  for dependency bumps; `flow-commit` for commit authoring.

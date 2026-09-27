@@ -1,19 +1,25 @@
 # Documentation
 
-Start with the [project README](../README.md) for installation and everyday use.
+New here? Start with the [project README](../README.md) to install the skills and pick one.
 
-| Guide                              | Use it for                                                  |
-| ---------------------------------- | ----------------------------------------------------------- |
-| [Workflow](OVERVIEW.md)            | Choose direct work, planning, review or orchestration       |
-| [Orchestration](ORCHESTRATION.md)  | Build contracts, acceptance gates and resumable runs        |
-| [Skills catalog](SKILLS.md)        | Find every skill and its activation description (generated) |
-| [Handoff table](SKILL-MAP.md)      | See the suite's routing (generated)                         |
-| [Configuration](CONFIGURATION.md)  | Profiles, destinations, scopes and upgrades                 |
-| [Current practices](PRACTICES.md)  | Sources, compatibility decisions and migration notes        |
-| [Authoring](AUTHORING.md)          | Write focused, portable skills and evaluate their behavior  |
-| [Architecture](ARCHITECTURE.md)    | Understand the CLI, target adapters and ownership checks    |
-| [Evaluations](../evals/README.md)  | Distinguish structural checks from actual agent exercises   |
-| [Contributing](../CONTRIBUTING.md) | Run the required gates and prepare changesets               |
+## Using the skills
 
-The [config schema](../agent-skills.schema.json) provides editor validation. The
-[changelog](../CHANGELOG.md) records published versions; unreleased changes belong in changesets.
+| Guide                             | Read it to                                                   |
+| --------------------------------- | ------------------------------------------------------------ |
+| [Workflow](OVERVIEW.md)           | Choose the right flow for a task and understand the evidence |
+| [Orchestration](ORCHESTRATION.md) | Walk through a gated, resumable multi-step run               |
+| [Skills catalog](SKILLS.md)       | Browse every skill, with a full page each (generated)        |
+| [Handoff map](SKILL-MAP.md)       | See which skill each one hands off to (generated)            |
+
+## Working on the suite
+
+| Guide                              | Read it to                                               |
+| ---------------------------------- | -------------------------------------------------------- |
+| [Authoring](AUTHORING.md)          | Write a focused, portable skill                          |
+| [Architecture](ARCHITECTURE.md)    | Understand the layout, distribution and validation rules |
+| [Design notes](PRACTICES.md)       | See sources, compatibility decisions and migration notes |
+| [Evaluations](../evals/README.md)  | Tell structural checks apart from real agent exercises   |
+| [Contributing](../CONTRIBUTING.md) | Set up, check your work and add a changeset              |
+
+Install profiles live in [profiles.json](../profiles.json). Released versions are in the
+[changelog](../CHANGELOG.md); unreleased changes are in `.changeset/`.

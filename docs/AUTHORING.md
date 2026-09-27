@@ -1,48 +1,70 @@
 # Authoring skills
 
-Write the information that changes an agent's decisions. Assume the agent understands ordinary
-coding; avoid copied manuals, repeated global rules and universal solutions to local failures.
+A good skill contains the information that changes an agent's decisions, and nothing else. Assume
+the agent already knows how to code; leave out copied manuals, general rules and advice any
+capable agent follows anyway.
 
-## Contract
+`pnpm validate` enforces the mechanical rules (see [Architecture](ARCHITECTURE.md#validation)).
+This guide covers what it can't check.
 
-Scaffold with `pnpm skills new <name>`. Keep portable frontmatter to `name` and `description`.
-Names match the directory, use kebab-case and contain at most 64 characters. Descriptions stay
-within 1024 characters, front-load the use case, name both `/skill` and `$skill`, and include
-real handoffs using `hands off to`, `hands back to`, `routes to` or `feeds`.
+## 1. Scaffold
 
-Descriptions are discovery metadata, not a place for an entire workflow. Prefer concise,
-discriminating triggers and boundaries. In the body include the outcome, necessary process,
-likely failure modes, evidence and a `Done when` gate. A small skill needs no extra resources.
+```sh
+pnpm skills new flow-<name> -d "What it does. Use when <triggers>. Hands off to \`flow-next\`."
+```
 
-## Execution rules
+Names use the `flow-` prefix and match their directory. Add the skill to `profiles.json` if it
+belongs to a profile.
 
-- Follow current user intent and repository requirements; preserve an existing authorization.
-- Use actual host capabilities. Skills, agents, tools and model names are different resources.
-- Delegate useful independent work only when available and authorized. Define write ownership.
-- For retrying work, specify finite stop conditions and preserve attempts across handoffs.
-- Distinguish worker checks, independent acceptance, broad review and delivery authorization.
-- Follow the user's artifact location and tracking policy. Ignored files do not travel with Git.
-- Verify current official documentation or pinned source for unstable APIs and configuration.
+## 2. Write the description
 
-Use a concise self-contained body where practical. Native targets copy/link supporting
-resources, but rendered targets currently export only body and description. A required relative
-reference or script therefore needs adapter support before a skill relying on it is portable.
-Do not add hidden dependencies on sibling skills that may not be installed; provide a meaningful
-fallback or state the needed capability.
+The description is always loaded, and it's how the agent decides to use the skill. Aim for about
+200 characters:
 
-## Evaluation
+1. What the skill does, in plain words.
+2. When to use it, with the words a user would actually say.
+3. A boundary only when a neighboring skill could be confused with it.
+4. A handoff clause naming the next skills in backticks. The handoff map is built from it.
 
-Add 3-5 instruction markers to `evals/beats.json`. These are inexpensive wording regressions,
-not proof of agent behavior. For a complex skill, execute representative requests in isolated
-fixtures using a fresh worker and minimal task context. Give expected outcomes only to the
-assessor, not the worker. Record the actual result and revise demonstrated failures.
+## 3. Write the body
 
-Test both intended triggers and nearby requests that should stay outside the skill. Include
-missing evidence, changed inputs, interruption, permission boundaries and small-task routing
-where they affect the workflow. See [evaluation cases](../evals/README.md).
+- **Outcome first:** one or two lines on what success looks like.
+- **Process:** phases or numbered steps with the decisions that matter: thresholds, budgets and
+  stop conditions.
+- **`## Anti-patterns`:** concrete failures this skill prevents.
+- **`## Done when`:** observable results and the evidence needed to claim them.
+- **Last line:** the next skill by backticked name, or the terminal result.
 
-## Before committing
+Use terse imperative sentences and bullets. If a sentence isn't a distinct rule, threshold or
+decision, cut it. Move material that only some runs need into `references/<topic>.md`, one level
+deep, and say when to read it.
 
-Run the repository gate in [AGENTS.md](../AGENTS.md), regenerate docs with `pnpm docs:gen`,
-and check them with `pnpm docs:check`. Inspect the generated result and test native installs
-in an isolated project. Keep strict formatting, padding and JSDoc conventions intact.
+## 4. Keep it agent-agnostic
+
+- Name no product, tool or model, and use no invocation syntax such as `/name` or `$name`.
+- Describe capabilities, not products: "a separate agent or fresh context", "the settings layers",
+  "available delegation".
+- Check what the environment actually provides at run time. Skills, agents, tools and models are
+  different things; never assume one implies another.
+- Don't depend on a sibling skill being installed. Give a fallback or name the capability you need.
+
+## 5. Keep behavior safe
+
+- Follow the user's current intent and the repository's rules, and don't re-ask for authorization
+  the user already gave.
+- Delegate only independent work, only when delegation is available and authorized, and with
+  clear file ownership.
+- Give retrying work finite stop conditions, and preserve attempt counts across handoffs.
+- Keep worker checks, independent acceptance, broad review and delivery authorization separate.
+- Respect where the user keeps artifacts. Git-ignored files don't travel with the repository.
+
+## 6. Evaluate
+
+- Add 3-5 short markers to `evals/beats.json`. They must appear in `SKILL.md`, and they catch
+  accidental wording loss, not behavior.
+- For a complex skill, run representative requests in isolated fixtures with a fresh agent, and
+  give the expected outcome only to the assessor.
+- Test requests that should trigger the skill and nearby ones that shouldn't.
+
+See [evaluations](../evals/README.md). Then run `pnpm check`, commit the `pnpm docs:gen` output,
+and try an install with `./install.sh --local --project` in a throwaway project.

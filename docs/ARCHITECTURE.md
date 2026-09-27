@@ -1,77 +1,67 @@
 # Architecture
 
-Skills are authored once as `skills/<name>/SKILL.md`. Target adapters install native skill
-directories or render the body into a host's rule format. These are different delivery modes;
-a rendered rule does not acquire native skill discovery, supporting files or agent configuration.
+This repository owns skill content and the checks that keep it portable. It does not ship an
+installer. The open [skills CLI](https://skills.sh) discovers `skills/` and copies each skill
+folder, supporting files included, into whichever agents the user picks.
 
-## Module map
+## Layout
 
-| Module                                               | Responsibility                                                                   |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `src/index.ts`, `src/cli.ts`                         | Process entry point and Commander command wiring                                 |
-| `src/commands/`                                      | Install/uninstall, sync, doctor, validation, listing, scaffolding and completion |
-| `src/core/config.ts`                                 | Root discovery, built-in defaults and config precedence                          |
-| `src/core/registry.ts`, `skill.ts`                   | Discover, select, parse and validate the corpus                                  |
-| `src/core/paths.ts`, `install-mode.ts`               | Resolve destinations and supported native install mode                           |
-| `src/core/install-fs.ts`                             | Ownership-aware filesystem operations and managed blocks                         |
-| `src/targets/`                                       | Format-specific install, uninstall and status adapters                           |
-| `scripts/gen-skill-docs.ts`                          | Catalog, handoff table and per-skill pages; read-only freshness mode             |
-| `scripts/eval-llm.ts`, `scripts/lib/eval-verdict.ts` | Optional instruction audit and complete-verdict validation                       |
-| `test/`, `evals/`                                    | CLI regression checks, instruction markers and realistic agent scenarios         |
+| Path                                              | Purpose                                                              |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| `skills/<name>/`                                  | The source of truth: `SKILL.md` plus optional `references/*.md`      |
+| `profiles.json`                                   | Named skill sets, passed to `npx skills add --skill`                 |
+| `install.sh`, `uninstall.sh`, `scripts/common.sh` | Thin wrappers over `npx skills add/remove`: profiles, legacy cleanup |
+| `.claude-plugin/`                                 | Optional plugin-marketplace manifests, versioned with `package.json` |
+| `src/`                                            | Authoring CLI (`pnpm skills list`, `validate`, `new`)                |
+| `scripts/gen-skill-docs.ts`                       | Generates the catalog, handoff map and per-skill pages               |
+| `scripts/smoke-install.sh`                        | Real `npx skills` install and removal in a throwaway project         |
+| `scripts/eval-llm.ts`, `scripts/prepare-eval.ts`  | Optional model audit and scenario fixtures                           |
+| `test/`, `evals/`                                 | Unit tests, instruction markers, agent scenarios                     |
 
-## Adapter contract
+## Portability contract
 
-Each `Target` has a name, description, `supportsSymlink` flag and three methods:
-`install(ctx): Action[]`, `uninstall(ctx): Action[]`, `status(ctx): SkillStatus[]`.
-The context supplies selected skills, resolved destination, mode, force and dry-run flags.
-Adapters return actions instead of logging, keeping behavior testable.
+- **Frontmatter:** only fields from the [Agent Skills specification](https://agentskills.io/specification)
+  (`name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`). Any
+  agent-specific extension is a validation error, so every agent reads a skill the same way.
+- **Body:** names no product, tool or model and uses no invocation syntax. Skills refer to each
+  other by backticked name (`` `flow-verify` ``), and each agent applies its own syntax.
+- **Supporting files:** situational detail goes in `references/<topic>.md`. The body links to the
+  file and says when to read it, and the file is copied along with the skill.
 
-| Adapter shape       | Targets                           | Output                                           |
-| ------------------- | --------------------------------- | ------------------------------------------------ |
-| Directory per skill | Claude Code, Codex                | Symlinked or copied complete directory           |
-| File per skill      | Cursor, Windsurf, Cline, Continue | Generated rule containing body and description   |
-| Managed bundle      | Copilot, Zed, aider               | Selected skill sections within a delimited block |
+## Validation
 
-Keep native host capabilities separate from what an adapter actually emits. Current target
-paths and migration considerations are in [configuration](CONFIGURATION.md).
+`pnpm validate` checks the whole corpus in one pass. A YAML error is reported as an issue and
+doesn't stop the scan.
 
-## Command flow
+**Errors** (always fail):
 
-Install resolves the corpus root and merged config, selects explicit names or profile unions,
-then resolves each selected target's consuming-project or user path. It invokes the adapter
-with the effective mode, prints actions and collects failures. One target's failure does not
-prevent subsequent targets from being inspected. Unknown or disabled requested targets fail.
+- malformed YAML, or a missing, mismatched, non-kebab-case or over-64-character `name`
+- a missing, multi-line or over-1,024-character `description`
+- frontmatter fields outside the spec
+- broken `references/` links, and backticked `flow-*` names that match no skill (checked in
+  bodies, descriptions and references)
+- an empty corpus, or descriptions totaling more than 8,000 characters
+- profile members that don't exist, `plugin.json` version drift from `package.json`, or a
+  marketplace entry that doesn't point at `./`
 
-`sync` refreshes only existing managed installations and preserves native copy/symlink modes.
-`doctor` reads state without mutation; missing skills mean uninstalled, while drift, conflicts
-and target errors make the report unhealthy. A healthy doctor report is not proof of host
-activation. `validate` rejects an empty corpus and reports all discoverable skill issues.
+**Warnings** (fail only with `--strict`):
 
-## Ownership and safety
+- a description over 280 or under 80 characters, or one without a handoff clause
+- a body over 500 lines or about 5,000 tokens
+- filler words, or a missing `Done when` or anti-patterns section
 
-- Native entries are managed through the ownership manifest, a recognized source symlink or
-  a copied directory's marker. An unmanaged collision is preserved unless `--force` requests
-  a backup and replacement. Uninstall skips unmanaged entries.
-- File-per-skill outputs carry a marker; managed blocks delimit only the installer-owned
-  portion of a shared file. Hand-written surrounding content is preserved.
-- `--force` backs up collisions to a sibling path. It is not blanket permission to remove
-  unrelated configuration. `--dry-run` previews without changes.
-- Codex legacy migration touches only content it can attribute to this installer. Windows
-  native installations use copy mode when symlinking is unavailable.
-- Changes to default destinations do not scan or delete old locations. Migration must preserve
-  hand-written content and inspect the old install explicitly.
+The description budgets exist because every installed description stays in the agent's context,
+and many agents cap the size of their skill index.
 
-## Validation and generated artifacts
+## Generated docs
 
-Frontmatter is parsed with `js-yaml`; malformed YAML becomes an issue rather than aborting the
-corpus scan. Descriptions are quoted when rendering to preserve colon-containing text.
-`docs:gen` owns the catalog, handoff table and generated skill pages. `docs:check` reports stale
-or obsolete output without rewriting files or the Git index.
+`pnpm docs:gen` writes `docs/SKILLS.md`, `docs/SKILL-MAP.md`, `docs/skills/` and the root [`llms.txt`](https://llmstxt.org) index that agents and crawlers can read. The handoff map
+is parsed from each description's closing clause (`Hands off to`, `Hands back to`, `Routes to`
+or `Feeds`). `pnpm docs:check` reports stale or obsolete output without writing anything.
 
-Instruction markers catch textual omissions. The optional model audit accepts only one typed,
-nonempty verdict for every requested marker; empty, partial, duplicate or unknown verdicts fail.
-It requires an explicit model and API key and fails visibly when unavailable. Neither check
-executes a skill. Actual agent decisions are assessed with isolated scenarios in [evals](../evals/README.md).
+## Tooling notes
 
-TypeScript scripts run through Node's `--import tsx` loader. The build remains a bundled CLI;
-`pnpm smoke` checks the packed artifact from a clean consumer project.
+- TypeScript runs through Node's `--import tsx` loader, so there is no build step.
+- The package is marked `private` only to prevent an accidental npm publish. Users install from GitHub.
+- Instruction markers and the optional model audit check wording, not behavior. Real agent
+  decisions are assessed with isolated scenarios; see [evals](../evals/README.md).

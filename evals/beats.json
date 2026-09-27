@@ -2,6 +2,7 @@
 	"flow-a11y": ["wcag 2.2", "keyboard", "accessibility tree", "prefer native elements", "not tested"],
 	"flow-adversarial-review": ["attack surface", "boundary breaker", "reachable", "residual risk"],
 	"flow-animate": ["storyboard", "dials", "critique", "reduced motion", "cleanup"],
+	"flow-api": ["consumer", "idempotency", "error shape", "breaking", "expand, migrate and contract"],
 	"flow-benchmark": ["baseline", "timing boundary", "variance", "p99", "raw results"],
 	"flow-brainstorm": ["one question at a time", "skeptic panel", "stress-test", "design sketch"],
 	"flow-commit": ["conventional", "imperative", "the why", "git diff --cached", "one logical change"],
@@ -12,6 +13,7 @@
 	"flow-git-fix": ["conflict markers", "restack", "abort", "force-with-lease", "worktree"],
 	"flow-handoff": ["handoffs", "live plan", "fresh agent", "next session", "dead-ends"],
 	"flow-migrate": ["canonical", "enumerate", "worktree", "denominator", "per site"],
+	"flow-observe": ["correlation", "cardinality", "alert on user-visible symptoms", "runbook", "trigger the failure"],
 	"flow-onboard": ["trace one real flow", "subsystem", "landmines", "distil", "breadth-first"],
 	"flow-orchestrate": ["independent", "accepted", "attempt", "revision", "stop conditions"],
 	"flow-plan": ["read-only", "blast radius", "fresh session", "vertical slice", "acceptance"],
@@ -30,5 +32,6 @@
 	"flow-triage": ["blast radius", "severity", "containment", "fix-now", "route"],
 	"flow-ui": ["every state", "render, compare, fix", "against a reference", "mock data", "two consecutive passes"],
 	"flow-verify": ["accept", "reject", "blocked", "independence", "criterion"],
-	"flow-work": ["verified slice", "evidence", "tests-first", "acceptance", "delegated mode"]
+	"flow-work": ["verified slice", "evidence", "tests-first", "acceptance", "delegated mode"],
+	"flow-write-skill": ["baseline", "use when", "near miss", "red-flags", "references/"]
 }

@@ -1,6 +1,6 @@
 ---
 name: flow-verify
-description: "Verify a bounded artifact against explicit acceptance criteria and return an evidence-backed ACCEPT, REJECT or BLOCKED verdict. Use as an independent phase gate or to check a claim. Hands back to `flow-orchestrate`."
+description: "Independent ACCEPT, REJECT or BLOCKED verdict against explicit acceptance criteria. Use as a phase gate or to check that claimed work is actually done. Hands back to `flow-orchestrate`."
 metadata:
   stage: verify
 ---
@@ -84,6 +84,13 @@ Verdict rules:
 For each rejection give the smallest reproducible counterexample and the required outcome.
 Do not implement the fix or prescribe an unrelated rewrite; the coordinator owns the
 correction loop and attempt budget.
+
+## Red flags
+
+- "The worker says it ran the tests": rerun them or mark the criterion BLOCKED.
+- "Close enough, the intent is clear": judge the written criterion, not the intent.
+- "I can just fix this small thing": verifiers stay read-only; report it.
+- "It passed on the earlier revision": evidence belongs to the inspected revision only.
 
 ## Anti-patterns
 

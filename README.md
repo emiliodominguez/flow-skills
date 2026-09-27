@@ -1,6 +1,6 @@
 # flow-skills
 
-[![Skills: 32](https://img.shields.io/badge/skills-32-2ea44f?style=for-the-badge&labelColor=161b22&logo=markdown&logoColor=white)](docs/SKILLS.md)
+[![Skills: 35](https://img.shields.io/badge/skills-35-2ea44f?style=for-the-badge&labelColor=161b22&logo=markdown&logoColor=white)](docs/SKILLS.md)
 [![Agent Skills: spec compliant](https://img.shields.io/badge/Agent%20Skills-spec%20compliant-8250df?style=for-the-badge&labelColor=161b22&logo=bookstack&logoColor=white)](https://agentskills.io/specification)
 [![Agents: any](https://img.shields.io/badge/agents-any-0969da?style=for-the-badge&labelColor=161b22&logo=probot&logoColor=white)](https://github.com/vercel-labs/skills)
 [![Install: npx skills add](https://img.shields.io/badge/npx-skills%20add-cb3837?style=for-the-badge&labelColor=161b22&logo=npm&logoColor=white)](https://skills.sh)
@@ -10,7 +10,7 @@ Portable workflow skills for AI coding agents: plan, build, verify and ship with
 
 ---
 
-**flow-skills** is a set of 32 [Agent Skills](https://agentskills.io) for everyday software work:
+**flow-skills** is a set of 35 [Agent Skills](https://agentskills.io) for everyday software work:
 exploring ideas, designing and building interfaces, planning, implementing, testing, reviewing,
 verifying, delivering and maintaining.
 Each skill is a plain `SKILL.md` folder that follows the open specification, so any agent that
@@ -55,13 +55,14 @@ also copy any `skills/<name>/` folder into your agent's skills directory by hand
 
 Install only the part of the workflow you use. Profiles are defined in [`profiles.json`](profiles.json).
 
-| Profile         | Skills (without the `flow-` prefix)                                                                |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| `core`          | plan, work, test, review, commit, ship, handoff                                                    |
-| `orchestration` | plan, orchestrate, verify, repo-brief, specialize, work, review, handoff                           |
-| `frontend`      | design, ui, styles, animate, a11y, redesign, prototype                                             |
-| `review`        | review, adversarial-review, simplify, refactor                                                     |
-| `maintenance`   | deps, diagnose, triage, benchmark, refactor, simplify, migrate, git-fix, pr-fix, prune-agent-setup |
+| Profile         | Skills (without the `flow-` prefix)                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| `core`          | plan, work, test, review, commit, ship, handoff                                                                 |
+| `orchestration` | plan, orchestrate, verify, repo-brief, specialize, work, review, handoff                                        |
+| `frontend`      | design, ui, styles, animate, a11y, redesign, prototype                                                          |
+| `review`        | review, adversarial-review, simplify, refactor                                                                  |
+| `backend`       | api, observe, benchmark, adversarial-review, migrate, deps                                                      |
+| `maintenance`   | deps, diagnose, triage, benchmark, refactor, simplify, migrate, git-fix, pr-fix, prune-agent-setup, write-skill |
 
 From a clone, the wrapper scripts accept profiles and pass everything after `--` to `npx skills`:
 
@@ -91,6 +92,7 @@ From a clone, the wrapper scripts accept profiles and pass everything after `--`
 | Implement and test a bounded change             | `flow-work`, `flow-test`                                                   |
 | Run dependent tasks with independent acceptance | `flow-orchestrate`, `flow-verify`, `flow-specialize`                       |
 | Review or improve code                          | `flow-review`, `flow-adversarial-review`, `flow-refactor`, `flow-simplify` |
+| Design an API or instrument a service           | `flow-api`, `flow-observe`                                                 |
 | Upgrade, migrate or measure                     | `flow-deps`, `flow-migrate`, `flow-benchmark`                              |
 | Investigate a failure                           | `flow-triage`, `flow-diagnose`                                             |
 | Commit, ship and handle review feedback         | `flow-commit`, `flow-ship`, `flow-pr-fix`, `flow-git-fix`                  |
@@ -98,6 +100,7 @@ From a clone, the wrapper scripts accept profiles and pass everything after `--`
 | Audit, upgrade or make UI accessible            | `flow-redesign`, `flow-a11y`                                               |
 | Write documentation                             | `flow-docs`                                                                |
 | Pause work or tidy your agent setup             | `flow-handoff`, `flow-prune-agent-setup`                                   |
+| Write or improve an agent skill                 | `flow-write-skill`                                                         |
 
 A typical path is `flow-plan` → `flow-work` → `flow-review` → `flow-ship`. Small changes can start at
 `flow-work`. Each skill ends by naming the next one; the [skill graph](docs/SKILL-MAP.md) shows every route.

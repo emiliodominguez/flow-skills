@@ -1,6 +1,6 @@
 ---
 name: flow-repo-brief
-description: "Build or refresh a compact, source-cited knowledge base for a change or subsystem. Use when agents keep rediscovering conventions, work spans sessions, or a brief may be stale; not a first tour (`flow-onboard`). Feeds `flow-plan` and `flow-specialize`."
+description: "Maintained, source-cited brief for a subsystem that agents reuse across sessions. Use when agents keep rediscovering conventions and commands, or agent notes on a subsystem need refreshing against source. Feeds `flow-plan` and `flow-specialize`."
 metadata:
   stage: understand
 ---

@@ -1,6 +1,6 @@
 ---
 name: flow-ship
-description: "Deliver verified changes through the requested Git or PR stage: commit, push, draft PR, ready, or merge, respecting narrower requests and actual CI behavior. Routes to `flow-commit`, `flow-pr-fix`, or `flow-git-fix`."
+description: "Delivery through the requested Git or PR stage: commit, push, PR, ready or merge. Use when asked to push, commit and push, open or update a PR, or merge. Routes to `flow-commit`, `flow-pr-fix` or `flow-git-fix`."
 metadata:
   stage: deliver
 ---
@@ -23,7 +23,7 @@ unrequested merge, deployment, reviewer request or message.
   unrelated user work.
 - Run the pre-launch checklist: required format, lint, types, tests, build, generated docs and
   relevant runtime checks. Use `flow-review` where the task or repository requires review.
-- Record the verified revision. If hooks or CI fixes change behavior, repeat affected checks
+- Run each check fresh and read its output before reporting it; record the verified revision. If hooks or CI fixes change behavior, repeat affected checks
   and review. A previous green revision does not verify the current one; keep unrun checks and
   missing access explicit.
 

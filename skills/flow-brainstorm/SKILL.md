@@ -1,6 +1,6 @@
 ---
 name: flow-brainstorm
-description: "Explore an unclear idea, expose key assumptions, compare real alternatives and converge on a design sketch. Use when the outcome or approach is still open. Hands off to `flow-prototype` for an experiment or `flow-plan`."
+description: "Collaborative idea exploration that ends in a design sketch. Use when the outcome or approach is still open, requirements are vague, or options need comparing. Hands off to `flow-prototype` or `flow-plan`."
 metadata:
   stage: explore
 ---

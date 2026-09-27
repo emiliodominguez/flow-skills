@@ -1,6 +1,6 @@
 ---
 name: flow-work
-description: "Implement a bounded change in verified slices from a request, plan, or coordinator task brief. Use for coding and bug fixes, not multi-worker gated runs (`flow-orchestrate`). Hands off to `flow-review`, or `flow-verify` via the coordinator."
+description: "Implementation of a bounded change in verified slices. Use for coding tasks, bug fixes or a plan task; multi-worker gated runs go to `flow-orchestrate`. Hands off to `flow-review`, or `flow-verify` via the coordinator."
 metadata:
   stage: build
 ---
@@ -36,12 +36,22 @@ Current user instructions override an older plan. Reconcile source drift before 
 
 ## Phase 4: Report completion
 
+- Before any "done", "fixed" or "passing" claim: name the check that proves it, run it fresh at this revision, read the full output, then state the result with that evidence.
 - Direct plan mode: check off a task only after its acceptance is evidenced. Append a short evidence note and set Status to in-progress or done. If the plan requires independent acceptance, route through `flow-verify` first.
 - Stay within owned scope. Inspect and preserve unrelated work in a required file; stop only when ownership or intent is unresolvable. Never stage a shared index another worker owns.
 
 ## When blocked
 
 Refine a falsifiable hypothesis from the failure, shrink the reproduction, and use `flow-diagnose` for a hard cause. Honor the task's correction budget; without one, stop after three unsuccessful attempts without progress and report the evidence. Missing access or contradictory requirements need a named prerequisite, not retries. Never weaken tests or acceptance to pass.
+
+## Red flags
+
+Stop and gather evidence when you catch yourself thinking:
+
+- "It should work now" or "that was a trivial change": run the check anyway.
+- "The test is wrong": prove it against the contract before touching it.
+- "I'll verify at the end": each slice gets its own evidence.
+- "One more quick fix": after repeated failed attempts, step back to `flow-diagnose`.
 
 ## Anti-patterns
 

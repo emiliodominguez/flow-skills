@@ -1,6 +1,6 @@
 ---
 name: flow-a11y
-description: "Audit and fix accessibility against WCAG 2.2 AA with keyboard, screen reader, contrast, zoom and motion evidence. Use for accessibility reviews or pre-release UI checks. Hands off to `flow-ui` or `flow-styles`, then `flow-review`."
+description: "Accessibility audit and fixes to WCAG 2.2 AA. Use when checking keyboard, screen reader, contrast, zoom or reduced-motion compliance, or before releasing UI. Hands off to `flow-ui` or `flow-styles`, then `flow-review`."
 metadata:
   stage: verify
 ---

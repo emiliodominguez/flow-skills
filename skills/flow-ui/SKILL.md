@@ -1,6 +1,6 @@
 ---
 name: flow-ui
-description: "Build production UI from a brief, design direction or reference image with a render, compare and fix loop across viewports and states. Use for pages, screens, components or matching a mockup. Hands off to `flow-a11y` or `flow-review`."
+description: "Production UI built in a render, compare and fix loop. Use for new pages, screens or components, or to match a mockup or screenshot. Hands off to `flow-a11y` or `flow-review`."
 metadata:
   stage: build
 ---

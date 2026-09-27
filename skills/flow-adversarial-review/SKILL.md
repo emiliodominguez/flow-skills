@@ -1,6 +1,6 @@
 ---
 name: flow-adversarial-review
-description: "Trace concrete attack paths from entry points through trust boundaries to reachable impact. Use for adversarial or security review of a change or system. Hands off to `flow-work` for fixes or `flow-review` for broader review."
+description: "Security and abuse review that traces attacker input to reachable impact. Use when a change touches auth, untrusted input, secrets, permissions or isolation, or a security review is requested. Hands off to `flow-work` or `flow-review`."
 metadata:
   stage: verify
 ---

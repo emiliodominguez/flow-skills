@@ -1,6 +1,6 @@
 ---
 name: flow-redesign
-description: "Audit an existing interface with screenshots and a scored rubric, then upgrade it in prioritized steps that preserve behavior, URLs and content contracts. Use to modernize or polish shipped UI. Hands off to `flow-design`, `flow-ui` or `flow-a11y`."
+description: "Measured upgrade of an existing interface. Use to modernize or polish shipped UI that looks dated or inconsistent without breaking URLs, content or behavior. Hands off to `flow-design`, `flow-ui` or `flow-a11y`."
 metadata:
   stage: build
 ---

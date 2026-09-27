@@ -1,6 +1,6 @@
 ---
 name: flow-simplify
-description: "Reduce accidental complexity and remove provably unused code while preserving semantics and external consumers. Use for targeted cleanup, not redesign. Hands off to `flow-review` for the diff or `flow-refactor` for structural changes."
+description: "Targeted cleanup of provably dead code and accidental complexity. Use for dead paths, needless indirection or generated slop, not redesign. Hands off to `flow-review` or `flow-refactor`."
 metadata:
   stage: build
 ---

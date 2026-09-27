@@ -1,6 +1,6 @@
 ---
 name: flow-diagnose
-description: "Investigate a hard failure with competing hypotheses and discriminating experiments, then verify the smallest supported fix. Use for bugs, regressions or intermittent incidents. Hands off to `flow-work` or `flow-triage`."
+description: "Root-cause investigation for hard failures. Use when a bug, regression or crash in the product has no obvious cause, or a first fix did not hold. Hands off to `flow-work` or `flow-triage`."
 metadata:
   stage: operate
 ---
@@ -14,7 +14,8 @@ confirmation needs evidence that rules out plausible alternatives.
 
 1. Establish symptom, expected behavior, environment, revision and impact. Reproduce with a
    small input when possible. For intermittent failures, record frequency, logs, traces and
-   conditions instead of waiting for an on-demand repro.
+   conditions instead of waiting for an on-demand repro. Name the check that will prove the
+   eventual fix (a failing regression test or a controlled signal), even before the cause is known.
 2. State a falsifiable hypothesis per plausible cause, with predictions and evidence for and
    against. Keep observations separate from explanations. Inspect actual data/control flow
    and changes near onset.
@@ -38,6 +39,13 @@ Honor any investigation budget. If experiments stop yielding information, access
 or evidence cannot separate causes, report the smallest missing observation instead of guessing
 or repeating a patch. Urgent containment belongs in `flow-triage` under the user's operational
 authorization.
+
+## Red flags
+
+- "I know what this is": write the competing hypothesis down and test it anyway.
+- "Let me try one more change": no new patch without a new observation.
+- "It went away": an unexplained disappearance is not a fix.
+- "Three fixes failed": the model of the system is wrong; revisit assumptions, not the patch.
 
 ## Anti-patterns
 

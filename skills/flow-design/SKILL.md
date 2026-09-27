@@ -1,6 +1,6 @@
 ---
 name: flow-design
-description: "Set a deliberate visual direction and design system (type, color, space, motion tokens and a DESIGN.md) from the brief, audience and existing brand. Use before building a new product, page or rebrand. Hands off to `flow-ui` or `flow-prototype`."
+description: "Visual direction and design system: tokens plus a DESIGN.md. Use before building a new product, page or rebrand, or when a new surface has no design system yet. Hands off to `flow-ui` or `flow-prototype`."
 metadata:
   stage: plan
 ---

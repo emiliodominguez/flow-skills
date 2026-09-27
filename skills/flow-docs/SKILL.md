@@ -1,6 +1,6 @@
 ---
 name: flow-docs
-description: "Write or update documentation for a defined reader, grounding claims and examples in current code. Use for guides, API/reference docs, architecture rationale, READMEs or stale-doc cleanup. Feeds `flow-review` or `flow-ship`."
+description: "Human-facing documentation grounded in current code. Use for READMEs, guides, API reference or architecture docs for people, including stale ones. Feeds `flow-review` or `flow-ship`."
 metadata:
   stage: build
 ---

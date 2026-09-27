@@ -1,6 +1,6 @@
 ---
 name: flow-handoff
-description: "Persist decisions, artifacts, verification state and the next action so another session can resume. Use when pausing, switching context or saving an interrupted plan or orchestration run. Routes to `flow-orchestrate`, `flow-work` or the named specialist."
+description: "Resumable handoff record for another session. Use when pausing or ending a session mid-task, or saving an interrupted plan or run. Routes to `flow-orchestrate`, `flow-work` or the named specialist."
 metadata:
   stage: plan
 ---

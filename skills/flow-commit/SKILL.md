@@ -1,6 +1,6 @@
 ---
 name: flow-commit
-description: "Write a conventional commit message for the intended change, or stage and create an atomic commit when asked. Message-only requests never mutate Git. Hands off to `flow-ship` when push or a pull request is part of the request."
+description: "Conventional commit messages and atomic commits. Use when asked only for a commit message or a commit; message-only requests never touch Git. Hands off to `flow-ship` when a push or PR was requested."
 metadata:
   stage: deliver
 ---
@@ -12,6 +12,9 @@ and pushing or opening a PR are separate outcomes.
 
 ## Process
 
+Decide the mode first. "Write a commit message" or "message for my staged changes" returns text
+only: no `git add`, no `git commit`, and say that nothing was committed.
+
 1. Inspect branch, status, staged, unstaged and relevant untracked changes. Read the index with
    `git diff --cached`; `git diff` alone misses staged content. Preserve unrelated staging and
    working files.
@@ -19,8 +22,9 @@ and pushing or opening a PR are separate outcomes.
    support; don't split an inseparable change to shrink file count.
 3. Conventional subject: `type(scope): imperative description`, following the repository's
    types, scopes, length and language. Describe the effect, not a file list.
-4. Body: the why when not obvious, plus constraints, significant tradeoffs and breaking-change
-   migration notes. Never invent rationale or claim unrun checks. Follow the repository's
+4. Body: the why and the user-visible effect in one plain sentence (for example "Exports over
+   10k rows now run in the background and email a download link."), plus constraints, significant tradeoffs and
+   breaking-change migration notes. Never invent rationale or claim unrun checks. Follow the repository's
    Co-Authored-By / generated-credit convention.
 5. Message-only request: return the message and stop. Authorized commit: stage only intended
    paths/hunks. Use `git add -p` when interactive; in a noninteractive host use scoped paths or

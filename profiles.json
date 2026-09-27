@@ -23,7 +23,9 @@
 			"flow-migrate",
 			"flow-git-fix",
 			"flow-pr-fix",
-			"flow-prune-agent-setup"
-		]
+			"flow-prune-agent-setup",
+			"flow-write-skill"
+		],
+		"backend": ["flow-api", "flow-observe", "flow-benchmark", "flow-adversarial-review", "flow-migrate", "flow-deps"]
 	}
 }

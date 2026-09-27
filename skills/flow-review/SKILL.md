@@ -1,6 +1,6 @@
 ---
 name: flow-review
-description: "Review code changes for correctness and maintainability defects with severity, confidence and falsifiable evidence. Use before shipping or on request; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`."
+description: "Code review with evidence-backed correctness and maintainability findings. Use before shipping, on a PR or diff, or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`."
 metadata:
   stage: verify
 ---
@@ -60,6 +60,13 @@ Lead with findings by severity, with file references and evidence. List checks p
 scope not checked and material uncertainty. "No findings" is valid and does not certify unrun
 tests. After later changes, reassess only the affected diff and invalidate stale findings.
 In a coordinated run, return findings to the owner; edits and retry state stay with them.
+
+## Red flags
+
+- "This looks wrong": trace a concrete input to a wrong result, or tag it PLAUSIBLE.
+- "The author probably handled it": find the guard or report the gap.
+- "I should find something": no findings is a valid result.
+- "Tests pass, so it's fine": check whether the tests cover the changed behavior.
 
 ## Anti-patterns
 

@@ -4,6 +4,17 @@
 
 _Audit and prune a coding agent's user-owned instructions, memory, settings, hooks, MCP servers, plugins, agents and skills by effective scope and provenance, for any host. Not caches or history. Feeds `flow-handoff`._
 
+**Stage:** operate · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_prune_agent_setup["flow-prune-agent-setup"]
+  flow_handoff["flow-handoff"]
+  flow_prune_agent_setup --> flow_handoff
+  classDef focus stroke-width:3px
+  class flow_prune_agent_setup focus
+```
+
 ---
 
 # Prune an agent setup

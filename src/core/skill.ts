@@ -71,6 +71,28 @@ export const WEASEL_WORDS = ["simply", "basically", "effortlessly", "trivially",
 export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
+ * Workflow stages, in graph order. Each skill declares one as `metadata.stage`; the docs
+ * dependency graph groups skills by it.
+ */
+export const STAGES = ["explore", "understand", "plan", "build", "verify", "deliver", "operate"] as const;
+
+/** A workflow stage from {@link STAGES}. */
+export type Stage = (typeof STAGES)[number];
+
+/**
+ * The declared workflow stage of a skill.
+ *
+ * @param skill - A loaded skill.
+ * @returns The stage, or undefined when missing or unknown.
+ */
+export function skillStage(skill: Skill): Stage | undefined {
+	const metadata = skill.frontmatter.metadata;
+	const stage = metadata && typeof metadata === "object" ? (metadata as Record<string, unknown>).stage : undefined;
+
+	return STAGES.find((known) => known === stage);
+}
+
+/**
  * Parse a SKILL.md's leading `---` frontmatter as YAML, matching the shared Agent
  * Skills format.
  *
@@ -195,6 +217,17 @@ export function validateSkill(skill: Skill): Issue[] {
 		if (!SPEC_FIELDS.includes(key))
 			add("error", "frontmatter.portable", `\`${key}\` is not an Agent Skills spec field; skills must stay host-agnostic`);
 	}
+
+	const metadata = fm.metadata;
+
+	// The spec defines metadata as a string-to-string map.
+	if (metadata !== undefined && (typeof metadata !== "object" || metadata === null || Array.isArray(metadata))) {
+		add("error", "metadata.shape", "`metadata` must be a map of string keys to string values");
+	} else if (metadata && Object.values(metadata).some((value) => typeof value !== "string")) {
+		add("error", "metadata.shape", "`metadata` values must be strings");
+	}
+
+	if (!skillStage(skill)) add("error", "metadata.stage", `\`metadata.stage\` must be one of: ${STAGES.join(", ")}`);
 
 	const lines = skill.body.split("\n").length;
 

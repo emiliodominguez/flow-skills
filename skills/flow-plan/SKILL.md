@@ -1,6 +1,8 @@
 ---
 name: flow-plan
 description: "Turn a defined outcome into a source-grounded plan with dependency-ordered tasks, acceptance criteria, evidence and stop conditions. Use for multi-change or multi-session work; small edits go to `flow-work`. Hands off to `flow-work` or `flow-orchestrate`."
+metadata:
+  stage: plan
 ---
 
 # Plan

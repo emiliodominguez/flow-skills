@@ -4,6 +4,19 @@
 
 _Measure a performance claim with a defined workload, timing boundary, reproducible baseline and uncertainty. Use before optimizing or to compare alternatives (cold, warm, latency, throughput). Feeds `flow-work` or `flow-refactor` with evidence._
 
+**Stage:** verify · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_benchmark["flow-benchmark"]
+  flow_work["flow-work"]
+  flow_refactor["flow-refactor"]
+  flow_benchmark --> flow_work
+  flow_benchmark --> flow_refactor
+  classDef focus stroke-width:3px
+  class flow_benchmark focus
+```
+
 ---
 
 # Benchmark

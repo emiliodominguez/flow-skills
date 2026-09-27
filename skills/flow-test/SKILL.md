@@ -1,6 +1,8 @@
 ---
 name: flow-test
 description: "Design and run tests around observable behavior, regressions, integration boundaries or flakiness. Use when adding coverage or fixing unreliable tests. Hands off to `flow-work` for implementation or `flow-verify` for an acceptance gate."
+metadata:
+  stage: build
 ---
 
 # Test

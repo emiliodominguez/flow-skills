@@ -4,6 +4,30 @@
 
 _Run a defined multi-step plan through bounded workers and independent acceptance gates. Use for cross-system features, investigations or long refactors with dependent phases, not small edits. Routes to `flow-plan`, `flow-verify`, `flow-review` or `flow-handoff`._
 
+**Stage:** plan · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_orchestrate["flow-orchestrate"]
+  flow_handoff["flow-handoff"]
+  flow_migrate["flow-migrate"]
+  flow_plan["flow-plan"]
+  flow_specialize["flow-specialize"]
+  flow_verify["flow-verify"]
+  flow_review["flow-review"]
+  flow_handoff --> flow_orchestrate
+  flow_migrate --> flow_orchestrate
+  flow_plan --> flow_orchestrate
+  flow_specialize --> flow_orchestrate
+  flow_verify --> flow_orchestrate
+  flow_orchestrate --> flow_plan
+  flow_orchestrate --> flow_verify
+  flow_orchestrate --> flow_review
+  flow_orchestrate --> flow_handoff
+  classDef focus stroke-width:3px
+  class flow_orchestrate focus
+```
+
 ---
 
 # Orchestrate

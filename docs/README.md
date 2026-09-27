@@ -9,7 +9,7 @@ New here? Start with the [project README](../README.md) to install the skills an
 | [Workflow](OVERVIEW.md)           | Choose the right flow for a task and understand the evidence |
 | [Orchestration](ORCHESTRATION.md) | Walk through a gated, resumable multi-step run               |
 | [Skills catalog](SKILLS.md)       | Browse every skill, with a full page each (generated)        |
-| [Handoff map](SKILL-MAP.md)       | See which skill each one hands off to (generated)            |
+| [Skill graph](SKILL-MAP.md)       | See how the skills hand off to each other (generated)        |
 
 ## Working on the suite
 

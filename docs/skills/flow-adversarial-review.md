@@ -4,6 +4,20 @@
 
 _Trace concrete attack paths and failure modes from entry points through trust boundaries to reachable impact. Use for requested adversarial or security review of a change or system. Hands off to `flow-work` for authorized fixes or `flow-review` for broader review._
 
+**Stage:** verify · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_adversarial_review["flow-adversarial-review"]
+  flow_review["flow-review"]
+  flow_work["flow-work"]
+  flow_review --> flow_adversarial_review
+  flow_adversarial_review --> flow_work
+  flow_adversarial_review --> flow_review
+  classDef focus stroke-width:3px
+  class flow_adversarial_review focus
+```
+
 ---
 
 # Adversarial review

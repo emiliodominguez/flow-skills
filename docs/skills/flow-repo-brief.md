@@ -4,6 +4,21 @@
 
 _Build or refresh a compact, source-cited knowledge base for a change or subsystem. Use when agents keep rediscovering conventions, work spans sessions, or a brief may be stale; not a first tour (`flow-onboard`). Feeds `flow-plan` and `flow-specialize`._
 
+**Stage:** understand · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_repo_brief["flow-repo-brief"]
+  flow_onboard["flow-onboard"]
+  flow_plan["flow-plan"]
+  flow_specialize["flow-specialize"]
+  flow_onboard --> flow_repo_brief
+  flow_repo_brief --> flow_plan
+  flow_repo_brief --> flow_specialize
+  classDef focus stroke-width:3px
+  class flow_repo_brief focus
+```
+
 ---
 
 # Repository brief

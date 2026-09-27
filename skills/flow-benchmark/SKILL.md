@@ -1,6 +1,8 @@
 ---
 name: flow-benchmark
 description: "Measure a performance claim with a defined workload, timing boundary, reproducible baseline and uncertainty. Use before optimizing or to compare alternatives (cold, warm, latency, throughput). Feeds `flow-work` or `flow-refactor` with evidence."
+metadata:
+  stage: verify
 ---
 
 # Benchmark

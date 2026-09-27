@@ -4,6 +4,38 @@
 
 _Implement a bounded change in verified slices from a request, plan, or coordinator task brief. Use for coding and bug fixes, not multi-worker gated runs (`flow-orchestrate`). Hands off to `flow-review`, or `flow-verify` via the coordinator._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_work["flow-work"]
+  flow_adversarial_review["flow-adversarial-review"]
+  flow_benchmark["flow-benchmark"]
+  flow_diagnose["flow-diagnose"]
+  flow_git_fix["flow-git-fix"]
+  flow_handoff["flow-handoff"]
+  flow_plan["flow-plan"]
+  flow_review["flow-review"]
+  flow_specialize["flow-specialize"]
+  flow_test["flow-test"]
+  flow_triage["flow-triage"]
+  flow_verify["flow-verify"]
+  flow_adversarial_review --> flow_work
+  flow_benchmark --> flow_work
+  flow_diagnose --> flow_work
+  flow_git_fix --> flow_work
+  flow_handoff --> flow_work
+  flow_plan --> flow_work
+  flow_review --> flow_work
+  flow_specialize --> flow_work
+  flow_test --> flow_work
+  flow_triage --> flow_work
+  flow_work --> flow_review
+  flow_work --> flow_verify
+  classDef focus stroke-width:3px
+  class flow_work focus
+```
+
 ---
 
 # Work

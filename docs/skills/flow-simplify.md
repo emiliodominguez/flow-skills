@@ -4,6 +4,19 @@
 
 _Reduce accidental complexity and remove provably unused code while preserving semantics and external consumers. Use for targeted cleanup, not redesign. Hands off to `flow-review` for the diff or `flow-refactor` for structural changes._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_simplify["flow-simplify"]
+  flow_review["flow-review"]
+  flow_refactor["flow-refactor"]
+  flow_simplify --> flow_review
+  flow_simplify --> flow_refactor
+  classDef focus stroke-width:3px
+  class flow_simplify focus
+```
+
 ---
 
 # Simplify

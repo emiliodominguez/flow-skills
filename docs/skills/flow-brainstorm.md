@@ -4,6 +4,20 @@
 
 _Explore an unclear idea, expose key assumptions, compare real alternatives and converge on a design sketch. Use before building when the outcome or approach is still open. Hands off to `flow-prototype` for an experiment or `flow-plan` for an executable design._
 
+**Stage:** explore · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_brainstorm["flow-brainstorm"]
+  flow_prototype["flow-prototype"]
+  flow_plan["flow-plan"]
+  flow_prototype --> flow_brainstorm
+  flow_brainstorm --> flow_prototype
+  flow_brainstorm --> flow_plan
+  classDef focus stroke-width:3px
+  class flow_brainstorm focus
+```
+
 ---
 
 # Brainstorm

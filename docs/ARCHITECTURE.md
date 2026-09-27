@@ -13,7 +13,7 @@ folder, supporting files included, into whichever agents the user picks.
 | `install.sh`, `uninstall.sh`, `scripts/common.sh` | Thin wrappers over `npx skills add/remove`: profiles, legacy cleanup |
 | `.claude-plugin/`                                 | Optional plugin-marketplace manifests, versioned with `package.json` |
 | `src/`                                            | Authoring CLI (`pnpm skills list`, `validate`, `new`)                |
-| `scripts/gen-skill-docs.ts`                       | Generates the catalog, handoff map and per-skill pages               |
+| `scripts/gen-skill-docs.ts`                       | Generates the catalog, skill graph, per-skill pages and llms.txt     |
 | `scripts/smoke-install.sh`                        | Real `npx skills` install and removal in a throwaway project         |
 | `scripts/eval-llm.ts`, `scripts/prepare-eval.ts`  | Optional model audit and scenario fixtures                           |
 | `test/`, `evals/`                                 | Unit tests, instruction markers, agent scenarios                     |
@@ -37,7 +37,8 @@ doesn't stop the scan.
 
 - malformed YAML, or a missing, mismatched, non-kebab-case or over-64-character `name`
 - a missing, multi-line or over-1,024-character `description`
-- frontmatter fields outside the spec
+- frontmatter fields outside the spec, a `metadata` value that is not a string, or a missing or
+  unknown `metadata.stage`
 - broken `references/` links, and backticked `flow-*` names that match no skill (checked in
   bodies, descriptions and references)
 - an empty corpus, or descriptions totaling more than 8,000 characters
@@ -55,9 +56,11 @@ and many agents cap the size of their skill index.
 
 ## Generated docs
 
-`pnpm docs:gen` writes `docs/SKILLS.md`, `docs/SKILL-MAP.md`, `docs/skills/` and the root [`llms.txt`](https://llmstxt.org) index that agents and crawlers can read. The handoff map
-is parsed from each description's closing clause (`Hands off to`, `Hands back to`, `Routes to`
-or `Feeds`). `pnpm docs:check` reports stale or obsolete output without writing anything.
+`pnpm docs:gen` writes `docs/SKILLS.md`, `docs/SKILL-MAP.md`, `docs/skills/` and the root [`llms.txt`](https://llmstxt.org) index that agents and crawlers can read. The skill graph
+is built by `src/core/graph.ts`: edges come from each description's closing clause (`Hands off to`,
+`Hands back to`, `Routes to` or `Feeds`), and groups come from `metadata.stage`. `SKILL-MAP.md`
+shows a stage overview, the full graph and a table, and each skill page shows its own neighborhood,
+all as Mermaid diagrams that GitHub renders inline. `pnpm docs:check` reports stale or obsolete output without writing anything.
 
 ## Tooling notes
 

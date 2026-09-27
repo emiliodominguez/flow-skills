@@ -4,6 +4,23 @@
 
 _Apply a known API or pattern transformation across a repository with a site inventory, variant handling and per-site evidence. Use for repetitive cross-file migrations or codemods once the target is understood. Hands off to `flow-review` or `flow-orchestrate`._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_migrate["flow-migrate"]
+  flow_deps["flow-deps"]
+  flow_refactor["flow-refactor"]
+  flow_review["flow-review"]
+  flow_orchestrate["flow-orchestrate"]
+  flow_deps --> flow_migrate
+  flow_refactor --> flow_migrate
+  flow_migrate --> flow_review
+  flow_migrate --> flow_orchestrate
+  classDef focus stroke-width:3px
+  class flow_migrate focus
+```
+
 ---
 
 # Migrate

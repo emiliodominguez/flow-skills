@@ -4,6 +4,20 @@
 
 _Address pull-request review feedback with traceable fixes and verified published state; push, replies and thread resolution stay within what the user authorized. Use when a PR has review comments. Hands back to `flow-review` or `flow-ship`._
 
+**Stage:** deliver · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_pr_fix["flow-pr-fix"]
+  flow_ship["flow-ship"]
+  flow_review["flow-review"]
+  flow_ship --> flow_pr_fix
+  flow_pr_fix --> flow_review
+  flow_pr_fix --> flow_ship
+  classDef focus stroke-width:3px
+  class flow_pr_fix focus
+```
+
 ---
 
 # Fix PR feedback

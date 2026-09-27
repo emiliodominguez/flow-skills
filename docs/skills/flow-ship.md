@@ -4,6 +4,28 @@
 
 _Deliver verified changes through the requested Git or PR stage: commit, push, draft PR, ready, or merge, respecting narrower requests and actual CI behavior. Routes to `flow-commit`, `flow-pr-fix`, or `flow-git-fix`._
 
+**Stage:** deliver · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_ship["flow-ship"]
+  flow_commit["flow-commit"]
+  flow_docs["flow-docs"]
+  flow_git_fix["flow-git-fix"]
+  flow_pr_fix["flow-pr-fix"]
+  flow_review["flow-review"]
+  flow_commit --> flow_ship
+  flow_docs --> flow_ship
+  flow_git_fix --> flow_ship
+  flow_pr_fix --> flow_ship
+  flow_review --> flow_ship
+  flow_ship --> flow_commit
+  flow_ship --> flow_pr_fix
+  flow_ship --> flow_git_fix
+  classDef focus stroke-width:3px
+  class flow_ship focus
+```
+
 ---
 
 # Ship

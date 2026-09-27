@@ -1,6 +1,8 @@
 ---
 name: flow-orchestrate
 description: "Run a defined multi-step plan through bounded workers and independent acceptance gates. Use for cross-system features, investigations or long refactors with dependent phases, not small edits. Routes to `flow-plan`, `flow-verify`, `flow-review` or `flow-handoff`."
+metadata:
+  stage: plan
 ---
 
 # Orchestrate

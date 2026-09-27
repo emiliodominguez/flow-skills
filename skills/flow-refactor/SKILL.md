@@ -1,6 +1,8 @@
 ---
 name: flow-refactor
 description: "Improve code structure (extract responsibilities, reduce coupling, clarify ownership) while preserving observable behavior and public contracts. Intentional behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`."
+metadata:
+  stage: build
 ---
 
 # Refactor

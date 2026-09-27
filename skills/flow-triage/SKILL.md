@@ -1,6 +1,8 @@
 ---
 name: flow-triage
 description: "Assess a reported failure's severity, blast radius and trajectory, identify authorized containment, and route next steps. Use for incidents and unclear bug reports; root cause belongs in `flow-diagnose`. Routes to `flow-diagnose`, `flow-work`, or `flow-plan`."
+metadata:
+  stage: operate
 ---
 
 # Triage

@@ -4,6 +4,21 @@
 
 _Map an unfamiliar repository: discover commands, trace one real flow, and note ownership, conventions, and constraints. Use for a first codebase tour, not maintained context (`flow-repo-brief`). Hands off to `flow-plan`, `flow-diagnose`, or `flow-repo-brief`._
 
+**Stage:** understand · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_onboard["flow-onboard"]
+  flow_plan["flow-plan"]
+  flow_diagnose["flow-diagnose"]
+  flow_repo_brief["flow-repo-brief"]
+  flow_onboard --> flow_plan
+  flow_onboard --> flow_diagnose
+  flow_onboard --> flow_repo_brief
+  classDef focus stroke-width:3px
+  class flow_onboard focus
+```
+
 ---
 
 # Onboard

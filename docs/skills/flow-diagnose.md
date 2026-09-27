@@ -4,6 +4,22 @@
 
 _Investigate a hard failure with competing hypotheses and discriminating experiments, then verify the smallest supported fix. Use for bugs, regressions or intermittent incidents; a deterministic repro is optional. Hands off to `flow-work` or `flow-triage`._
 
+**Stage:** operate · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_diagnose["flow-diagnose"]
+  flow_onboard["flow-onboard"]
+  flow_triage["flow-triage"]
+  flow_work["flow-work"]
+  flow_onboard --> flow_diagnose
+  flow_triage --> flow_diagnose
+  flow_diagnose --> flow_work
+  flow_diagnose --> flow_triage
+  classDef focus stroke-width:3px
+  class flow_diagnose focus
+```
+
 ---
 
 # Diagnose

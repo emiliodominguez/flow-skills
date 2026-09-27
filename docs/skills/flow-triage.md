@@ -4,6 +4,22 @@
 
 _Assess a reported failure's severity, blast radius and trajectory, identify authorized containment, and route next steps. Use for incidents and unclear bug reports; root cause belongs in `flow-diagnose`. Routes to `flow-diagnose`, `flow-work`, or `flow-plan`._
 
+**Stage:** operate · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_triage["flow-triage"]
+  flow_diagnose["flow-diagnose"]
+  flow_work["flow-work"]
+  flow_plan["flow-plan"]
+  flow_diagnose --> flow_triage
+  flow_triage --> flow_diagnose
+  flow_triage --> flow_work
+  flow_triage --> flow_plan
+  classDef focus stroke-width:3px
+  class flow_triage focus
+```
+
 ---
 
 # Triage

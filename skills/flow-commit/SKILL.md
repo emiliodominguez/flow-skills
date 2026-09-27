@@ -1,6 +1,8 @@
 ---
 name: flow-commit
 description: "Write a conventional commit message for the intended change, or stage and create an atomic commit when asked. Message-only requests never mutate Git. Hands off to `flow-ship` when push or a pull request is part of the request."
+metadata:
+  stage: deliver
 ---
 
 # Commit

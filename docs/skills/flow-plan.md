@@ -4,6 +4,30 @@
 
 _Turn a defined outcome into a source-grounded plan with dependency-ordered tasks, acceptance criteria, evidence and stop conditions. Use for multi-change or multi-session work; small edits go to `flow-work`. Hands off to `flow-work` or `flow-orchestrate`._
 
+**Stage:** plan · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_plan["flow-plan"]
+  flow_brainstorm["flow-brainstorm"]
+  flow_onboard["flow-onboard"]
+  flow_orchestrate["flow-orchestrate"]
+  flow_prototype["flow-prototype"]
+  flow_repo_brief["flow-repo-brief"]
+  flow_triage["flow-triage"]
+  flow_work["flow-work"]
+  flow_brainstorm --> flow_plan
+  flow_onboard --> flow_plan
+  flow_orchestrate --> flow_plan
+  flow_prototype --> flow_plan
+  flow_repo_brief --> flow_plan
+  flow_triage --> flow_plan
+  flow_plan --> flow_work
+  flow_plan --> flow_orchestrate
+  classDef focus stroke-width:3px
+  class flow_plan focus
+```
+
 ---
 
 # Plan

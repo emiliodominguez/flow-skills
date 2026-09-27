@@ -4,6 +4,18 @@
 
 _Write a conventional commit message for the intended change, or stage and create an atomic commit when asked. Message-only requests never mutate Git. Hands off to `flow-ship` when push or a pull request is part of the request._
 
+**Stage:** deliver · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_commit["flow-commit"]
+  flow_ship["flow-ship"]
+  flow_ship --> flow_commit
+  flow_commit --> flow_ship
+  classDef focus stroke-width:3px
+  class flow_commit focus
+```
+
 ---
 
 # Commit

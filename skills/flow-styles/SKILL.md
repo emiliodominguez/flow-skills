@@ -1,6 +1,8 @@
 ---
 name: flow-styles
 description: "Implement or refactor CSS within the repo's styling architecture, browser targets and accessible states, verified in the rendered page. Use for layout, responsive, cascade and UI polish. Hands off to `flow-animate` or `flow-review`."
+metadata:
+  stage: build
 ---
 
 # Styles

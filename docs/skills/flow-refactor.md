@@ -4,6 +4,23 @@
 
 _Improve code structure (extract responsibilities, reduce coupling, clarify ownership) while preserving observable behavior and public contracts. Intentional behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_refactor["flow-refactor"]
+  flow_benchmark["flow-benchmark"]
+  flow_simplify["flow-simplify"]
+  flow_review["flow-review"]
+  flow_migrate["flow-migrate"]
+  flow_benchmark --> flow_refactor
+  flow_simplify --> flow_refactor
+  flow_refactor --> flow_review
+  flow_refactor --> flow_migrate
+  classDef focus stroke-width:3px
+  class flow_refactor focus
+```
+
 ---
 
 # Refactor

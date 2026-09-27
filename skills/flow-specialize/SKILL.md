@@ -1,6 +1,8 @@
 ---
 name: flow-specialize
 description: "Write a repository-specific worker brief and matching verifier brief from inspected code, conventions, and a bounded task. Use when generic agents keep missing local architecture, lint rules, or domain contracts. Feeds `flow-orchestrate` or `flow-work`."
+metadata:
+  stage: understand
 ---
 
 # Specialize a worker

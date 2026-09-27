@@ -4,6 +4,20 @@
 
 _Design, tune or critique interface motion via storyboard, dev-only dials and rendered interaction checks. Use when motion should clarify hierarchy, feedback or a visual experience. Hands off to `flow-styles` for layout or `flow-review` for implementation review._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_animate["flow-animate"]
+  flow_styles["flow-styles"]
+  flow_review["flow-review"]
+  flow_styles --> flow_animate
+  flow_animate --> flow_styles
+  flow_animate --> flow_review
+  classDef focus stroke-width:3px
+  class flow_animate focus
+```
+
 ---
 
 # Animate

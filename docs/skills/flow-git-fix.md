@@ -4,6 +4,20 @@
 
 _Resolve a Git conflict, interrupted merge/rebase/cherry-pick, stacked-branch issue or authorized branch cleanup while preserving unrelated work. Use for demonstrated Git or history problems. Hands back to `flow-work` or `flow-ship`._
 
+**Stage:** deliver · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_git_fix["flow-git-fix"]
+  flow_ship["flow-ship"]
+  flow_work["flow-work"]
+  flow_ship --> flow_git_fix
+  flow_git_fix --> flow_work
+  flow_git_fix --> flow_ship
+  classDef focus stroke-width:3px
+  class flow_git_fix focus
+```
+
 ---
 
 # Repair Git state

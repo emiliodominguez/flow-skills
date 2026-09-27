@@ -4,6 +4,19 @@
 
 _Update dependencies using current release guidance, compatible upgrade groups, coherent lockfiles and verified installs. Use for dependency bumps, advisories or framework upgrades. Hands off to `flow-review` for the diff or `flow-migrate` for API migration._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_deps["flow-deps"]
+  flow_review["flow-review"]
+  flow_migrate["flow-migrate"]
+  flow_deps --> flow_review
+  flow_deps --> flow_migrate
+  classDef focus stroke-width:3px
+  class flow_deps focus
+```
+
 ---
 
 # Dependencies

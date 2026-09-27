@@ -4,6 +4,21 @@
 
 _Write a repository-specific worker brief and matching verifier brief from inspected code, conventions, and a bounded task. Use when generic agents keep missing local architecture, lint rules, or domain contracts. Feeds `flow-orchestrate` or `flow-work`._
 
+**Stage:** understand · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_specialize["flow-specialize"]
+  flow_repo_brief["flow-repo-brief"]
+  flow_orchestrate["flow-orchestrate"]
+  flow_work["flow-work"]
+  flow_repo_brief --> flow_specialize
+  flow_specialize --> flow_orchestrate
+  flow_specialize --> flow_work
+  classDef focus stroke-width:3px
+  class flow_specialize focus
+```
+
 ---
 
 # Specialize a worker

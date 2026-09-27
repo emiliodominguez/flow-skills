@@ -13,8 +13,9 @@ This guide covers what it can't check.
 pnpm skills new flow-<name> -d "What it does. Use when <triggers>. Hands off to \`flow-next\`."
 ```
 
-Names use the `flow-` prefix and match their directory. Add the skill to `profiles.json` if it
-belongs to a profile.
+Names use the `flow-` prefix and match their directory. Set `metadata.stage` to the skill's
+workflow stage (`explore`, `understand`, `plan`, `build`, `verify`, `deliver` or `operate`); the
+[skill graph](SKILL-MAP.md) groups skills by it. Add the skill to `profiles.json` if it belongs to a profile.
 
 ## 2. Write the description
 
@@ -24,7 +25,7 @@ The description is always loaded, and it's how the agent decides to use the skil
 1. What the skill does, in plain words.
 2. When to use it, with the words a user would actually say.
 3. A boundary only when a neighboring skill could be confused with it.
-4. A handoff clause naming the next skills in backticks. The handoff map is built from it.
+4. A handoff clause naming the next skills in backticks. The skill graph draws its edges from it.
 
 ## 3. Write the body
 

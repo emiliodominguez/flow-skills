@@ -4,6 +4,19 @@
 
 _Design and run tests around observable behavior, regressions, integration boundaries or flakiness. Use when adding coverage or fixing unreliable tests. Hands off to `flow-work` for implementation or `flow-verify` for an acceptance gate._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_test["flow-test"]
+  flow_work["flow-work"]
+  flow_verify["flow-verify"]
+  flow_test --> flow_work
+  flow_test --> flow_verify
+  classDef focus stroke-width:3px
+  class flow_test focus
+```
+
 ---
 
 # Test

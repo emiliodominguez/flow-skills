@@ -37,6 +37,7 @@ function makeSkill(overrides: Omit<Partial<Skill>, "frontmatter"> & { frontmatte
 		frontmatter: {
 			name: "flow-demo",
 			description: "Demonstrate validation with a description long enough to pass. Hands off to `flow-other` for more.",
+			metadata: { stage: "build" },
 			...overrides.frontmatter,
 		},
 	} as Skill;
@@ -91,7 +92,16 @@ describe("validateSkill", () => {
 	});
 
 	it("accepts optional spec fields", () => {
-		expect(validateSkill(makeSkill({ frontmatter: { license: "MIT", metadata: { owner: "x" } } }))).toEqual([]);
+		expect(validateSkill(makeSkill({ frontmatter: { license: "MIT", metadata: { stage: "plan", owner: "x" } } }))).toEqual([]);
+	});
+
+	it("requires a known stage and a string-to-string metadata map", () => {
+		const rules = (metadata: unknown) => validateSkill(makeSkill({ frontmatter: { metadata } })).map((i) => i.rule);
+
+		expect(rules(undefined)).toEqual(["metadata.stage"]);
+		expect(rules({ stage: "ship" })).toEqual(["metadata.stage"]);
+		expect(rules(["build"])).toEqual(["metadata.shape", "metadata.stage"]);
+		expect(rules({ stage: "build", count: 3 })).toEqual(["metadata.shape"]);
 	});
 
 	it("flags a missing description", () => {

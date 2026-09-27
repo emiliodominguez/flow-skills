@@ -1,6 +1,8 @@
 ---
 name: flow-git-fix
 description: "Resolve a Git conflict, interrupted merge/rebase/cherry-pick, stacked-branch issue or authorized branch cleanup while preserving unrelated work. Use for demonstrated Git or history problems. Hands back to `flow-work` or `flow-ship`."
+metadata:
+  stage: deliver
 ---
 
 # Repair Git state

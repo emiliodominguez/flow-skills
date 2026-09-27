@@ -1,6 +1,8 @@
 ---
 name: flow-simplify
 description: "Reduce accidental complexity and remove provably unused code while preserving semantics and external consumers. Use for targeted cleanup, not redesign. Hands off to `flow-review` for the diff or `flow-refactor` for structural changes."
+metadata:
+  stage: build
 ---
 
 # Simplify

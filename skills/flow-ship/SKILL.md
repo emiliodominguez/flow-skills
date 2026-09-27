@@ -1,6 +1,8 @@
 ---
 name: flow-ship
 description: "Deliver verified changes through the requested Git or PR stage: commit, push, draft PR, ready, or merge, respecting narrower requests and actual CI behavior. Routes to `flow-commit`, `flow-pr-fix`, or `flow-git-fix`."
+metadata:
+  stage: deliver
 ---
 
 # Ship

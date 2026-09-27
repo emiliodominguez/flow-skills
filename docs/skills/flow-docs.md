@@ -4,6 +4,19 @@
 
 _Write or update documentation for a defined reader, grounding claims and examples in current code. Use for guides, API/reference docs, architecture rationale, READMEs or stale-doc cleanup. Feeds `flow-review` or `flow-ship`._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_docs["flow-docs"]
+  flow_review["flow-review"]
+  flow_ship["flow-ship"]
+  flow_docs --> flow_review
+  flow_docs --> flow_ship
+  classDef focus stroke-width:3px
+  class flow_docs focus
+```
+
 ---
 
 # Document

@@ -1,6 +1,8 @@
 ---
 name: flow-pr-fix
 description: "Address pull-request review feedback with traceable fixes and verified published state; push, replies and thread resolution stay within what the user authorized. Use when a PR has review comments. Hands back to `flow-review` or `flow-ship`."
+metadata:
+  stage: deliver
 ---
 
 # Fix PR feedback

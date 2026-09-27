@@ -1,6 +1,8 @@
 ---
 name: flow-adversarial-review
 description: "Trace concrete attack paths and failure modes from entry points through trust boundaries to reachable impact. Use for requested adversarial or security review of a change or system. Hands off to `flow-work` for authorized fixes or `flow-review` for broader review."
+metadata:
+  stage: verify
 ---
 
 # Adversarial review

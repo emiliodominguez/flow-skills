@@ -4,6 +4,22 @@
 
 _Verify a bounded artifact against explicit acceptance criteria and return an evidence-backed ACCEPT, REJECT, or BLOCKED verdict. Use as an independent phase gate or to check a specific claim; broad review is `flow-review`. Hands back to `flow-orchestrate`._
 
+**Stage:** verify · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_verify["flow-verify"]
+  flow_orchestrate["flow-orchestrate"]
+  flow_test["flow-test"]
+  flow_work["flow-work"]
+  flow_orchestrate --> flow_verify
+  flow_test --> flow_verify
+  flow_work --> flow_verify
+  flow_verify --> flow_orchestrate
+  classDef focus stroke-width:3px
+  class flow_verify focus
+```
+
 ---
 
 # Verify

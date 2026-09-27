@@ -1,6 +1,8 @@
 ---
 name: flow-prototype
 description: "Build a small runnable experiment (script, demo, or visual alternatives) that answers one technical or UX question before committing to production design. Use for spikes and proofs of concept. Hands off to `flow-brainstorm` or `flow-plan`."
+metadata:
+  stage: explore
 ---
 
 # Prototype

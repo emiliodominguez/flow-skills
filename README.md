@@ -97,7 +97,7 @@ From a clone, the wrapper scripts accept profiles and pass everything after `--`
 | Pause work or tidy your agent setup             | `flow-handoff`, `flow-prune-agent-setup`                                   |
 
 A typical path is `flow-plan` → `flow-work` → `flow-review` → `flow-ship`. Small changes can start at
-`flow-work`. Each skill ends by naming the next one; the [handoff map](docs/SKILL-MAP.md) shows every route.
+`flow-work`. Each skill ends by naming the next one; the [skill graph](docs/SKILL-MAP.md) shows every route.
 
 Skills are instructions only. Installing one starts no process, registers no agent and grants no permission.
 

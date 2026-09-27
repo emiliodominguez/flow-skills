@@ -48,4 +48,4 @@ flowchart TD
 
 Every installed skill's description sits in the agent's context. Install a
 [profile](../profiles.json) when you only need part of the workflow. See the
-[catalog](SKILLS.md), the [handoff map](SKILL-MAP.md) and the [orchestration example](ORCHESTRATION.md).
+[catalog](SKILLS.md), the [skill graph](SKILL-MAP.md) and the [orchestration example](ORCHESTRATION.md).

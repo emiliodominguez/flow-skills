@@ -4,6 +4,22 @@
 
 _Persist decisions, artifacts, verification state and the next action so another session can resume. Use when pausing, switching context or saving an interrupted plan or orchestration run. Routes to `flow-orchestrate`, `flow-work` or the named specialist._
 
+**Stage:** plan · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_handoff["flow-handoff"]
+  flow_orchestrate["flow-orchestrate"]
+  flow_prune_agent_setup["flow-prune-agent-setup"]
+  flow_work["flow-work"]
+  flow_orchestrate --> flow_handoff
+  flow_prune_agent_setup --> flow_handoff
+  flow_handoff --> flow_orchestrate
+  flow_handoff --> flow_work
+  classDef focus stroke-width:3px
+  class flow_handoff focus
+```
+
 ---
 
 # Handoff

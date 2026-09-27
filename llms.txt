@@ -38,5 +38,5 @@
 
 - [Workflow](docs/OVERVIEW.md): choosing a flow, contracts and evidence
 - [Orchestration](docs/ORCHESTRATION.md): a gated, resumable multi-step run
-- [Handoff map](docs/SKILL-MAP.md): which skill hands off to which
+- [Skill graph](docs/SKILL-MAP.md): which skill hands off to which
 - [Authoring](docs/AUTHORING.md): how skills in this suite are written

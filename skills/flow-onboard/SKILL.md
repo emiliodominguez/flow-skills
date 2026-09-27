@@ -1,6 +1,8 @@
 ---
 name: flow-onboard
 description: "Map an unfamiliar repository: discover commands, trace one real flow, and note ownership, conventions, and constraints. Use for a first codebase tour, not maintained context (`flow-repo-brief`). Hands off to `flow-plan`, `flow-diagnose`, or `flow-repo-brief`."
+metadata:
+  stage: understand
 ---
 
 # Onboard

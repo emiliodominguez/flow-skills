@@ -1,6 +1,8 @@
 ---
 name: flow-prune-agent-setup
 description: "Audit and prune a coding agent's user-owned instructions, memory, settings, hooks, MCP servers, plugins, agents and skills by effective scope and provenance, for any host. Not caches or history. Feeds `flow-handoff`."
+metadata:
+  stage: operate
 ---
 
 # Prune an agent setup

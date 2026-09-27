@@ -4,6 +4,41 @@
 
 _Review code changes for concrete correctness and maintainability defects with severity, confidence and falsifiable evidence. Use before shipping or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review`, or `flow-ship`._
 
+**Stage:** verify · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_review["flow-review"]
+  flow_adversarial_review["flow-adversarial-review"]
+  flow_animate["flow-animate"]
+  flow_deps["flow-deps"]
+  flow_docs["flow-docs"]
+  flow_migrate["flow-migrate"]
+  flow_orchestrate["flow-orchestrate"]
+  flow_pr_fix["flow-pr-fix"]
+  flow_refactor["flow-refactor"]
+  flow_simplify["flow-simplify"]
+  flow_styles["flow-styles"]
+  flow_work["flow-work"]
+  flow_ship["flow-ship"]
+  flow_adversarial_review --> flow_review
+  flow_animate --> flow_review
+  flow_deps --> flow_review
+  flow_docs --> flow_review
+  flow_migrate --> flow_review
+  flow_orchestrate --> flow_review
+  flow_pr_fix --> flow_review
+  flow_refactor --> flow_review
+  flow_simplify --> flow_review
+  flow_styles --> flow_review
+  flow_work --> flow_review
+  flow_review --> flow_work
+  flow_review --> flow_adversarial_review
+  flow_review --> flow_ship
+  classDef focus stroke-width:3px
+  class flow_review focus
+```
+
 ---
 
 # Review

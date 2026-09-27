@@ -4,6 +4,20 @@
 
 _Implement or refactor CSS within the repo's styling architecture, browser targets and accessible states, verified in the rendered page. Use for layout, responsive, cascade and UI polish. Hands off to `flow-animate` or `flow-review`._
 
+**Stage:** build · [full graph](../SKILL-MAP.md)
+
+```mermaid
+flowchart LR
+  flow_styles["flow-styles"]
+  flow_animate["flow-animate"]
+  flow_review["flow-review"]
+  flow_animate --> flow_styles
+  flow_styles --> flow_animate
+  flow_styles --> flow_review
+  classDef focus stroke-width:3px
+  class flow_styles focus
+```
+
 ---
 
 # Styles

@@ -48,7 +48,7 @@ Root-cause investigation for hard failures. Use when a bug, regression or crash 
 
 ## [flow-docs](skills/flow-docs.md)
 
-Human-facing documentation grounded in current code. Use for READMEs, guides, API reference or architecture docs for people, including stale ones. Feeds `flow-review` or `flow-ship`.
+Human-facing documentation grounded in current code. Use when writing or updating a README, contributing guide, usage docs, API reference or architecture docs. Feeds `flow-review` or `flow-ship`.
 
 ## [flow-git-fix](skills/flow-git-fix.md)
 
@@ -68,7 +68,7 @@ Observability for a service or feature: structured logs, metrics, traces and ale
 
 ## [flow-onboard](skills/flow-onboard.md)
 
-First tour of an unfamiliar repository. Use when starting in a new codebase, or asked how a project is organized or how a request flows through it. Hands off to `flow-plan`, `flow-diagnose` or `flow-repo-brief`.
+First tour of an unfamiliar repository. Use when asked to explain how a codebase is organized, how a request flows through it, or where to start in a new repo. Hands off to `flow-plan`, `flow-diagnose` or `flow-repo-brief`.
 
 ## [flow-orchestrate](skills/flow-orchestrate.md)
 
@@ -76,7 +76,7 @@ Multi-worker execution of a plan with independent acceptance gates. Use for cros
 
 ## [flow-plan](skills/flow-plan.md)
 
-Source-grounded implementation plan with acceptance criteria. Use for multi-change or multi-session work or before a risky change; small edits go to `flow-work`. Hands off to `flow-work` or `flow-orchestrate`.
+Source-grounded implementation plan with acceptance criteria. Use to sequence multi-change or multi-session work, or before a risky change; small edits go to `flow-work`. Hands off to `flow-work` or `flow-orchestrate`.
 
 ## [flow-pr-fix](skills/flow-pr-fix.md)
 
@@ -88,7 +88,7 @@ Throwaway experiment that answers one technical or UX question. Use for spikes, 
 
 ## [flow-prune-agent-setup](skills/flow-prune-agent-setup.md)
 
-Audit and tidy a coding agent's configuration: instructions, memory, settings, hooks, MCP servers, plugins and installed skills. Use when that setup has grown noisy, conflicting or stale. Feeds `flow-handoff`.
+Audit and tidy a coding agent's configuration: instructions, memory, settings, hooks, MCP servers and plugins. Use when that setup has grown noisy, conflicting or stale. Feeds `flow-handoff`.
 
 ## [flow-redesign](skills/flow-redesign.md)
 
@@ -96,7 +96,7 @@ Measured upgrade of an existing interface. Use to modernize or polish shipped UI
 
 ## [flow-refactor](skills/flow-refactor.md)
 
-Behavior-preserving structural change. Use to extract responsibilities, reduce coupling or clarify ownership; intentional behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`.
+Behavior-preserving structural change. Use to untangle dependencies, redraw module boundaries, extract responsibilities or reduce coupling; behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`.
 
 ## [flow-repo-brief](skills/flow-repo-brief.md)
 
@@ -124,7 +124,7 @@ CSS within the repo's styling architecture, verified in the browser. Use for lay
 
 ## [flow-test](skills/flow-test.md)
 
-Behavior-focused tests. Use when adding coverage, writing a regression test first, or fixing flaky or intermittently failing tests. Hands off to `flow-work` for implementation or `flow-verify` for an acceptance gate.
+Behavior-focused tests. Use when adding coverage, writing a regression test first, or fixing flaky tests that fail randomly or intermittently. Hands off to `flow-work` for implementation or `flow-verify` for an acceptance gate.
 
 ## [flow-triage](skills/flow-triage.md)
 
@@ -140,8 +140,8 @@ Independent ACCEPT, REJECT or BLOCKED verdict against explicit acceptance criter
 
 ## [flow-work](skills/flow-work.md)
 
-Implementation of a bounded change in verified slices. Use for coding tasks, bug fixes or a plan task; multi-worker gated runs go to `flow-orchestrate`. Hands off to `flow-review`, or `flow-verify` via the coordinator.
+Implementation of a bounded change in verified slices. Use for most coding requests: features, changes, bug fixes or a plan task; multi-worker gated runs go to `flow-orchestrate`. Hands off to `flow-review`, or `flow-verify` via the coordinator.
 
 ## [flow-write-skill](skills/flow-write-skill.md)
 
-Write or fix an agent skill: trigger description, lean body, references and evals. Use when creating a SKILL.md, or when agents ignore, misapply or fail to load a skill. Hands off to `flow-review`.
+Write or fix an agent skill. Use when an agent ignores, misapplies or fails to load a skill, or to create a SKILL.md with a trigger description, lean body and evals. Hands off to `flow-review`.

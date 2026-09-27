@@ -1,6 +1,6 @@
 ---
 name: flow-docs
-description: "Human-facing documentation grounded in current code. Use for READMEs, guides, API reference or architecture docs for people, including stale ones. Feeds `flow-review` or `flow-ship`."
+description: "Human-facing documentation grounded in current code. Use when writing or updating a README, contributing guide, usage docs, API reference or architecture docs. Feeds `flow-review` or `flow-ship`."
 metadata:
   stage: build
 ---

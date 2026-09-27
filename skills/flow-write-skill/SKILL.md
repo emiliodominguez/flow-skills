@@ -1,6 +1,6 @@
 ---
 name: flow-write-skill
-description: "Write or fix an agent skill: trigger description, lean body, references and evals. Use when creating a SKILL.md, or when agents ignore, misapply or fail to load a skill. Hands off to `flow-review`."
+description: "Write or fix an agent skill. Use when an agent ignores, misapplies or fails to load a skill, or to create a SKILL.md with a trigger description, lean body and evals. Hands off to `flow-review`."
 metadata:
   stage: build
 ---

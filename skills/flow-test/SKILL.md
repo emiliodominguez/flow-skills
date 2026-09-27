@@ -1,6 +1,6 @@
 ---
 name: flow-test
-description: "Behavior-focused tests. Use when adding coverage, writing a regression test first, or fixing flaky or intermittently failing tests. Hands off to `flow-work` for implementation or `flow-verify` for an acceptance gate."
+description: "Behavior-focused tests. Use when adding coverage, writing a regression test first, or fixing flaky tests that fail randomly or intermittently. Hands off to `flow-work` for implementation or `flow-verify` for an acceptance gate."
 metadata:
   stage: build
 ---

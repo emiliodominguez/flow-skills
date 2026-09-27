@@ -1,6 +1,6 @@
 ---
 name: flow-onboard
-description: "First tour of an unfamiliar repository. Use when starting in a new codebase, or asked how a project is organized or how a request flows through it. Hands off to `flow-plan`, `flow-diagnose` or `flow-repo-brief`."
+description: "First tour of an unfamiliar repository. Use when asked to explain how a codebase is organized, how a request flows through it, or where to start in a new repo. Hands off to `flow-plan`, `flow-diagnose` or `flow-repo-brief`."
 metadata:
   stage: understand
 ---

@@ -53,7 +53,7 @@
 		"assertions": [
 			"Says it would run the real CLI command with --json and inspect the output",
 			"Adds or updates a test for the new flag",
-			"Ties any completion claim to specific checks that were run rather than asserting it works",
+			"States it will report the task done only after naming checks pass, rather than asserting it works",
 			"Keeps scope to the requested flag without unrelated refactors"
 		]
 	},

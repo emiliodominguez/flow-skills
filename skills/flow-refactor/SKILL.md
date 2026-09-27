@@ -1,6 +1,6 @@
 ---
 name: flow-refactor
-description: "Behavior-preserving structural change. Use to extract responsibilities, reduce coupling or clarify ownership; intentional behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`."
+description: "Behavior-preserving structural change. Use to untangle dependencies, redraw module boundaries, extract responsibilities or reduce coupling; behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`."
 metadata:
   stage: build
 ---

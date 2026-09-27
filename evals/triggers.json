@@ -96,8 +96,8 @@
 		],
 		"near": [
 			{
-				"prompt": "the api started returning 500s intermittently after the deploy and nobody knows why",
-				"expect": "flow-triage"
+				"prompt": "the staging api throws 500s on some requests since yesterday and nobody knows why",
+				"expect": "flow-diagnose"
 			},
 			{
 				"prompt": "the jest suite fails randomly on CI about one run in five",
@@ -199,7 +199,7 @@
 	},
 	"flow-diagnose": {
 		"should": [
-			"checkout crashes for maybe 2 percent of users and I can't reproduce it locally",
+			"the checkout code sometimes throws a null order id error and I can't reproduce it locally",
 			"I patched the race condition yesterday but the duplicate orders are back",
 			"since the node upgrade the worker segfaults on startup and I have no idea why",
 			"the report job silently writes empty files on some nights, figure out what's really going on"

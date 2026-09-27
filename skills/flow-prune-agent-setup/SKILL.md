@@ -1,6 +1,6 @@
 ---
 name: flow-prune-agent-setup
-description: "Audit and tidy a coding agent's configuration: instructions, memory, settings, hooks, MCP servers, plugins and installed skills. Use when that setup has grown noisy, conflicting or stale. Feeds `flow-handoff`."
+description: "Audit and tidy a coding agent's configuration: instructions, memory, settings, hooks, MCP servers and plugins. Use when that setup has grown noisy, conflicting or stale. Feeds `flow-handoff`."
 metadata:
   stage: operate
 ---

@@ -1,6 +1,6 @@
 ---
 name: flow-work
-description: "Implementation of a bounded change in verified slices. Use for coding tasks, bug fixes or a plan task; multi-worker gated runs go to `flow-orchestrate`. Hands off to `flow-review`, or `flow-verify` via the coordinator."
+description: "Implementation of a bounded change in verified slices. Use for most coding requests: features, changes, bug fixes or a plan task; multi-worker gated runs go to `flow-orchestrate`. Hands off to `flow-review`, or `flow-verify` via the coordinator."
 metadata:
   stage: build
 ---

@@ -82,8 +82,8 @@ Verdict rules:
 - No conditional ACCEPT with unfinished required checks.
 
 For each rejection give the smallest reproducible counterexample and the required outcome.
-Do not implement the fix or prescribe an unrelated rewrite; the coordinator owns the
-correction loop and attempt budget.
+Describe the required outcome, never corrected code: no patch, snippet or rewritten function.
+The coordinator owns the correction loop and attempt budget.
 
 ## Red flags
 

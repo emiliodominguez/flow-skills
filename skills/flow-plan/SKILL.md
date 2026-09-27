@@ -1,6 +1,6 @@
 ---
 name: flow-plan
-description: "Source-grounded implementation plan with acceptance criteria. Use for multi-change or multi-session work or before a risky change; small edits go to `flow-work`. Hands off to `flow-work` or `flow-orchestrate`."
+description: "Source-grounded implementation plan with acceptance criteria. Use to sequence multi-change or multi-session work, or before a risky change; small edits go to `flow-work`. Hands off to `flow-work` or `flow-orchestrate`."
 metadata:
   stage: plan
 ---

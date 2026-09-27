@@ -1,6 +1,6 @@
 ---
 name: flow-verify
-description: "Verify a bounded artifact against explicit acceptance criteria and return an evidence-backed ACCEPT, REJECT, or BLOCKED verdict. Use as an independent phase gate or to check a specific claim; broad review is `flow-review`. Hands back to `flow-orchestrate`."
+description: "Verify a bounded artifact against explicit acceptance criteria and return an evidence-backed ACCEPT, REJECT or BLOCKED verdict. Use as an independent phase gate or to check a claim. Hands back to `flow-orchestrate`."
 metadata:
   stage: verify
 ---

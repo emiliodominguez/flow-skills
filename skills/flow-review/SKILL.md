@@ -1,6 +1,6 @@
 ---
 name: flow-review
-description: "Review code changes for concrete correctness and maintainability defects with severity, confidence and falsifiable evidence. Use before shipping or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review`, or `flow-ship`."
+description: "Review code changes for correctness and maintainability defects with severity, confidence and falsifiable evidence. Use before shipping or on request; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`."
 metadata:
   stage: verify
 ---

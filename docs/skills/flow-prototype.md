@@ -10,8 +10,10 @@ _Build a small runnable experiment (script, demo, or visual alternatives) that a
 flowchart LR
   flow_prototype["flow-prototype"]
   flow_brainstorm["flow-brainstorm"]
+  flow_design["flow-design"]
   flow_plan["flow-plan"]
   flow_brainstorm --> flow_prototype
+  flow_design --> flow_prototype
   flow_prototype --> flow_brainstorm
   flow_prototype --> flow_plan
   classDef focus stroke-width:3px

@@ -61,4 +61,5 @@ access, name which visual and interaction claims remain unverified.
 - Interaction, focus and reduced-motion behavior are verified or explicitly unverified.
 - Cascade and source follow local conventions without unrelated rewrites.
 
-Use `flow-animate` for a motion pass or `flow-review` for implementation review.
+Use `flow-animate` for a motion pass, `flow-a11y` for a full accessibility audit, or `flow-review`
+for implementation review. New screens start in `flow-ui`, new visual directions in `flow-design`.

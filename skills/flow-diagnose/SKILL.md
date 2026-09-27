@@ -1,6 +1,6 @@
 ---
 name: flow-diagnose
-description: "Investigate a hard failure with competing hypotheses and discriminating experiments, then verify the smallest supported fix. Use for bugs, regressions or intermittent incidents; a deterministic repro is optional. Hands off to `flow-work` or `flow-triage`."
+description: "Investigate a hard failure with competing hypotheses and discriminating experiments, then verify the smallest supported fix. Use for bugs, regressions or intermittent incidents. Hands off to `flow-work` or `flow-triage`."
 metadata:
   stage: operate
 ---

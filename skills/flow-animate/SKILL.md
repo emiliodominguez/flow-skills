@@ -1,6 +1,6 @@
 ---
 name: flow-animate
-description: "Design, tune or critique interface motion via storyboard, dev-only dials and rendered interaction checks. Use when motion should clarify hierarchy, feedback or a visual experience. Hands off to `flow-styles` for layout or `flow-review` for implementation review."
+description: "Design, tune or critique interface motion via storyboard, dev-only dials and rendered checks. Use when motion should clarify hierarchy, feedback or state. Hands off to `flow-styles` for layout or `flow-review` for review."
 metadata:
   stage: build
 ---

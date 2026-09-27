@@ -1,6 +1,6 @@
 ---
 name: flow-deps
-description: "Update dependencies using current release guidance, compatible upgrade groups, coherent lockfiles and verified installs. Use for dependency bumps, advisories or framework upgrades. Hands off to `flow-review` for the diff or `flow-migrate` for API migration."
+description: "Update dependencies using current release guidance, compatible upgrade groups, coherent lockfiles and verified installs. Use for bumps, advisories or framework upgrades. Hands off to `flow-review` or `flow-migrate`."
 metadata:
   stage: build
 ---

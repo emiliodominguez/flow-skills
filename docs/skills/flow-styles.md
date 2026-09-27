@@ -9,8 +9,10 @@ _Implement or refactor CSS within the repo's styling architecture, browser targe
 ```mermaid
 flowchart LR
   flow_styles["flow-styles"]
+  flow_a11y["flow-a11y"]
   flow_animate["flow-animate"]
   flow_review["flow-review"]
+  flow_a11y --> flow_styles
   flow_animate --> flow_styles
   flow_styles --> flow_animate
   flow_styles --> flow_review
@@ -76,4 +78,5 @@ access, name which visual and interaction claims remain unverified.
 - Interaction, focus and reduced-motion behavior are verified or explicitly unverified.
 - Cascade and source follow local conventions without unrelated rewrites.
 
-Use `flow-animate` for a motion pass or `flow-review` for implementation review.
+Use `flow-animate` for a motion pass, `flow-a11y` for a full accessibility audit, or `flow-review`
+for implementation review. New screens start in `flow-ui`, new visual directions in `flow-design`.

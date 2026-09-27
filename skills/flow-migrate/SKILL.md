@@ -1,6 +1,6 @@
 ---
 name: flow-migrate
-description: "Apply a known API or pattern transformation across a repository with a site inventory, variant handling and per-site evidence. Use for repetitive cross-file migrations or codemods once the target is understood. Hands off to `flow-review` or `flow-orchestrate`."
+description: "Apply a known API or pattern transformation across a repository with a site inventory, variant handling and per-site evidence. Use for repetitive cross-file migrations or codemods. Hands off to `flow-review` or `flow-orchestrate`."
 metadata:
   stage: build
 ---

@@ -1,10 +1,12 @@
 {
+	"flow-a11y": ["wcag 2.2", "keyboard", "accessibility tree", "prefer native elements", "not tested"],
 	"flow-adversarial-review": ["attack surface", "boundary breaker", "reachable", "residual risk"],
 	"flow-animate": ["storyboard", "dials", "critique", "reduced motion", "cleanup"],
 	"flow-benchmark": ["baseline", "timing boundary", "variance", "p99", "raw results"],
 	"flow-brainstorm": ["one question at a time", "skeptic panel", "stress-test", "design sketch"],
 	"flow-commit": ["conventional", "imperative", "the why", "git diff --cached", "one logical change"],
 	"flow-deps": ["compatibility group", "changelog", "lockfile", "held back"],
+	"flow-design": ["one line", "dials", "established systems", "consistency locks", "generic default"],
 	"flow-diagnose": ["hypothesis", "discriminates", "instrument", "regression test", "falsifiable"],
 	"flow-docs": ["reader", "anchor", "colocate", "source of truth", "prune"],
 	"flow-git-fix": ["conflict markers", "restack", "abort", "force-with-lease", "worktree"],
@@ -16,6 +18,7 @@
 	"flow-pr-fix": ["every thread", "commit sha", "group by intent", "root review comment", "gh api"],
 	"flow-prototype": ["throwaway", "one question", "terminal app", "archive"],
 	"flow-prune-agent-setup": ["punch list", "auto-delete", "settings.json", "false positives", "enabledplugins"],
+	"flow-redesign": ["contracts to preserve", "baseline", "punch list", "polish", "before-and-after"],
 	"flow-refactor": ["characterisation", "single-writer", "deeper", "safety net", "scope creep"],
 	"flow-repo-brief": ["source", "hypotheses", "stale", "revision", "provenance"],
 	"flow-review": ["persona", "refute", "confirmed", "plausible", "findings schema"],
@@ -25,6 +28,7 @@
 	"flow-styles": ["aspect-ratio", "prefers-reduced-motion", "logical properties", "color-mix", "focus-visible"],
 	"flow-test": ["characterization", "flakiness", "nondeterminism", "pin before you change", "one reason to fail"],
 	"flow-triage": ["blast radius", "severity", "containment", "fix-now", "route"],
+	"flow-ui": ["every state", "render, compare, fix", "against a reference", "mock data", "two consecutive passes"],
 	"flow-verify": ["accept", "reject", "blocked", "independence", "criterion"],
 	"flow-work": ["verified slice", "evidence", "tests-first", "acceptance", "delegated mode"]
 }

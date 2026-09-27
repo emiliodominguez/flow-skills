@@ -11,7 +11,7 @@
 			"flow-review",
 			"flow-handoff"
 		],
-		"frontend": ["flow-styles", "flow-animate", "flow-prototype"],
+		"frontend": ["flow-design", "flow-ui", "flow-styles", "flow-animate", "flow-a11y", "flow-redesign", "flow-prototype"],
 		"review": ["flow-review", "flow-adversarial-review", "flow-simplify", "flow-refactor"],
 		"maintenance": [
 			"flow-deps",

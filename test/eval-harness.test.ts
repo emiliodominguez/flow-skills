@@ -55,9 +55,14 @@ describe("trigger evals", () => {
 	it("parse picks and fail closed on unknown skills", () => {
 		expect(parsePick('```json\n{"skill": "flow-a"}\n```', ["flow-a"])).toBe("flow-a");
 		expect(parsePick('{"skill": null}', ["flow-a"])).toBeNull();
-		expect(parsePick('{"skill": "flow-a"}\n{"note": "extra"}', ["flow-a"])).toBe("flow-a");
+		expect(function () {
+			parsePick('{"skill": "flow-a"}\n{"skill": "flow-b"}', ["flow-a", "flow-b"]);
+		}).toThrow();
+		expect(function () {
+			parsePick('prefix {"skill": "flow-a"}', ["flow-a"]);
+		}).toThrow();
 		expect(() => parsePick('{"skill": "flow-x"}', ["flow-a"])).toThrow(/unknown/);
-		expect(() => parsePick("no idea", ["flow-a"])).toThrow(/no JSON/);
+		expect(() => parsePick("no idea", ["flow-a"])).toThrow();
 	});
 
 	it("build a router prompt from the index and score by majority", () => {
@@ -146,6 +151,13 @@ describe("model backends", () => {
 			"--disable-slash-commands",
 			"--setting-sources",
 			"",
+			"--strict-mcp-config",
+			"--mcp-config",
+			'{"mcpServers":{}}',
+			"--settings",
+			'{"disableAllHooks":true,"autoMemoryEnabled":false}',
+			"--no-chrome",
+			"--no-session-persistence",
 			"--system-prompt",
 			"sys",
 		]);

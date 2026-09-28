@@ -31,9 +31,10 @@ export interface TriggerScore {
  *
  * @param set - Parsed `evals/triggers.json`.
  * @param names - Every discovered skill name.
+ * @param minimum - Minimum positive and near-miss counts for this split.
  * @returns Human-readable problems; empty when valid.
  */
-export function validateTriggers(set: Record<string, TriggerCases>, names: string[]): string[] {
+export function validateTriggers(set: Record<string, TriggerCases>, names: string[], minimum = { should: 3, near: 2 }): string[] {
 	const problems: string[] = [];
 	const known = new Set(names);
 	const seen = new Set<string>();
@@ -43,9 +44,10 @@ export function validateTriggers(set: Record<string, TriggerCases>, names: strin
 	for (const [owner, cases] of Object.entries(set)) {
 		if (!known.has(owner)) problems.push(`${owner}: not a skill`);
 
-		if (!Array.isArray(cases.should) || cases.should.length < 3) problems.push(`${owner}: needs at least 3 should prompts`);
+		if (!Array.isArray(cases.should) || cases.should.length < minimum.should)
+			problems.push(`${owner}: needs at least ${minimum.should} should prompts`);
 
-		if (!Array.isArray(cases.near) || cases.near.length < 2) problems.push(`${owner}: needs at least 2 near misses`);
+		if (!Array.isArray(cases.near) || cases.near.length < minimum.near) problems.push(`${owner}: needs at least ${minimum.near} near misses`);
 
 		for (const prompt of [...(cases.should ?? []), ...(cases.near ?? []).map((n) => n.prompt)]) {
 			const key = prompt.trim().toLowerCase();
@@ -94,11 +96,12 @@ export function routerPrompt(skills: { name: string; description: string }[], re
  * @returns The picked skill, or null for no skill.
  */
 export function parsePick(text: string, names: string[]): string | null {
-	const match = /\{[^{}]*\}/.exec(text);
+	const fenced = /^```(?:json)?\s*\n([\s\S]*?)\n```$/.exec(text.trim());
+	const value: unknown = JSON.parse(fenced?.[1] ?? text);
 
-	if (!match) throw new Error("Router returned no JSON object.");
+	if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Router must return one JSON object.");
 
-	const parsed = JSON.parse(match[0]) as { skill?: unknown };
+	const parsed = value as { skill?: unknown };
 
 	if (parsed.skill === null) return null;
 

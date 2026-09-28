@@ -1,6 +1,6 @@
 # Skill evaluations
 
-Keep three kinds of evidence separate. A prompt containing the right words is not proof that
+Keep these evidence layers separate. A prompt containing the right words is not proof that
 an agent will follow it.
 
 | Layer                   | Command or method                                          | What it establishes                                                          |
@@ -9,6 +9,7 @@ an agent will follow it.
 | Model instruction audit | `pnpm eval:llm [skill]`                                    | A configured judge evaluates the written instructions against those markers  |
 | Routing                 | `pnpm eval:triggers [skill] [--runs 3]`                    | The description index routes requests to the right skill, or to none         |
 | With/without answers    | `pnpm eval:ab [case or skill] [--runs 3] [--out file]`     | Loading the skill changes a model's answer on the asserted qualities         |
+| Conversation decisions  | `pnpm eval:workflows [case] [--runs 3]`                    | Routing and proposed next actions follow conversation state and corrections  |
 | Behavioral scenarios    | `pnpm eval:behavior [scenario]`, or a manual agent session | Actual decisions, commands, artifacts and stopping behavior in that scenario |
 
 ## Instruction markers and model audit
@@ -18,17 +19,18 @@ accidental textual omissions; they do not validate runtime behavior or quality.
 
 ## Model backends
 
-The model evals (`eval:llm`, `eval:triggers`, `eval:ab`) share one client with two backends:
+The answer-only model evals (`eval:llm`, `eval:triggers`, `eval:ab`, `eval:workflows`) share one client with two backends:
 
 | `EVAL_BACKEND` | Auth                                  | Notes                                                                    |
 | -------------- | ------------------------------------- | ------------------------------------------------------------------------ |
 | `api`          | `ANTHROPIC_API_KEY` plus `EVAL_MODEL` | Default. Provider charges apply.                                         |
 | `claude`       | A signed-in Claude Code CLI           | Uses your plan's limits. `EVAL_MODEL` is optional (for example `haiku`). |
 
-The `claude` backend runs the CLI headless with its default system prompt replaced and tools,
-skills and every settings source disabled, so memory files and locally installed skills cannot
-leak into a baseline. `EVAL_JUDGE_MODEL` sets a separate judge for `eval:ab`, and `--concurrency`
-bounds parallel calls. Missing configuration exits 2 and means **not run**; nothing selects an
+The `claude` backend runs the CLI headless with its default system prompt replaced, native tools
+disabled, and a strict empty MCP configuration. Skills, settings sources, hooks, auto memory,
+browser integration and session persistence are disabled. `EVAL_JUDGE_MODEL` sets a separate
+judge for `eval:ab` and `eval:workflows`; the routing and A/B runners offer `--concurrency`.
+Missing configuration exits 2 and means **not run**; nothing selects an
 invented model identifier, and none of this runs in CI.
 
 ```sh
@@ -49,9 +51,58 @@ evidence from becoming a passing score; it does not turn the audit into behavior
 `triggers.json` gives every skill four requests that should load it and three near misses that
 share its vocabulary but belong to another skill (or to none). The runner shows a model the
 same name-and-description index a host loads, asks which single skill it would load first, and
-scores each prompt by majority over `--runs`. It exits 1 below `--min` accuracy (default 0.9).
-Misroutes are description problems: fix the description that attracted or lost the request,
-not the prompt. Keep a few prompts back when tuning so the score is not fitted to its own test.
+scores each prompt by strict majority over `--runs`. It exits 1 below `--min` accuracy (default 0.9)
+or on any model/parsing error, even if other picks would provide a passing majority. The response
+must be one complete routing object, optionally in one JSON fence; extra or partial output fails.
+
+`--set dev` is the default and uses `triggers.json`. `--set heldout` uses
+`triggers-heldout.json`, with one positive and one near miss per skill. Both splits must cover the
+corpus, use known labels and have no reused prompts after case/whitespace normalization. CI
+checks those properties without model access.
+
+```sh
+EVAL_BACKEND=claude pnpm eval:triggers flow-release --set dev --runs 3
+EVAL_BACKEND=claude pnpm eval:triggers --set heldout --runs 3 --out .eval-runs/routing-validation.json
+```
+
+Tune descriptions against development prompts. Freeze held-out prompts before their first model
+run and do not rewrite them or tune descriptions in response to their scores. A newly discovered
+failure can become a development case; retire that held-out case explicitly and add a fresh,
+unseen replacement for later validation. New skills need independently authored held-out cases.
+Changing the validation set starts a new dataset version, identified by its content hash.
+
+The held-out set is public and maintained in this repository, not a secret or independently
+administered benchmark. Avoid opening its prompts while tuning. Held-out misses omit prompt text
+from stdout; the optional JSON report retains individual picks and labels along with dataset and
+description-index hashes, backend/model configuration and repetition count. Output files are
+created exclusively. A small fixed set and a single model run establish only narrow evidence.
+
+## Conversation decisions
+
+```sh
+EVAL_BACKEND=claude pnpm eval:workflows --runs 2 --save .eval-runs/workflow-decisions
+EVAL_BACKEND=claude pnpm eval:workflows missing-review-skill
+```
+
+`workflows.json` defines multi-turn user messages, an installed skill subset and assessor-only
+expectations. The initial cases cover plan/build/review/push handoffs, a correction revoking
+delivery, and review when the named review skill is unavailable. At each turn the router sees
+only available descriptions and the observed conversation. The continuation model receives the
+actual prior answers and progressively loaded skill bodies, without expected routes or assertions.
+A fresh assessor grades the written next action; a deterministic route failure cannot be
+overridden by the assessor. Missing, duplicate or malformed judgments are errors.
+
+This is a **decision-only conversation proxy**. Later user turns supply milestones such as
+"implementation is complete"; no fixture is built, no tests or delivery commands execute, and a
+passing proposed action is not evidence that an agent performs it. Use `eval:behavior` for actual
+tool execution. These workflow cases are development regressions, not held-out cases.
+
+Each run saves every raw model exchange, each completed graded turn and a final result. The
+summary records dataset/skill hashes, model configuration, expected/completed turn counts and
+PASS, FAIL or ERROR. Earlier graded turns survive a later error. Existing evidence directories
+are never overwritten. Exit 0 requires every selected conversation and turn to pass; failures
+or incomplete evidence exit 1, and missing backend configuration exits 2. Model calls are opt-in
+and never part of CI.
 
 ## With/without answers
 

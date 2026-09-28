@@ -213,15 +213,7 @@ for (const scenario of selected) {
 				const evidence = { prompt: scenario.prompt, answer: answer.answer, before, after, gitBefore, gitAfter, tools: events };
 
 				fs.writeFileSync(path.join(directory, "answer.json"), JSON.stringify(answer, null, "\t"));
-				const judgeArgs = [
-					...claudeArgs("You are an independent execution assessor. Grade only the supplied evidence.", judge.model),
-					"--no-session-persistence",
-					"--strict-mcp-config",
-					"--mcp-config",
-					'{"mcpServers":{}}',
-					"--settings",
-					'{"disableAllHooks":true,"autoMemoryEnabled":false}',
-				];
+				const judgeArgs = claudeArgs("You are an independent execution assessor. Grade only the supplied evidence.", judge.model);
 				const judgeExecution = await runBoundedProcess(
 					"claude",
 					judgeArgs,

@@ -17,6 +17,7 @@ folder, supporting files included, into whichever agents the user picks.
 | `scripts/smoke-install.sh`                              | Real CLI install, list and removal in temporary project/user scopes              |
 | `scripts/eval-llm.ts`, `scripts/prepare-eval.ts`        | Optional model audit and scenario fixtures                                       |
 | `scripts/eval-behavior.ts`, `scripts/fixture-server.ts` | Tool-using agent scenarios, confined fixture capabilities and execution evidence |
+| `scripts/eval-triggers.ts`, `scripts/eval-workflows.ts` | Development/held-out routing and conversation decision checks                    |
 | `test/`, `evals/`                                       | Unit tests, instruction markers, agent scenarios                                 |
 
 ## Portability contract
@@ -70,3 +71,5 @@ all as Mermaid diagrams that GitHub renders inline. `pnpm docs:check` reports st
 - The package is marked `private` only to prevent an accidental npm publish. Users install from GitHub.
 - Instruction markers and the optional model audit check wording, not behavior. Real agent
   decisions are assessed with isolated scenarios; see [evals](../evals/README.md).
+- Routing validation has disjoint development and frozen held-out prompts. Workflow continuation
+  checks replay written decisions; they do not execute the proposed actions.

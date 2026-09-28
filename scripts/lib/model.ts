@@ -68,7 +68,25 @@ export function requireModel(label: string, env: NodeJS.ProcessEnv = process.env
  * @returns Arguments for the `claude` executable.
  */
 export function claudeArgs(system: string, model?: string): string[] {
-	const args = ["-p", "--output-format", "json", "--tools", "", "--disable-slash-commands", "--setting-sources", "", "--system-prompt", system];
+	const args = [
+		"-p",
+		"--output-format",
+		"json",
+		"--tools",
+		"",
+		"--disable-slash-commands",
+		"--setting-sources",
+		"",
+		"--strict-mcp-config",
+		"--mcp-config",
+		'{"mcpServers":{}}',
+		"--settings",
+		'{"disableAllHooks":true,"autoMemoryEnabled":false}',
+		"--no-chrome",
+		"--no-session-persistence",
+		"--system-prompt",
+		system,
+	];
 
 	return model ? [...args, "--model", model] : args;
 }

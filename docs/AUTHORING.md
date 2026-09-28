@@ -77,10 +77,14 @@ deep, and say when to read it.
   accidental wording loss, not behavior.
 - Add four should prompts and three near misses to `evals/triggers.json`, and run
   `pnpm eval:triggers` when you have model access.
+- Add one independent positive and near miss to `evals/triggers-heldout.json` for new skills.
+  Freeze them before validation; tune against development prompts, not held-out scores.
 - Add an `evals/ab.json` case for behavior the skill claims to change. `pnpm eval:ab` flags
   assertions that pass without the skill; those measure nothing.
 - For a complex skill, run representative requests in isolated fixtures with a fresh agent, and
   give the expected outcome only to the assessor.
+- Add conversation regressions to `evals/workflows.json` when a failure concerns handoffs,
+  corrections or missing skills. `pnpm eval:workflows` assesses decisions, not execution.
 
 See [evaluations](../evals/README.md). Then run `pnpm check`, commit the `pnpm docs:gen` output,
 and try an install with `./install.sh --local --project` in a throwaway project.

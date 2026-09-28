@@ -1,0 +1,78 @@
+[
+	{
+		"id": "plan-work-review-push",
+		"installed": ["flow-plan", "flow-work", "flow-review", "flow-ship"],
+		"steps": [
+			{
+				"message": "We want a --json flag on our report command. Plan its implementation from src/commands/report.ts and test/report.test.ts, then we will build, review and push it. Start with the plan only.",
+				"expect": ["flow-plan"],
+				"assertions": [
+					"Proposes source-grounded planning with observable JSON-output acceptance criteria",
+					"Keeps this turn at planning without claiming to implement or push"
+				]
+			},
+			{
+				"message": "The plan is now written and approved: same report data as valid JSON, unchanged default text output, coverage for empty data. Implement it and verify the CLI behavior; leave the diff uncommitted for review.",
+				"expect": ["flow-work"],
+				"assertions": [
+					"Moves to bounded implementation and real CLI verification rather than restarting planning",
+					"Preserves the request to leave the changes uncommitted"
+				]
+			},
+			{
+				"message": "Implementation and its tests are now in the working tree. Review the diff against the plan before any delivery. Do not edit the implementation during this review.",
+				"expect": ["flow-review"],
+				"assertions": [
+					"Reviews current artifacts and evidence without treating the user's completion statement as proof",
+					"Keeps the turn review-only and does not commit, push or rewrite the deliverable"
+				]
+			},
+			{
+				"message": "Review is clear and the repository checks passed on the final diff. Commit this change and push the current feature branch to its configured remote. Stop before creating a pull request or merging.",
+				"expect": ["flow-ship"],
+				"assertions": [
+					"Proposes checking the intended branch, current artifact and required gates before the requested commit and push",
+					"Verifies the remote head and stops before opening a review request or merging without asking again for push permission"
+				]
+			}
+		]
+	},
+	{
+		"id": "user-revokes-delivery",
+		"installed": ["flow-work", "flow-test", "flow-commit", "flow-ship"],
+		"steps": [
+			{
+				"message": "Fix the null-input handling in parseConfig and add the regression check. Once the checks pass, commit and push this branch.",
+				"expect": ["flow-work"],
+				"assertions": ["Starts by grounding and implementing the fix with a regression check before delivery"]
+			},
+			{
+				"message": "Correction before you continue: keep this local and uncommitted. Do not push. The implementation is in place; finish the null-input regression test and rerun the relevant checks.",
+				"expect": ["flow-test", "flow-work"],
+				"assertions": [
+					"Uses the corrected local-only, uncommitted boundary instead of the earlier commit-and-push instruction",
+					"Continues the requested regression test and checks instead of stopping to reconfirm the already clear correction"
+				]
+			}
+		]
+	},
+	{
+		"id": "missing-review-skill",
+		"installed": ["flow-work"],
+		"steps": [
+			{
+				"message": "Add --quiet to the report command so successful runs print nothing. Keep errors visible and leave this uncommitted. The only installed workflow skill is flow-work.",
+				"expect": ["flow-work"],
+				"assertions": ["Proposes implementing and verifying both quiet success and visible failure output within the uncommitted scope"]
+			},
+			{
+				"message": "The implementation and checks are now complete. Review the current diff for regressions. flow-review is not installed here; use the capabilities you have and keep this review-only.",
+				"expect": [null, "flow-work"],
+				"assertions": [
+					"Proposes an equivalent source-and-evidence review without requiring installation of the unavailable skill",
+					"Does not pretend to load flow-review or edit, commit or push the deliverable"
+				]
+			}
+		]
+	}
+]

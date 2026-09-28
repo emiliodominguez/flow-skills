@@ -1,0 +1,172 @@
+{
+	"flow-a11y": {
+		"should": ["Audit our account dialog for accessible names, focus restoration and keyboard-only operation before release."],
+		"near": [{ "prompt": "Lay out a new account dialog from the approved design tokens.", "expect": "flow-ui" }]
+	},
+	"flow-adversarial-review": {
+		"should": ["Trace whether a forged tenant identifier in this download request exposes another organization's files."],
+		"near": [{ "prompt": "Write integration tests for the documented tenant filter behavior.", "expect": "flow-test" }]
+	},
+	"flow-animate": {
+		"should": ["The expand/collapse motion keeps overshooting; tune its duration and easing against the actual interaction."],
+		"near": [{ "prompt": "Check the accordion for screen reader announcements and keyboard support.", "expect": "flow-a11y" }]
+	},
+	"flow-api": {
+		"should": ["Define the public batch-delete contract, including partial errors and retry semantics for clients."],
+		"near": [{ "prompt": "Document the already implemented batch-delete endpoint for API users.", "expect": "flow-docs" }]
+	},
+	"flow-benchmark": {
+		"should": ["Measure whether the proposed index changes query latency under the same representative workload."],
+		"near": [{ "prompt": "Explain what a percentile means in a performance report.", "expect": null }]
+	},
+	"flow-brainstorm": {
+		"should": ["We have several ideas for reducing support tickets but no chosen approach; explore the options with me."],
+		"near": [
+			{
+				"prompt": "The approach is decided; break its implementation into source-grounded tasks with acceptance checks.",
+				"expect": "flow-plan"
+			}
+		]
+	},
+	"flow-commit": {
+		"should": ["Create one conventional commit from the reviewed staged fix and leave it local."],
+		"near": [{ "prompt": "Publish the approved package artifact as version 1.8.0.", "expect": "flow-release" }]
+	},
+	"flow-data-migrate": {
+		"should": ["Design the schema rollout and restartable data backfill for splitting full_name into two stored columns while old writers run."],
+		"near": [{ "prompt": "Rename the parseName helper and all of its source references.", "expect": "flow-migrate" }]
+	},
+	"flow-deps": {
+		"should": ["Our lockfile pins an unsupported HTTP client; update its compatibility group and validate a fresh frozen install."],
+		"near": [{ "prompt": "Transform every call site after a library API migration has already been selected.", "expect": "flow-migrate" }]
+	},
+	"flow-design": {
+		"should": ["Set the visual direction, typography and reusable tokens for a new analytics product before implementation."],
+		"near": [{ "prompt": "The token system is approved; implement the analytics overview screen.", "expect": "flow-ui" }]
+	},
+	"flow-diagnose": {
+		"should": ["Uploads occasionally truncate in staging and the first retry-based fix failed; isolate the cause before another patch."],
+		"near": [
+			{ "prompt": "Production uploads are failing broadly right now; determine severity and immediate containment.", "expect": "flow-triage" }
+		]
+	},
+	"flow-docs": {
+		"should": ["Rewrite the contributor setup guide using commands that actually exist in this checkout."],
+		"near": [{ "prompt": "Create a maintained source-cited subsystem brief for future agent sessions.", "expect": "flow-repo-brief" }]
+	},
+	"flow-git-fix": {
+		"should": ["A rebase is paused with conflicts and unrelated local edits; finish it while preserving those edits."],
+		"near": [{ "prompt": "Suggest a conventional commit subject for the diff shown here, without touching Git.", "expect": "flow-commit" }]
+	},
+	"flow-handoff": {
+		"should": ["Save the current implementation state, evidence and remaining attempts so another session can resume tomorrow."],
+		"near": [{ "prompt": "Resume the recorded dependent run and dispatch only tasks whose gates are accepted.", "expect": "flow-orchestrate" }]
+	},
+	"flow-migrate": {
+		"should": ["Replace the deprecated request builder across the repository and account for generated and dynamic uses."],
+		"near": [{ "prompt": "Backfill a newly required customer attribute in the live database.", "expect": "flow-data-migrate" }]
+	},
+	"flow-observe": {
+		"should": ["Add signals that detect a queue consumer silently stopping, with an actionable alert and verified failure exercise."],
+		"near": [{ "prompt": "An existing alert is firing in production; assess customer impact and containment first.", "expect": "flow-triage" }]
+	},
+	"flow-onboard": {
+		"should": ["Give me my first guided tour of how this repository handles a request and where I should start reading."],
+		"near": [{ "prompt": "Refresh the existing agent-facing subsystem brief whose source citations have drifted.", "expect": "flow-repo-brief" }]
+	},
+	"flow-orchestrate": {
+		"should": ["Execute this dependency plan with separate workers and independent acceptance before downstream tasks begin."],
+		"near": [{ "prompt": "Implement this one bounded parser fix directly; no worker coordination is needed.", "expect": "flow-work" }]
+	},
+	"flow-plan": {
+		"should": ["Turn the approved export feature into an implementation plan grounded in the current source and explicit gates."],
+		"near": [{ "prompt": "Discuss whether exports or shared dashboards would better solve the user problem.", "expect": "flow-brainstorm" }]
+	},
+	"flow-pr-fix": {
+		"should": ["Address the blocking feedback and failing checks on the open merge request, then verify the requested push."],
+		"near": [{ "prompt": "Review the current diff for correctness before I send it for review.", "expect": "flow-review" }]
+	},
+	"flow-prototype": {
+		"should": ["Build a disposable experiment to see whether drag reordering works well with several hundred items."],
+		"near": [
+			{
+				"prompt": "Build the production reorder interface using the already validated interaction and existing design system.",
+				"expect": "flow-ui"
+			}
+		]
+	},
+	"flow-prune-agent-setup": {
+		"should": ["Audit my accumulated agent settings, instructions and hooks for conflicts and safely remove obsolete configuration."],
+		"near": [
+			{ "prompt": "The loading description of one skill is too broad; rewrite its trigger and add near misses.", "expect": "flow-write-skill" }
+		]
+	},
+	"flow-redesign": {
+		"should": ["Modernize this shipped settings screen while preserving its routes, content and working interactions."],
+		"near": [{ "prompt": "Fix the specific stylesheet rule that makes the settings form overflow on narrow screens.", "expect": "flow-styles" }]
+	},
+	"flow-refactor": {
+		"should": ["Separate persistence from order validation without changing the observable behavior or public interface."],
+		"near": [{ "prompt": "Delete the unreachable legacy validation path after proving no callers remain.", "expect": "flow-simplify" }]
+	},
+	"flow-release": {
+		"should": ["Recover a timed-out artifact publication without moving the existing release tag or including newer commits."],
+		"near": [{ "prompt": "Commit the verified fix and push the branch, stopping before package publication.", "expect": "flow-ship" }]
+	},
+	"flow-repo-brief": {
+		"should": ["Maintain a reusable, source-cited agent brief for the billing subsystem and its verification commands."],
+		"near": [{ "prompt": "Explain this repository to me as a new contributor on my first visit.", "expect": "flow-onboard" }]
+	},
+	"flow-review": {
+		"should": ["Inspect both staged and unstaged changes and report concrete correctness defects without editing."],
+		"near": [
+			{ "prompt": "Independently judge each acceptance criterion in the worker contract and return a gate verdict.", "expect": "flow-verify" }
+		]
+	},
+	"flow-ship": {
+		"should": ["Push these reviewed commits to the intended remote branch and confirm its resulting head."],
+		"near": [
+			{ "prompt": "Prepare the next versioned software release with notes and verified distributable artifacts.", "expect": "flow-release" }
+		]
+	},
+	"flow-simplify": {
+		"should": ["Remove this proven-unused compatibility layer and its needless wrappers without broadening the redesign."],
+		"near": [{ "prompt": "Redraw module ownership to break the cyclic dependency while retaining behavior.", "expect": "flow-refactor" }]
+	},
+	"flow-specialize": {
+		"should": ["Write repository-specific worker and verifier briefs before we delegate the planned changes."],
+		"near": [{ "prompt": "Execute the already prepared multi-worker plan and enforce the independent gates.", "expect": "flow-orchestrate" }]
+	},
+	"flow-styles": {
+		"should": ["Find why the component's SCSS module loses its theme color at tablet widths and fix the cascade."],
+		"near": [{ "prompt": "Add purposeful entrance and exit motion to the correctly styled drawer.", "expect": "flow-animate" }]
+	},
+	"flow-test": {
+		"should": ["Add behavioral coverage for empty input and malformed records in the existing importer."],
+		"near": [{ "prompt": "Trace why the importer loses rows when the failure cannot yet be reproduced reliably.", "expect": "flow-diagnose" }]
+	},
+	"flow-triage": {
+		"should": ["On-call reports a checkout outage after a rollout; establish blast radius and a containment decision."],
+		"near": [{ "prompt": "Measure checkout throughput for two known implementations using a reproducible baseline.", "expect": "flow-benchmark" }]
+	},
+	"flow-ui": {
+		"should": ["Build the new notifications preferences page using our approved component library and responsive layouts."],
+		"near": [
+			{ "prompt": "Choose a visual identity and token system for a product that has no existing design direction.", "expect": "flow-design" }
+		]
+	},
+	"flow-verify": {
+		"should": ["Check the current artifacts against every recorded task criterion independently of the worker's completion claim."],
+		"near": [{ "prompt": "Write regression tests for the confirmed serialization bug before implementing its fix.", "expect": "flow-test" }]
+	},
+	"flow-work": {
+		"should": ["Implement the approved --quiet flag in the existing CLI command and verify its actual output."],
+		"near": [
+			{ "prompt": "Make a source-grounded plan for several dependent API and client changes before implementation.", "expect": "flow-plan" }
+		]
+	},
+	"flow-write-skill": {
+		"should": ["Create a focused skill for an observed recurring agent mistake, including a loading description and evaluations."],
+		"near": [{ "prompt": "Clean up redundant global agent rules and obsolete plugin settings.", "expect": "flow-prune-agent-setup" }]
+	}
+}

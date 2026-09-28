@@ -2,7 +2,7 @@
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm check    # everything CI runs; the pre-commit hook formats staged files
+pnpm check    # format, lint, types, validation, tests and generated docs
 ```
 
 Style, frontmatter, budgets, links and generated docs are all enforced by `pnpm check`. When it
@@ -19,7 +19,10 @@ passes, what's left is judgment:
 - Try it for real: `./install.sh --local --project` in a throwaway project, then use it in an agent
   session. Say which agents you tried and what you didn't check; marker tests don't prove behavior
   ([evals](evals/README.md)).
-- For install script or manifest changes, run `pnpm smoke`. It needs npm registry access.
+- For install script or manifest changes, run `pnpm smoke`. It needs npm registry access and
+  checks install, list and removal in temporary project and user directories, using both symlinks
+  and copies. It also checks PromptScript in project scope. These are CLI checks, not agent sessions.
+- CI also runs `pnpm audit --prod --audit-level=high`.
 
 ## Commits and versions
 

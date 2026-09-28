@@ -14,7 +14,7 @@ folder, supporting files included, into whichever agents the user picks.
 | `.claude-plugin/`                                 | Optional plugin-marketplace manifests, versioned with `package.json` |
 | `src/`                                            | Authoring CLI (`pnpm skills list`, `validate`, `new`)                |
 | `scripts/gen-skill-docs.ts`                       | Generates the catalog, skill graph, per-skill pages and llms.txt     |
-| `scripts/smoke-install.sh`                        | Real `npx skills` install and removal in a throwaway project         |
+| `scripts/smoke-install.sh`                        | Real CLI install, list and removal in temporary project/user scopes  |
 | `scripts/eval-llm.ts`, `scripts/prepare-eval.ts`  | Optional model audit and scenario fixtures                           |
 | `test/`, `evals/`                                 | Unit tests, instruction markers, agent scenarios                     |
 
@@ -22,7 +22,8 @@ folder, supporting files included, into whichever agents the user picks.
 
 - **Frontmatter:** only fields from the [Agent Skills specification](https://agentskills.io/specification)
   (`name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`). Any
-  agent-specific extension is a validation error, so every agent reads a skill the same way.
+  agent-specific extension is a validation error. This keeps the format portable; task behavior
+  still depends on the agent and model.
 - **Body:** names no product, tool or model and uses no invocation syntax. Skills refer to each
   other by backticked name (`` `flow-verify` ``), and each agent applies its own syntax.
 - **Supporting files:** situational detail goes in `references/<topic>.md`. The body links to the

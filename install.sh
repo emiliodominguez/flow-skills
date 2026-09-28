@@ -7,7 +7,7 @@
 #   ./install.sh --profile core            # one profile from profiles.json (repeatable)
 #   ./install.sh --project                 # into the current project instead of user scope
 #   ./install.sh --local                   # from this checkout instead of GitHub
-#   ./install.sh -- -a <agent>... -y       # specific agents, no prompts
+#   ./install.sh -- -a <agent>... -y       # recommended for user scope; avoids project-only agents
 #   ./install.sh --dry-run                 # print the command without running it
 #
 set -eu

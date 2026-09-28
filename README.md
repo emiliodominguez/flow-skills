@@ -16,14 +16,17 @@ verifying, delivering and maintaining.
 Each skill is a plain `SKILL.md` folder that follows the open specification, so any agent that
 supports skills can use it.
 
-- **Agent-agnostic.** Skills name no product, tool or model and use only spec frontmatter. The same
-  files behave the same way wherever they're installed.
-- **Light on context.** Descriptions average about 230 characters and stay under 7,500 in total.
+- **Agent-agnostic.** Skills name no product, tool or model and use only spec frontmatter. Compatible
+  agents can load the same files; task behavior depends on the agent and model.
+- **Light on context.** Descriptions average about 210 characters and stay under 7,500 in total.
   Detailed guidance loads only when a skill runs.
 - **Evidence over claims.** Every skill ends with observable checks. Larger work can pass through
   independent `ACCEPT` / `REJECT` / `BLOCKED` gates.
 
 ## Quick start
+
+The current [skills CLI](https://github.com/vercel-labs/skills/blob/main/package.json) requires
+Node.js 22.20.0 or newer. Repository development uses Node.js 24, pinned in `.nvmrc`.
 
 ```sh
 npx skills add emiliodominguez/flow-skills
@@ -42,7 +45,7 @@ flow-plan Add account export with explicit acceptance criteria and non-goals.
 | Goal                                | Command                                                                  |
 | ----------------------------------- | ------------------------------------------------------------------------ |
 | Pick skills and agents in a prompt  | `npx skills add emiliodominguez/flow-skills`                             |
-| Install for your user, not the repo | `npx skills add emiliodominguez/flow-skills -g`                          |
+| Install for your user, not the repo | `npx skills add emiliodominguez/flow-skills -g -a <agent> -y`            |
 | Target specific agents, no prompts  | `npx skills add emiliodominguez/flow-skills -a <agent>... -y`            |
 | Install specific skills             | `npx skills add emiliodominguez/flow-skills --skill flow-plan flow-work` |
 | See what is available               | `npx skills add emiliodominguez/flow-skills --list`                      |
@@ -50,6 +53,30 @@ flow-plan Add account export with explicit acceptance criteria and non-goals.
 
 Agent ids come from the [skills CLI](https://github.com/vercel-labs/skills). You can
 also copy any `skills/<name>/` folder into your agent's skills directory by hand.
+
+### PromptScript error during a global install
+
+If you see `PromptScript does not support global skill installation`, select your agents explicitly:
+
+```sh
+npx skills add emiliodominguez/flow-skills -g -a codex -y
+```
+
+Replace `codex` with your agent id, or list several, such as `-a claude-code codex cursor`.
+To select every skill, use `--skill '*'`. Avoid `--all` and `-a '*'` for global installs:
+they select project-only agents too, and `--all` overrides an explicit agent list.
+
+This is an [upstream skills CLI issue](https://github.com/vercel-labs/skills/issues/1496),
+reproduced with version 1.7.0 on 2026-09-27. Automatic agent selection can include PromptScript even when it is
+not installed. PromptScript supports project installs only. Other selected agents can still receive
+the skills, and the CLI can print `Done!` and exit successfully despite reporting failed targets.
+Check the installation results or run `npx skills list -g` before assuming everything failed.
+
+If you use PromptScript, install in your project without `-g`:
+
+```sh
+npx skills add emiliodominguez/flow-skills -a promptscript -y
+```
 
 ### Profiles
 
@@ -67,10 +94,13 @@ Install only the part of the workflow you use. Profiles are defined in [`profile
 From a clone, the wrapper scripts accept profiles and pass everything after `--` to `npx skills`:
 
 ```sh
-./install.sh --profile core --profile review   # user scope; the CLI asks which agents
+./install.sh --profile core --profile review -- -a <agent> -y  # user scope, explicit agent
 ./install.sh --project -- -a <agent> -y        # current project, one agent
 ./uninstall.sh --dry-run                       # preview removing every flow-* skill
 ```
+
+The wrapper defaults to user scope, so pass an explicit `-a` list after `--` to avoid the
+upstream global-install issue described above.
 
 ### More options
 

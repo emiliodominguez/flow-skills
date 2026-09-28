@@ -82,6 +82,7 @@ installer wrote for rule-only tools are not removed automatically; delete those 
 ## Test limits
 
 - Unit tests cover validation, reporting and the authoring commands.
-- `pnpm smoke` runs a real `npx skills` install and removal for several agents in a throwaway
-  project. It checks files on disk, not live agent sessions.
+- `pnpm smoke` runs real CLI installs, listing and removal in temporary project and user
+  directories, using symlinks and copies with explicit agents. It also checks PromptScript in
+  project scope. It checks files on disk, not live agent sessions.
 - Isolated scenario runs check selected high-impact decisions, not every agent or task.

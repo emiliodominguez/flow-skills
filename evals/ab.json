@@ -114,5 +114,18 @@
 			"Leaves the unstaged README change out of the message",
 			"Does not claim tests or checks were run"
 		]
+	},
+	{
+		"id": "data-live-backfill",
+		"skill": "flow-data-migrate",
+		"prompt": "Prepare the migration for an orders table with 40 million rows: replace delivery_address with required delivery_address_v2 derived by normalizeAddress. Old application instances will keep writing delivery_address during a rolling deploy. The backfill worker may be interrupted and retried. A bulk copy already ran last night; the dashboard says all rows are filled. We need to finish today. Describe the concrete implementation and evidence needed to finish; do not execute anything.",
+		"assertions": [
+			"Checks the actual database engine and version before choosing engine-specific migration syntax rather than building the plan around an assumed engine",
+			"Does not promise a completion time or invent throughput before measuring a representative workload",
+			"Accounts for writes from old application versions during the backfill and avoids overwriting newer data",
+			"Makes batch retries idempotent and advances durable checkpoints only with or after successful batch commits",
+			"Requires value-level source-to-target reconciliation rather than accepting non-null counts as completion",
+			"Rehearses a recovery path that accounts for writes since a backup and delays destructive contraction until consumers retire"
+		]
 	}
 ]

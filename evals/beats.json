@@ -33,5 +33,6 @@
 	"flow-ui": ["every state", "render, compare, fix", "against a reference", "mock data", "two consecutive passes"],
 	"flow-verify": ["accept", "reject", "blocked", "independence", "criterion"],
 	"flow-work": ["verified slice", "evidence", "tests-first", "acceptance", "delegated mode"],
-	"flow-write-skill": ["baseline", "use when", "near miss", "red-flags", "references/"]
+	"flow-write-skill": ["baseline", "use when", "near miss", "red-flags", "references/"],
+	"flow-data-migrate": ["all readers and writers", "durable checkpoints", "source and target values", "recovery mechanism"]
 }

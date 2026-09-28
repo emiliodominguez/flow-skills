@@ -12,6 +12,7 @@ flowchart LR
   flow_a11y["flow-a11y"]
   flow_adversarial_review["flow-adversarial-review"]
   flow_animate["flow-animate"]
+  flow_data_migrate["flow-data-migrate"]
   flow_deps["flow-deps"]
   flow_docs["flow-docs"]
   flow_migrate["flow-migrate"]
@@ -27,6 +28,7 @@ flowchart LR
   flow_a11y --> flow_review
   flow_adversarial_review --> flow_review
   flow_animate --> flow_review
+  flow_data_migrate --> flow_review
   flow_deps --> flow_review
   flow_docs --> flow_review
   flow_migrate --> flow_review

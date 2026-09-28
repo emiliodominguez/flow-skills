@@ -1,6 +1,6 @@
 # flow-skills
 
-> 35 portable, agent-agnostic Agent Skills for software work: plan, build, test, review, verify, orchestrate and ship.
+> 36 portable, agent-agnostic Agent Skills for software work: plan, build, test, review, verify, orchestrate and ship.
 > Install with `npx skills add emiliodominguez/flow-skills`. Each skill is a SKILL.md folder under skills/.
 
 ## Skills
@@ -12,6 +12,7 @@
 - [flow-benchmark](skills/flow-benchmark/SKILL.md): Performance measurement with a reproducible baseline and stated uncertainty. Use before optimizing, or to compare alternatives on speed, memory or size. Feeds `flow-work` or `flow-refactor` with evidence.
 - [flow-brainstorm](skills/flow-brainstorm/SKILL.md): Collaborative idea exploration that ends in a design sketch. Use when the outcome or approach is still open, requirements are vague, or options need comparing. Hands off to `flow-prototype` or `flow-plan`.
 - [flow-commit](skills/flow-commit/SKILL.md): Conventional commit messages and atomic commits. Use when asked only for a commit message or a commit; message-only requests never touch Git. Hands off to `flow-ship` when a push or review request was asked for.
+- [flow-data-migrate](skills/flow-data-migrate/SKILL.md): Database schema and data migrations. Use when changing stored data, adding constraints or running a live backfill. Hands off to `flow-review` or `flow-orchestrate`.
 - [flow-deps](skills/flow-deps/SKILL.md): Dependency updates with verified installs. Use for version bumps, security advisories, outdated packages, automated update requests or a framework version upgrade. Hands off to `flow-review` or `flow-migrate`.
 - [flow-design](skills/flow-design/SKILL.md): Visual direction and design system: tokens plus a DESIGN.md. Use before building a new product, page or rebrand, or when a new surface has no design system yet. Hands off to `flow-ui` or `flow-prototype`.
 - [flow-diagnose](skills/flow-diagnose/SKILL.md): Root-cause investigation for hard failures. Use when a bug, regression or crash in the product has no obvious cause, or a first fix did not hold. Hands off to `flow-work` or `flow-triage`.

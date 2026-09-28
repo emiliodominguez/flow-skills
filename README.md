@@ -1,6 +1,6 @@
 # flow-skills
 
-[![Skills: 35](https://img.shields.io/badge/skills-35-2ea44f?style=for-the-badge&labelColor=161b22&logo=markdown&logoColor=white)](docs/SKILLS.md)
+[![Skills: 36](https://img.shields.io/badge/skills-36-2ea44f?style=for-the-badge&labelColor=161b22&logo=markdown&logoColor=white)](docs/SKILLS.md)
 [![Agent Skills: spec compliant](https://img.shields.io/badge/Agent%20Skills-spec%20compliant-8250df?style=for-the-badge&labelColor=161b22&logo=bookstack&logoColor=white)](https://agentskills.io/specification)
 [![Agents: any](https://img.shields.io/badge/agents-any-0969da?style=for-the-badge&labelColor=161b22&logo=probot&logoColor=white)](https://github.com/vercel-labs/skills)
 [![Install: npx skills add](https://img.shields.io/badge/npx-skills%20add-cb3837?style=for-the-badge&labelColor=161b22&logo=npm&logoColor=white)](https://skills.sh)
@@ -10,7 +10,7 @@ Portable workflow skills for AI coding agents: plan, build, verify and ship with
 
 ---
 
-**flow-skills** is a set of 35 [Agent Skills](https://agentskills.io) for everyday software work:
+**flow-skills** is a set of 36 [Agent Skills](https://agentskills.io) for everyday software work:
 exploring ideas, designing and building interfaces, planning, implementing, testing, reviewing,
 verifying, delivering and maintaining.
 Each skill is a plain `SKILL.md` folder that follows the open specification, so any agent that
@@ -18,7 +18,7 @@ supports skills can use it.
 
 - **Agent-agnostic.** Skills name no product, tool or model and use only spec frontmatter. Compatible
   agents can load the same files; task behavior depends on the agent and model.
-- **Light on context.** Descriptions average about 210 characters and stay under 7,500 in total.
+- **Light on context.** Descriptions average about 210 characters and stay under 8,000 in total.
   Detailed guidance loads only when a skill runs.
 - **Evidence over claims.** Every skill ends with observable checks. Larger work can pass through
   independent `ACCEPT` / `REJECT` / `BLOCKED` gates.
@@ -88,7 +88,7 @@ Install only the part of the workflow you use. Profiles are defined in [`profile
 | `orchestration` | plan, orchestrate, verify, repo-brief, specialize, work, review, handoff                                        |
 | `frontend`      | design, ui, styles, animate, a11y, redesign, prototype                                                          |
 | `review`        | review, adversarial-review, simplify, refactor                                                                  |
-| `backend`       | api, observe, benchmark, adversarial-review, migrate, deps                                                      |
+| `backend`       | api, observe, benchmark, adversarial-review, migrate, deps, data-migrate                                        |
 | `maintenance`   | deps, diagnose, triage, benchmark, refactor, simplify, migrate, git-fix, pr-fix, prune-agent-setup, write-skill |
 
 From a clone, the wrapper scripts accept profiles and pass everything after `--` to `npx skills`:
@@ -124,6 +124,7 @@ upstream global-install issue described above.
 | Review or improve code                          | `flow-review`, `flow-adversarial-review`, `flow-refactor`, `flow-simplify` |
 | Design an API or instrument a service           | `flow-api`, `flow-observe`                                                 |
 | Upgrade, migrate or measure                     | `flow-deps`, `flow-migrate`, `flow-benchmark`                              |
+| Change database schemas or backfill live data   | `flow-data-migrate`                                                        |
 | Investigate a failure                           | `flow-triage`, `flow-diagnose`                                             |
 | Commit, ship and handle review feedback         | `flow-commit`, `flow-ship`, `flow-pr-fix`, `flow-git-fix`                  |
 | Set a visual direction and build UI             | `flow-design`, `flow-ui`, `flow-styles`, `flow-animate`                    |

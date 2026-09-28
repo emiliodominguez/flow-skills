@@ -768,5 +768,27 @@
 				"expect": "flow-docs"
 			}
 		]
+	},
+	"flow-data-migrate": {
+		"should": [
+			"add a required region column to the customers table without breaking old deployed writers",
+			"backfill normalized addresses on 40 million rows while orders are still being updated",
+			"our data migration stopped halfway through, make it safe to resume without losing concurrent edits",
+			"retire the old stored price field after migrating every record and checking recovery"
+		],
+		"near": [
+			{
+				"prompt": "replace the deprecated formatPrice function across every source file",
+				"expect": "flow-migrate"
+			},
+			{
+				"prompt": "design the HTTP contract for accepting a shipping address",
+				"expect": "flow-api"
+			},
+			{
+				"prompt": "what is a foreign key constraint",
+				"expect": null
+			}
+		]
 	}
 }

@@ -9,12 +9,14 @@ _Multi-worker execution of a plan with independent acceptance gates. Use for cro
 ```mermaid
 flowchart LR
   flow_orchestrate["flow-orchestrate"]
+  flow_data_migrate["flow-data-migrate"]
   flow_handoff["flow-handoff"]
   flow_migrate["flow-migrate"]
   flow_plan["flow-plan"]
   flow_specialize["flow-specialize"]
   flow_verify["flow-verify"]
   flow_review["flow-review"]
+  flow_data_migrate --> flow_orchestrate
   flow_handoff --> flow_orchestrate
   flow_migrate --> flow_orchestrate
   flow_plan --> flow_orchestrate

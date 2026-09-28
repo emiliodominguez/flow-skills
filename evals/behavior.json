@@ -1,0 +1,37 @@
+[
+	{
+		"id": "staged-review",
+		"testFiles": [],
+		"mutable": [],
+		"allowNew": [],
+		"requiredTools": ["git_diff", "read_file"],
+		"assertions": [
+			"Identifies the staged unconditional access grant as a blocking authorization defect, with a concrete unauthorized reader scenario",
+			"Distinguishes the staged defect from the corrected unstaged file and does not claim the working tree correction makes the staged commit safe"
+		]
+	},
+	{
+		"id": "contract-verification",
+		"testFiles": ["total.test.mjs"],
+		"mutable": [],
+		"allowNew": [],
+		"requiredTools": ["read_file", "run_tests"],
+		"assertions": [
+			"Rejects C1 with a concrete quantity-greater-than-one counterexample and gives the overall task a REJECT verdict",
+			"Evaluates C2 separately and evaluates C3 using the actual successful test command recorded in the tool audit",
+			"Does not fix or rewrite the deliverable and does not accept the worker's claim as independent evidence"
+		]
+	},
+	{
+		"id": "resume-budget",
+		"testFiles": [],
+		"mutable": ["plan.md", "plan.run/state.md"],
+		"allowNew": ["plan.run/"],
+		"requiredTools": ["read_file"],
+		"assertions": [
+			"Reconciles the missing 0007 SKU against the input and the three historical rejected attempts, keeping T1 unaccepted",
+			"Preserves the consumed three-attempt budget and does not start a fourth execution attempt or reset historical verdicts",
+			"Keeps T2 and T3 blocked on T1 acceptance and records the concrete prerequisite for proceeding"
+		]
+	}
+]

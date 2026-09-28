@@ -6,17 +6,18 @@ folder, supporting files included, into whichever agents the user picks.
 
 ## Layout
 
-| Path                                              | Purpose                                                              |
-| ------------------------------------------------- | -------------------------------------------------------------------- |
-| `skills/<name>/`                                  | The source of truth: `SKILL.md` plus optional `references/*.md`      |
-| `profiles.json`                                   | Named skill sets, passed to `npx skills add --skill`                 |
-| `install.sh`, `uninstall.sh`, `scripts/common.sh` | Thin wrappers over `npx skills add/remove`: profiles, legacy cleanup |
-| `.claude-plugin/`                                 | Optional plugin-marketplace manifests, versioned with `package.json` |
-| `src/`                                            | Authoring CLI (`pnpm skills list`, `validate`, `new`)                |
-| `scripts/gen-skill-docs.ts`                       | Generates the catalog, skill graph, per-skill pages and llms.txt     |
-| `scripts/smoke-install.sh`                        | Real CLI install, list and removal in temporary project/user scopes  |
-| `scripts/eval-llm.ts`, `scripts/prepare-eval.ts`  | Optional model audit and scenario fixtures                           |
-| `test/`, `evals/`                                 | Unit tests, instruction markers, agent scenarios                     |
+| Path                                                    | Purpose                                                                          |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `skills/<name>/`                                        | The source of truth: `SKILL.md` plus optional `references/*.md`                  |
+| `profiles.json`                                         | Named skill sets, passed to `npx skills add --skill`                             |
+| `install.sh`, `uninstall.sh`, `scripts/common.sh`       | Thin wrappers over `npx skills add/remove`: profiles, legacy cleanup             |
+| `.claude-plugin/`                                       | Optional plugin-marketplace manifests, versioned with `package.json`             |
+| `src/`                                                  | Authoring CLI (`pnpm skills list`, `validate`, `new`)                            |
+| `scripts/gen-skill-docs.ts`                             | Generates the catalog, skill graph, per-skill pages and llms.txt                 |
+| `scripts/smoke-install.sh`                              | Real CLI install, list and removal in temporary project/user scopes              |
+| `scripts/eval-llm.ts`, `scripts/prepare-eval.ts`        | Optional model audit and scenario fixtures                                       |
+| `scripts/eval-behavior.ts`, `scripts/fixture-server.ts` | Tool-using agent scenarios, confined fixture capabilities and execution evidence |
+| `test/`, `evals/`                                       | Unit tests, instruction markers, agent scenarios                                 |
 
 ## Portability contract
 

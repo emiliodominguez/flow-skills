@@ -20,7 +20,7 @@ const padding = [
 ];
 
 export default tseslint.config(
-	{ ignores: ["dist/", "node_modules/", "skills/", "templates/", "coverage/", "*.config.ts", "eslint.config.js"] },
+	{ ignores: ["dist/", "node_modules/", "skills/", "templates/", "coverage/", ".eval-runs/", "*.config.ts", "eslint.config.js"] },
 	js.configs.recommended,
 	...tseslint.configs.recommended,
 	{

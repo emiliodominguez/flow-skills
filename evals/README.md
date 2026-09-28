@@ -9,7 +9,7 @@ an agent will follow it.
 | Model instruction audit | `pnpm eval:llm [skill]`                                    | A configured judge evaluates the written instructions against those markers  |
 | Routing                 | `pnpm eval:triggers [skill] [--runs 3]`                    | The description index routes requests to the right skill, or to none         |
 | With/without answers    | `pnpm eval:ab [case or skill] [--runs 3] [--out file]`     | Loading the skill changes a model's answer on the asserted qualities         |
-| Behavioral scenarios    | Prepare an isolated fixture, then run an independent agent | Actual decisions, commands, artifacts and stopping behavior in that scenario |
+| Behavioral scenarios    | `pnpm eval:behavior [scenario]`, or a manual agent session | Actual decisions, commands, artifacts and stopping behavior in that scenario |
 
 ## Instruction markers and model audit
 
@@ -68,6 +68,60 @@ decisions, not whether an agent executes them; use the behavioral scenarios for 
 model evals need the same configuration as the audit and can incur provider charges.
 
 ## Reproducible behavioral scenarios
+
+### Automated execution
+
+```sh
+EVAL_BACKEND=claude pnpm eval:behavior
+EVAL_BACKEND=claude pnpm eval:behavior contract-verification --runs 2 --variant both --save .eval-runs/verification
+```
+
+The runner prepares a fresh fixture per case, repetition and variant, then launches a real
+headless agent with tools. `--variant with` is the default; `without` omits skill context and
+`both` runs the same exercise with and without it. `EVAL_MODEL` and `EVAL_JUDGE_MODEL` select
+the executing and assessing models; omission uses the signed-in CLI's default. Model usage
+consumes plan limits or incurs provider charges. These runs are opt-in and never run in CI.
+
+Execution currently supports the signed-in Claude CLI with `--no-session-persistence`
+and explicit MCP configuration. Hooks and auto memory are disabled explicitly. Built-in tools, installed skills,
+settings sources and ambient MCP servers are disabled. The five fixture capabilities are:
+
+- `list_files` and `read_file`: inspect only the disposable fixture.
+- `write_file`: edit fixture files so unauthorized edits remain observable failures.
+- `git_diff`: capture HEAD, index entries, staged diff and unstaged diff separately.
+- `run_tests`: execute the scenario's fixed test command and return its real exit status/output.
+
+There is no general shell, network tool or delegation capability. File tools reject traversal,
+symlinks and Git internals. Test execution is allowed only while the fixture still matches its
+trusted starting files; the runner does not execute agent-written code. This bounded capability
+environment establishes behavior for these exercises, not compatibility with every native host
+tool or a general-purpose sandbox for arbitrary repositories.
+
+`behavior.json` holds assessor-only assertions, protected-file rules and required tool calls.
+The executing agent receives the task, skill context and capability description, never the
+rubric. After execution, deterministic checks compare files and Git state and inspect actual
+tool calls, including writes later restored. A separate fresh model call assesses the remaining
+semantic assertions against the answer, audit and before/after artifacts. A missing, duplicate
+or malformed judgment fails the run. The judge cannot override a failed deterministic check.
+
+Each output directory contains the fixture, before/after contents and hashes, `tools.jsonl`,
+the CLI transcript, process exit evidence, answer, raw judge response and `result.json`.
+`summary.json` records every requested run. Skill/scenario/assessment hashes, CLI and runtime
+versions, observed model identifiers, usage and duration identify the evidence. Keep raw output
+local by default; inspect it before sharing. Existing output directories are never overwritten.
+
+The default timeout is 180 seconds per executor or assessor; `--timeout` changes it. Interrupting
+a run terminates its active execution, records remaining cases as NOT_RUN and exits 130. Nonzero exits,
+timeouts, permission failures, missing tool evidence and failed assertions exit 1. Missing
+backend configuration or CLI exits 2 and means **not run**. Exit 0 requires every selected
+run to pass, including both variants when requested. A task-level REJECT or BLOCKED can be
+the correct behavior and receive a behavioral PASS.
+
+The backend uses the CLI's documented [programmatic execution](https://code.claude.com/docs/en/headless)
+and [explicit MCP configuration](https://code.claude.com/docs/en/mcp). The skills themselves remain
+host-agnostic. CI tests the harness with local fixtures and processes, without calling a model.
+
+### Manual execution
 
 `scenarios.json` contains starting files, prompts and Git layers. Prepare one into a **new**
 directory; the preparer refuses to replace an existing path and makes no network calls:

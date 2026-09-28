@@ -38,7 +38,8 @@
 		"prepare": "husky",
 		"docs:check": "node --import tsx scripts/gen-skill-docs.ts --check",
 		"eval:prepare": "node --import tsx scripts/prepare-eval.ts",
-		"smoke": "sh scripts/smoke-install.sh"
+		"smoke": "sh scripts/smoke-install.sh",
+		"eval:behavior": "node --import tsx scripts/eval-behavior.ts"
 	},
 	"lint-staged": {
 		"*.{ts,js}": [

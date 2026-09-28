@@ -18,6 +18,8 @@ building and verifying separate, but it never forces a new session or a fixed pa
 
 ## Contracts and evidence
 
+For concrete prompts, artifacts and stopping points, see the [everyday examples](EXAMPLES.md).
+
 Every task states its outcome, the files it owns, its dependencies, acceptance criteria, the
 evidence required and when to stop. Workers produce artifacts; a verifier decides whether the
 current artifact meets the gate.

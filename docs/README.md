@@ -4,12 +4,13 @@ New here? Start with the [project README](../README.md) to install the skills an
 
 ## Using the skills
 
-| Guide                             | Read it to                                                   |
-| --------------------------------- | ------------------------------------------------------------ |
-| [Workflow](OVERVIEW.md)           | Choose the right flow for a task and understand the evidence |
-| [Orchestration](ORCHESTRATION.md) | Walk through a gated, resumable multi-step run               |
-| [Skills catalog](SKILLS.md)       | Browse every skill, with a full page each (generated)        |
-| [Skill graph](SKILL-MAP.md)       | See how the skills hand off to each other (generated)        |
+| Guide                             | Read it to                                                     |
+| --------------------------------- | -------------------------------------------------------------- |
+| [Workflow](OVERVIEW.md)           | Choose the right flow for a task and understand the evidence   |
+| [Everyday examples](EXAMPLES.md)  | Copy a bug fix, dependency upgrade or review-feedback workflow |
+| [Orchestration](ORCHESTRATION.md) | Walk through a gated, resumable multi-step run                 |
+| [Skills catalog](SKILLS.md)       | Browse every skill, with a full page each (generated)          |
+| [Skill graph](SKILL-MAP.md)       | See how the skills hand off to each other (generated)          |
 
 ## Working on the suite
 

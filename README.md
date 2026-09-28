@@ -141,15 +141,16 @@ Skills are instructions only. Installing one starts no process, registers no age
 
 ## Documentation
 
-| Read                                   | To learn                                                     |
-| -------------------------------------- | ------------------------------------------------------------ |
-| [Workflow](docs/OVERVIEW.md)           | Which flow fits a task, and how contracts and evidence work  |
-| [Orchestration](docs/ORCHESTRATION.md) | A worked example of a gated, resumable multi-step run        |
-| [Skills catalog](docs/SKILLS.md)       | Every skill's description, with a full page for each         |
-| [Design notes](docs/PRACTICES.md)      | Sources, compatibility decisions, token budget and migration |
-| [Authoring](docs/AUTHORING.md)         | How to write a good skill for this suite                     |
-| [Architecture](docs/ARCHITECTURE.md)   | Repository layout and what validation enforces               |
-| [Evaluations](evals/README.md)         | What the tests prove, and how to run real agent scenarios    |
+| Read                                   | To learn                                                       |
+| -------------------------------------- | -------------------------------------------------------------- |
+| [Workflow](docs/OVERVIEW.md)           | Which flow fits a task, and how contracts and evidence work    |
+| [Everyday examples](docs/EXAMPLES.md)  | Copy a bug fix, dependency upgrade or review-feedback workflow |
+| [Orchestration](docs/ORCHESTRATION.md) | A worked example of a gated, resumable multi-step run          |
+| [Skills catalog](docs/SKILLS.md)       | Every skill's description, with a full page for each           |
+| [Design notes](docs/PRACTICES.md)      | Sources, compatibility decisions, token budget and migration   |
+| [Authoring](docs/AUTHORING.md)         | How to write a good skill for this suite                       |
+| [Architecture](docs/ARCHITECTURE.md)   | Repository layout and what validation enforces                 |
+| [Evaluations](evals/README.md)         | What the tests prove, and how to run real agent scenarios      |
 
 ## Contributing
 

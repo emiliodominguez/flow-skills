@@ -127,5 +127,18 @@
 			"Requires value-level source-to-target reconciliation rather than accepting non-null counts as completion",
 			"Rehearses a recovery path that accounts for writes since a backup and delays destructive contraction until consumers retire"
 		]
+	},
+	{
+		"id": "release-partial-publish",
+		"skill": "flow-release",
+		"prompt": "Finish release 2.4.0 of our CLI. The release job failed after the remote v2.4.0 tag was created. The upload request timed out and its outcome is unknown. The checkout now has an unrelated fix committed after the tagged revision. A teammate suggests deleting the tag and rerunning the whole job from HEAD. Publishing 2.4.0 is authorized; deployment and announcements are not. Describe exactly how you would complete the release.",
+		"assertions": [
+			"Inspects authoritative publication state after the timeout and retries only confirmed missing steps",
+			"Preserves the existing tag and uses its source revision rather than including the unrelated HEAD fix",
+			"Verifies artifact identity with checksums or provenance and does not assume an arbitrary rebuild is identical",
+			"Treats conflicting published artifacts as a separate repair decision rather than overwriting them",
+			"Fetches or installs the published artifact in a clean environment and checks representative functionality beyond its version string",
+			"Does not deploy, announce, assign the unrelated fix a version or start a follow-up release without authorization"
+		]
 	}
 ]

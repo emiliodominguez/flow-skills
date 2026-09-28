@@ -1,6 +1,6 @@
 # flow-skills
 
-> 36 portable, agent-agnostic Agent Skills for software work: plan, build, test, review, verify, orchestrate and ship.
+> 37 portable, agent-agnostic Agent Skills for software work: plan, build, test, review, verify, orchestrate and ship.
 > Install with `npx skills add emiliodominguez/flow-skills`. Each skill is a SKILL.md folder under skills/.
 
 ## Skills
@@ -29,9 +29,10 @@
 - [flow-prune-agent-setup](skills/flow-prune-agent-setup/SKILL.md): Audit and tidy a coding agent's configuration: instructions, memory, settings, hooks, MCP servers and plugins. Use when that setup has grown noisy, conflicting or stale. Feeds `flow-handoff`.
 - [flow-redesign](skills/flow-redesign/SKILL.md): Measured upgrade of an existing interface. Use to modernize or polish shipped UI that looks dated or inconsistent without breaking URLs, content or behavior. Hands off to `flow-design`, `flow-ui` or `flow-a11y`.
 - [flow-refactor](skills/flow-refactor/SKILL.md): Behavior-preserving structural change. Use to untangle dependencies, redraw module boundaries, extract responsibilities or reduce coupling; behavior changes belong in `flow-work`. Hands off to `flow-review` or `flow-migrate`.
+- [flow-release](skills/flow-release/SKILL.md): Versioned software releases and publication recovery. Use when preparing a version, publishing artifacts or resuming a partial release. Hands off to `flow-ship` or `flow-triage`.
 - [flow-repo-brief](skills/flow-repo-brief/SKILL.md): Maintained, source-cited brief for a subsystem that agents reuse across sessions. Use when agents keep rediscovering conventions and commands, or agent notes on a subsystem need refreshing against source. Feeds `flow-plan` and `flow-specialize`.
 - [flow-review](skills/flow-review/SKILL.md): Code review with evidence-backed correctness and maintainability findings. Use before shipping, on a PR, MR or diff, or when asked to review; gates belong in `flow-verify`. Routes to `flow-work`, `flow-adversarial-review` or `flow-ship`.
-- [flow-ship](skills/flow-ship/SKILL.md): Delivery through the requested Git or review stage: commit, push, pull or merge request, ready or merge. Use when asked to push, commit and push, open or update a PR or MR, or merge. Routes to `flow-commit`, `flow-pr-fix` or `flow-git-fix`.
+- [flow-ship](skills/flow-ship/SKILL.md): Delivery through the requested Git or review stage: commit, push, pull or merge request, ready or merge. Use when asked to push, commit and push, open or update a PR or MR, or merge. Routes to `flow-commit`, `flow-pr-fix`, `flow-git-fix` or `flow-release`.
 - [flow-simplify](skills/flow-simplify/SKILL.md): Targeted cleanup of provably dead code and accidental complexity. Use for dead paths, needless indirection or generated slop, not redesign. Hands off to `flow-review` or `flow-refactor`.
 - [flow-specialize](skills/flow-specialize/SKILL.md): Repository-specific worker and verifier briefs. Use when delegating tasks to agents that need local architecture, lint rules or domain contracts. Feeds `flow-orchestrate` or `flow-work`.
 - [flow-styles](skills/flow-styles/SKILL.md): CSS within the repo's styling architecture, verified in the browser. Use for layout, responsive, cascade or theming bugs in existing components. Hands off to `flow-animate` or `flow-review`.

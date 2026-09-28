@@ -9,7 +9,7 @@ For the phase tour, see [OVERVIEW.md](OVERVIEW.md).
 
 ## Stages
 
-36 skills, 76 handoffs. Edge labels count the handoffs between two stages.
+37 skills, 79 handoffs. Edge labels count the handoffs between two stages.
 
 ```mermaid
 flowchart LR
@@ -18,7 +18,7 @@ flowchart LR
   stage_plan["plan (5)"]
   stage_build["build (13)"]
   stage_verify["verify (5)"]
-  stage_deliver["deliver (4)"]
+  stage_deliver["deliver (5)"]
   stage_operate["operate (4)"]
   stage_explore -->|2| stage_plan
   stage_understand -->|3| stage_plan
@@ -35,6 +35,7 @@ flowchart LR
   stage_verify -->|1| stage_deliver
   stage_deliver -->|1| stage_build
   stage_deliver -->|1| stage_verify
+  stage_deliver -->|1| stage_operate
   stage_operate -->|2| stage_plan
   stage_operate -->|2| stage_build
 ```
@@ -88,6 +89,7 @@ flowchart LR
     flow_commit["flow-commit"]
     flow_git_fix["flow-git-fix"]
     flow_pr_fix["flow-pr-fix"]
+    flow_release["flow-release"]
     flow_ship["flow-ship"]
   end
   subgraph stage_operate["operate"]
@@ -147,6 +149,8 @@ flowchart LR
   flow_redesign --> flow_a11y
   flow_refactor --> flow_review
   flow_refactor --> flow_migrate
+  flow_release --> flow_ship
+  flow_release --> flow_triage
   flow_repo_brief --> flow_plan
   flow_repo_brief --> flow_specialize
   flow_review --> flow_work
@@ -155,6 +159,7 @@ flowchart LR
   flow_ship --> flow_commit
   flow_ship --> flow_pr_fix
   flow_ship --> flow_git_fix
+  flow_ship --> flow_release
   flow_simplify --> flow_review
   flow_simplify --> flow_refactor
   flow_specialize --> flow_orchestrate
@@ -204,14 +209,15 @@ flowchart LR
 | [flow-prune-agent-setup](skills/flow-prune-agent-setup.md) | operate | - | `flow-handoff` |
 | [flow-redesign](skills/flow-redesign.md) | build | - | `flow-design`, `flow-ui`, `flow-a11y` |
 | [flow-refactor](skills/flow-refactor.md) | build | `flow-benchmark`, `flow-simplify` | `flow-review`, `flow-migrate` |
+| [flow-release](skills/flow-release.md) | deliver | `flow-ship` | `flow-ship`, `flow-triage` |
 | [flow-repo-brief](skills/flow-repo-brief.md) | understand | `flow-onboard` | `flow-plan`, `flow-specialize` |
 | [flow-review](skills/flow-review.md) | verify | `flow-a11y`, `flow-adversarial-review`, `flow-animate`, `flow-data-migrate`, `flow-deps`, `flow-docs`, `flow-migrate`, `flow-orchestrate`, `flow-pr-fix`, `flow-refactor`, `flow-simplify`, `flow-styles`, `flow-ui`, `flow-work`, `flow-write-skill` | `flow-work`, `flow-adversarial-review`, `flow-ship` |
-| [flow-ship](skills/flow-ship.md) | deliver | `flow-commit`, `flow-docs`, `flow-git-fix`, `flow-pr-fix`, `flow-review` | `flow-commit`, `flow-pr-fix`, `flow-git-fix` |
+| [flow-ship](skills/flow-ship.md) | deliver | `flow-commit`, `flow-docs`, `flow-git-fix`, `flow-pr-fix`, `flow-release`, `flow-review` | `flow-commit`, `flow-pr-fix`, `flow-git-fix`, `flow-release` |
 | [flow-simplify](skills/flow-simplify.md) | build | - | `flow-review`, `flow-refactor` |
 | [flow-specialize](skills/flow-specialize.md) | understand | `flow-repo-brief` | `flow-orchestrate`, `flow-work` |
 | [flow-styles](skills/flow-styles.md) | build | `flow-a11y`, `flow-animate` | `flow-animate`, `flow-review` |
 | [flow-test](skills/flow-test.md) | build | - | `flow-work`, `flow-verify` |
-| [flow-triage](skills/flow-triage.md) | operate | `flow-diagnose`, `flow-observe` | `flow-diagnose`, `flow-work`, `flow-plan` |
+| [flow-triage](skills/flow-triage.md) | operate | `flow-diagnose`, `flow-observe`, `flow-release` | `flow-diagnose`, `flow-work`, `flow-plan` |
 | [flow-ui](skills/flow-ui.md) | build | `flow-a11y`, `flow-design`, `flow-redesign` | `flow-a11y`, `flow-review` |
 | [flow-verify](skills/flow-verify.md) | verify | `flow-orchestrate`, `flow-test`, `flow-work` | `flow-orchestrate` |
 | [flow-work](skills/flow-work.md) | build | `flow-adversarial-review`, `flow-api`, `flow-benchmark`, `flow-diagnose`, `flow-git-fix`, `flow-handoff`, `flow-plan`, `flow-review`, `flow-specialize`, `flow-test`, `flow-triage` | `flow-review`, `flow-verify` |

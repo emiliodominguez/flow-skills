@@ -1,6 +1,6 @@
 # flow-skills
 
-[![Skills: 36](https://img.shields.io/badge/skills-36-2ea44f?style=for-the-badge&labelColor=161b22&logo=markdown&logoColor=white)](docs/SKILLS.md)
+[![Skills: 37](https://img.shields.io/badge/skills-37-2ea44f?style=for-the-badge&labelColor=161b22&logo=markdown&logoColor=white)](docs/SKILLS.md)
 [![Agent Skills: spec compliant](https://img.shields.io/badge/Agent%20Skills-spec%20compliant-8250df?style=for-the-badge&labelColor=161b22&logo=bookstack&logoColor=white)](https://agentskills.io/specification)
 [![Agents: any](https://img.shields.io/badge/agents-any-0969da?style=for-the-badge&labelColor=161b22&logo=probot&logoColor=white)](https://github.com/vercel-labs/skills)
 [![Install: npx skills add](https://img.shields.io/badge/npx-skills%20add-cb3837?style=for-the-badge&labelColor=161b22&logo=npm&logoColor=white)](https://skills.sh)
@@ -10,7 +10,7 @@ Portable workflow skills for AI coding agents: plan, build, verify and ship with
 
 ---
 
-**flow-skills** is a set of 36 [Agent Skills](https://agentskills.io) for everyday software work:
+**flow-skills** is a set of 37 [Agent Skills](https://agentskills.io) for everyday software work:
 exploring ideas, designing and building interfaces, planning, implementing, testing, reviewing,
 verifying, delivering and maintaining.
 Each skill is a plain `SKILL.md` folder that follows the open specification, so any agent that
@@ -84,7 +84,7 @@ Install only the part of the workflow you use. Profiles are defined in [`profile
 
 | Profile         | Skills (without the `flow-` prefix)                                                                             |
 | --------------- | --------------------------------------------------------------------------------------------------------------- |
-| `core`          | plan, work, test, review, commit, ship, handoff                                                                 |
+| `core`          | plan, work, test, review, commit, ship, release, handoff                                                        |
 | `orchestration` | plan, orchestrate, verify, repo-brief, specialize, work, review, handoff                                        |
 | `frontend`      | design, ui, styles, animate, a11y, redesign, prototype                                                          |
 | `review`        | review, adversarial-review, simplify, refactor                                                                  |
@@ -127,6 +127,7 @@ upstream global-install issue described above.
 | Change database schemas or backfill live data   | `flow-data-migrate`                                                        |
 | Investigate a failure                           | `flow-triage`, `flow-diagnose`                                             |
 | Commit, ship and handle review feedback         | `flow-commit`, `flow-ship`, `flow-pr-fix`, `flow-git-fix`                  |
+| Prepare or publish a versioned release          | `flow-release`                                                             |
 | Set a visual direction and build UI             | `flow-design`, `flow-ui`, `flow-styles`, `flow-animate`                    |
 | Audit, upgrade or make UI accessible            | `flow-redesign`, `flow-a11y`                                               |
 | Write documentation                             | `flow-docs`                                                                |

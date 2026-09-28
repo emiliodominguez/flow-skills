@@ -1,6 +1,6 @@
 ---
 name: flow-ship
-description: "Delivery through the requested Git or review stage: commit, push, pull or merge request, ready or merge. Use when asked to push, commit and push, open or update a PR or MR, or merge. Routes to `flow-commit`, `flow-pr-fix` or `flow-git-fix`."
+description: "Delivery through the requested Git or review stage: commit, push, pull or merge request, ready or merge. Use when asked to push, commit and push, open or update a PR or MR, or merge. Routes to `flow-commit`, `flow-pr-fix`, `flow-git-fix` or `flow-release`."
 metadata:
   stage: deliver
 ---
@@ -67,4 +67,5 @@ Otherwise stop at the requested stage with a usable link.
 - Verification belongs to the delivered revision; remaining limits are visible.
 - The user has the commit or change request reference.
 
-Use `flow-pr-fix` for later review feedback or `flow-git-fix` for a demonstrated Git problem.
+Use `flow-release` for requested versioned publication, `flow-pr-fix` for later review feedback
+or `flow-git-fix` for a demonstrated Git problem.

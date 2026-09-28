@@ -11,10 +11,12 @@ flowchart LR
   flow_triage["flow-triage"]
   flow_diagnose["flow-diagnose"]
   flow_observe["flow-observe"]
+  flow_release["flow-release"]
   flow_work["flow-work"]
   flow_plan["flow-plan"]
   flow_diagnose --> flow_triage
   flow_observe --> flow_triage
+  flow_release --> flow_triage
   flow_triage --> flow_diagnose
   flow_triage --> flow_work
   flow_triage --> flow_plan

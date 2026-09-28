@@ -34,5 +34,6 @@
 	"flow-verify": ["accept", "reject", "blocked", "independence", "criterion"],
 	"flow-work": ["verified slice", "evidence", "tests-first", "acceptance", "delegated mode"],
 	"flow-write-skill": ["baseline", "use when", "near miss", "red-flags", "references/"],
-	"flow-data-migrate": ["all readers and writers", "durable checkpoints", "source and target values", "recovery mechanism"]
+	"flow-data-migrate": ["all readers and writers", "durable checkpoints", "source and target values", "recovery mechanism"],
+	"flow-release": ["source revision", "timeout means unknown", "representative behavior", "retry only missing steps"]
 }

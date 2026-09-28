@@ -1,6 +1,6 @@
 {
 	"profiles": {
-		"core": ["flow-plan", "flow-work", "flow-test", "flow-review", "flow-commit", "flow-ship", "flow-handoff"],
+		"core": ["flow-plan", "flow-work", "flow-test", "flow-review", "flow-commit", "flow-ship", "flow-release", "flow-handoff"],
 		"orchestration": [
 			"flow-plan",
 			"flow-orchestrate",

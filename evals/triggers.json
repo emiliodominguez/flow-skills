@@ -790,5 +790,27 @@
 				"expect": null
 			}
 		]
+	},
+	"flow-release": {
+		"should": [
+			"prepare version 3.0 with release notes and the exact artifacts we will publish",
+			"the publish job timed out after creating the version tag, finish the partial release",
+			"publish the approved CLI version and verify consumers can install and use it",
+			"choose the next package release version from the compatibility changes and check its artifacts"
+		],
+		"near": [
+			{
+				"prompt": "push this branch to main after the checks pass",
+				"expect": "flow-ship"
+			},
+			{
+				"prompt": "update our installed dependencies to supported versions",
+				"expect": "flow-deps"
+			},
+			{
+				"prompt": "what does the patch digit in semantic versioning mean",
+				"expect": null
+			}
+		]
 	}
 }

@@ -50,7 +50,7 @@
 		"*.{json,md,yml,yaml}": "prettier --write"
 	},
 	"dependencies": {
-		"commander": "^15.0.0",
+		"commander": "^15.1.0",
 		"js-yaml": "^5.4.2",
 		"picocolors": "^1.1.1"
 	},
